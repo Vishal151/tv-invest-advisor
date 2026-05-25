@@ -1,7 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, Header, Depends
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import get_settings
 from app.services.cache import cache
@@ -17,13 +16,49 @@ router = APIRouter()
 
 # ── Request / Response models ─────────────────────────────────────────────────
 
+
 class QueryRequest(BaseModel):
     question: str = Field(..., min_length=5, max_length=500)
-    sector: Optional[str] = None
-    brand_stage: Optional[str] = None
-    tv_history: Optional[str] = None
-    primary_goal: Optional[str] = None
-    budget_tier: Optional[str] = None
+    sector: str | None = None
+    brand_stage: str | None = None
+    tv_history: str | None = None
+    primary_goal: str | None = None
+    budget_tier: str | None = None
+
+    @field_validator("sector")
+    @classmethod
+    def validate_sector(cls, v: str | None) -> str | None:
+        if v is not None and v not in settings.valid_sectors:
+            raise ValueError(f"Invalid sector '{v}'. Valid: {settings.valid_sectors}")
+        return v
+
+    @field_validator("brand_stage")
+    @classmethod
+    def validate_brand_stage(cls, v: str | None) -> str | None:
+        if v is not None and v not in settings.valid_brand_stages:
+            raise ValueError(f"Invalid brand_stage '{v}'. Valid: {settings.valid_brand_stages}")
+        return v
+
+    @field_validator("tv_history")
+    @classmethod
+    def validate_tv_history(cls, v: str | None) -> str | None:
+        if v is not None and v not in settings.valid_tv_history:
+            raise ValueError(f"Invalid tv_history '{v}'. Valid: {settings.valid_tv_history}")
+        return v
+
+    @field_validator("primary_goal")
+    @classmethod
+    def validate_primary_goal(cls, v: str | None) -> str | None:
+        if v is not None and v not in settings.valid_primary_goals:
+            raise ValueError(f"Invalid primary_goal '{v}'. Valid: {settings.valid_primary_goals}")
+        return v
+
+    @field_validator("budget_tier")
+    @classmethod
+    def validate_budget_tier(cls, v: str | None) -> str | None:
+        if v is not None and v not in settings.valid_budget_tiers:
+            raise ValueError(f"Invalid budget_tier '{v}'. Valid: {settings.valid_budget_tiers}")
+        return v
 
 
 class Source(BaseModel):
@@ -47,17 +82,20 @@ class HealthResponse(BaseModel):
     status: str
     chroma_docs: int
     version: str
+    redis: str = "disabled"
 
 
 # ── Auth dependency ───────────────────────────────────────────────────────────
 
-def verify_api_key(x_api_key: str = Header(...)):
+
+def verify_api_key(x_api_key: str = Header(...)) -> str:
     if x_api_key != settings.api_key:
         raise HTTPException(status_code=401, detail="Invalid API key")
     return x_api_key
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
 
 @router.get("/health", response_model=HealthResponse)
 async def health():
@@ -70,14 +108,6 @@ async def health():
 
 @router.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest):
-    # Validate enum inputs
-    if request.sector and request.sector not in settings.valid_sectors:
-        raise HTTPException(status_code=422, detail=f"Invalid sector: {request.sector}")
-    if request.brand_stage and request.brand_stage not in settings.valid_brand_stages:
-        raise HTTPException(status_code=422, detail=f"Invalid brand_stage")
-    if request.budget_tier and request.budget_tier not in settings.valid_budget_tiers:
-        raise HTTPException(status_code=422, detail=f"Invalid budget_tier")
-
     # 1. Cache lookup
     cached = cache.get(
         question=request.question,
@@ -100,7 +130,7 @@ async def query(request: QueryRequest):
         raise HTTPException(
             status_code=400,
             detail="Query is outside the scope of this tool. "
-                   "Please ask about TV advertising, media planning, or brand growth.",
+            "Please ask about TV advertising, media planning, or brand growth.",
         )
 
     # 3. Retrieve relevant chunks
@@ -112,8 +142,7 @@ async def query(request: QueryRequest):
     if not chunks:
         raise HTTPException(
             status_code=503,
-            detail="No research documents found. "
-                   "Please ensure the corpus has been ingested.",
+            detail="No research documents found. " "Please ensure the corpus has been ingested.",
         )
 
     # 4. Generate answer via LiteLLM
