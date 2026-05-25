@@ -15,6 +15,7 @@ dependencies = [
     "pysqlite3-binary>=0.5.4.post2",
     "python-dotenv>=1.2.2",
     "python-pptx>=1.0.2",
+    "redis>=7.4.0",
     "requests>=2.34.2",
     "uvicorn>=0.48.0",
 ]

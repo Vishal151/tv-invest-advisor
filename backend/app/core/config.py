@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     # Primary model (via LiteLLM)
     primary_model: str = "gpt-4o"
     fallback_model: str = "claude-3-5-sonnet-20241022"
-    guardrail_model: str = "gpt-4o-mini"   # cheap + fast for input/output checks
+    guardrail_model: str = "gpt-4o-mini"  # cheap + fast for input/output checks
 
     # Embedding model
     embedding_model: str = "text-embedding-3-small"
@@ -55,30 +55,55 @@ class Settings(BaseSettings):
     chroma_collection: str = "thinkbox_docs"
 
     # ── RAG settings ─────────────────────────────────────────────────────────
-    retrieval_top_k: int = 5            # chunks returned per query
-    chunk_size: int = 800               # tokens per chunk
-    chunk_overlap: int = 100            # overlap between chunks
+    retrieval_top_k: int = 5  # chunks returned per query
+    chunk_size: int = 800  # tokens per chunk
+    chunk_overlap: int = 100  # overlap between chunks
 
     # ── Cache ────────────────────────────────────────────────────────────────
-    cache_ttl_seconds: int = 60 * 60 * 24 * 7   # 7 days
-    cache_max_size: int = 500                     # max entries in dict cache
+    cache_ttl_seconds: int = 60 * 60 * 24 * 7  # 7 days
+    cache_max_size: int = 500  # max entries in dict cache
+
+    # ── Redis ─────────────────────────────────────────────────────────────────
+    redis_url: str = Field(default="", description="Redis URL. Empty = use in-memory dict cache.")
+
+    @property
+    def redis_enabled(self) -> bool:
+        return bool(self.redis_url)
 
     # ── Valid enum values for structured query inputs ─────────────────────────
     valid_sectors: list[str] = [
-        "FMCG", "Retail", "Finance", "Auto",
-        "Telco", "Travel", "DTC", "Other",
+        "FMCG",
+        "Retail",
+        "Finance",
+        "Auto",
+        "Telco",
+        "Travel",
+        "DTC",
+        "Other",
     ]
     valid_brand_stages: list[str] = [
-        "start-up", "scale-up", "established", "large",
+        "start-up",
+        "scale-up",
+        "established",
+        "large",
     ]
     valid_tv_history: list[str] = [
-        "never", "tried", "regular",
+        "never",
+        "tried",
+        "regular",
     ]
     valid_primary_goals: list[str] = [
-        "sales", "brand", "both", "unsure",
+        "sales",
+        "brand",
+        "both",
+        "unsure",
     ]
     valid_budget_tiers: list[str] = [
-        "under-100k", "100k-500k", "500k-2m", "2m-plus", "undecided",
+        "under-100k",
+        "100k-500k",
+        "500k-2m",
+        "2m-plus",
+        "undecided",
     ]
 
     @property
