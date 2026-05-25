@@ -11,13 +11,15 @@ Manual inspection confirms retrieval is working correctly.
 
 # SQLite fix must be first
 __import__("pysqlite3")
-import sys
+import sys  # noqa: E402
+
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
-from pathlib import Path
+from pathlib import Path  # noqa: E402
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.services.retriever import retrieve, get_doc_count
+from app.services.retriever import retrieve, get_doc_count  # noqa: E402
 
 SMOKE_QUERIES = [
     {

@@ -11,20 +11,21 @@ Each file must begin with SOURCE:, URL:, TOPIC:, SECTOR: header lines.
 
 # SQLite fix must be first
 __import__("pysqlite3")
-import sys
+import sys  # noqa: E402
+
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
-import hashlib
-import logging
-from pathlib import Path
+import hashlib  # noqa: E402
+import logging  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
+import chromadb  # noqa: E402
+from chromadb.config import Settings as ChromaSettings  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.core.config import get_settings
-from app.services.embedder import embed_batch
+from app.core.config import get_settings  # noqa: E402
+from app.services.embedder import embed_batch  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -42,15 +43,15 @@ def parse_header(text: str) -> tuple[dict, str]:
 
     for i, line in enumerate(lines):
         if line.startswith("SOURCE:"):
-            metadata["source_title"] = line[len("SOURCE:"):].strip()
+            metadata["source_title"] = line[len("SOURCE:") :].strip()
         elif line.startswith("URL:"):
-            metadata["source_url"] = line[len("URL:"):].strip()
+            metadata["source_url"] = line[len("URL:") :].strip()
         elif line.startswith("PUBLISHED:"):
             pass  # informational only
         elif line.startswith("TOPIC:"):
-            metadata["topic"] = line[len("TOPIC:"):].strip()
+            metadata["topic"] = line[len("TOPIC:") :].strip()
         elif line.startswith("SECTOR:"):
-            metadata["sector"] = line[len("SECTOR:"):].strip()
+            metadata["sector"] = line[len("SECTOR:") :].strip()
         elif line.strip() == "" and i > 0 and metadata:
             body_start = i + 1
             break
@@ -97,7 +98,7 @@ def ingest_text_file(
     total_added = 0
 
     for batch_start in range(0, len(chunks), batch_size):
-        batch = chunks[batch_start: batch_start + batch_size]
+        batch = chunks[batch_start : batch_start + batch_size]
 
         # Build IDs first to check what already exists
         ids = [
@@ -111,7 +112,7 @@ def ingest_text_file(
         new_indices = [i for i, cid in enumerate(ids) if cid not in existing]
 
         if not new_indices:
-            logger.info(f"  Already ingested — skipping")
+            logger.info("  Already ingested — skipping")
             total_added += len(batch)
             continue
 
@@ -125,7 +126,9 @@ def ingest_text_file(
             documents.append(chunk)
             metadatas.append({**metadata, "page": chunk_index + 1, "chunk_index": chunk_index})
 
-        collection.upsert(ids=new_ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+        collection.upsert(
+            ids=new_ids, embeddings=embeddings, documents=documents, metadatas=metadatas
+        )
         total_added += len(batch)
 
     logger.info(f"  {txt_path.name} — {total_added} chunks ingested")
@@ -145,7 +148,9 @@ def delete_source_chunks(collection: chromadb.Collection, source_title: str) -> 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Ingest scraped research text files into ChromaDB.")
+    parser = argparse.ArgumentParser(
+        description="Ingest scraped research text files into ChromaDB."
+    )
     parser.add_argument("--force", action="store_true", help="Delete and re-ingest all sources.")
     args = parser.parse_args()
 
