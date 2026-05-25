@@ -98,23 +98,34 @@ def ingest_text_file(
 
     for batch_start in range(0, len(chunks), batch_size):
         batch = chunks[batch_start: batch_start + batch_size]
-        embeddings = embed_batch(batch)
-        ids, documents, metadatas = [], [], []
 
-        for i, (chunk, _) in enumerate(zip(batch, embeddings)):
-            chunk_index = batch_start + i
-            chunk_id = hashlib.sha256(
-                f"{metadata['source_title']}_scraped_{chunk_index}".encode()
+        # Build IDs first to check what already exists
+        ids = [
+            hashlib.sha256(
+                f"{metadata['source_title']}_scraped_{batch_start + i}".encode()
             ).hexdigest()[:16]
-            ids.append(chunk_id)
-            documents.append(chunk)
-            metadatas.append({
-                **metadata,
-                "page": chunk_index + 1,
-                "chunk_index": chunk_index,
-            })
+            for i in range(len(batch))
+        ]
 
-        collection.upsert(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+        existing = collection.get(ids=ids, include=[])["ids"]
+        new_indices = [i for i, cid in enumerate(ids) if cid not in existing]
+
+        if not new_indices:
+            logger.info(f"  Already ingested — skipping")
+            total_added += len(batch)
+            continue
+
+        new_chunks = [batch[i] for i in new_indices]
+        new_ids = [ids[i] for i in new_indices]
+        embeddings = embed_batch(new_chunks)
+
+        documents, metadatas = [], []
+        for i, (chunk, _) in enumerate(zip(new_chunks, embeddings)):
+            chunk_index = batch_start + new_indices[i]
+            documents.append(chunk)
+            metadatas.append({**metadata, "page": chunk_index + 1, "chunk_index": chunk_index})
+
+        collection.upsert(ids=new_ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
         total_added += len(batch)
 
     logger.info(f"  {txt_path.name} — {total_added} chunks ingested")

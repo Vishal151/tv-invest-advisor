@@ -188,23 +188,33 @@ def ingest_document(
 
     for batch_start in range(0, len(all_chunks), batch_size):
         batch = all_chunks[batch_start: batch_start + batch_size]
-        texts = [c["text"] for c in batch]
 
-        embeddings = embed_batch(texts)
-
+        # Build IDs first so we can check what already exists
         ids = []
-        metadatas = []
-        documents = []
-
-        for i, (chunk, embedding) in enumerate(zip(batch, embeddings)):
+        for i, chunk in enumerate(batch):
             chunk_index = batch_start + i
-
-            # Deterministic ID — prevents duplicates on re-run
             chunk_id = hashlib.sha256(
                 f"{doc_metadata['source_title']}_{chunk['page']}_{chunk_index}".encode()
             ).hexdigest()[:16]
-
             ids.append(chunk_id)
+
+        # Skip embedding if all chunks in this batch already exist
+        existing = collection.get(ids=ids, include=[])["ids"]
+        new_indices = [i for i, cid in enumerate(ids) if cid not in existing]
+
+        if not new_indices:
+            logger.info(f"  Batch {batch_start // batch_size + 1}: already ingested — skipping")
+            total_added += len(batch)
+            continue
+
+        new_batch = [batch[i] for i in new_indices]
+        new_ids = [ids[i] for i in new_indices]
+        embeddings = embed_batch([c["text"] for c in new_batch])
+
+        documents = []
+        metadatas = []
+        for i, (chunk, _) in enumerate(zip(new_batch, embeddings)):
+            chunk_index = batch_start + new_indices[i]
             documents.append(chunk["text"])
             metadatas.append({
                 **doc_metadata,
@@ -213,7 +223,7 @@ def ingest_document(
             })
 
         collection.upsert(
-            ids=ids,
+            ids=new_ids,
             embeddings=embeddings,
             documents=documents,
             metadatas=metadatas,
@@ -222,7 +232,7 @@ def ingest_document(
         total_added += len(batch)
         logger.info(
             f"  Batch {batch_start // batch_size + 1}: "
-            f"{total_added}/{len(all_chunks)} chunks stored"
+            f"{len(new_ids)} new / {len(batch) - len(new_ids)} skipped"
         )
 
     logger.info(f"✓ {pdf_path.name} — {total_added} chunks ingested")
