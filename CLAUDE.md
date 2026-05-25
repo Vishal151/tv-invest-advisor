@@ -31,20 +31,23 @@ frontend, Docker Compose.
 | Component | Status | Notes |
 |-----------|--------|-------|
 | Project structure | ✅ Done | Folders, .gitignore, CLAUDE.md |
-| backend/app/core/config.py | ⬜ Next | Settings, env vars |
-| backend/app/main.py | ⬜ Todo | FastAPI app entry point |
-| backend/app/api/routes.py | ⬜ Todo | /query, /ingest, /health |
-| backend/app/services/embedder.py | ⬜ Todo | OpenAI embedding wrapper |
-| backend/app/services/retriever.py | ⬜ Todo | ChromaDB retrieval |
-| backend/app/services/generator.py | ⬜ Todo | LiteLLM call |
-| backend/app/services/cache.py | ⬜ Todo | Dict cache, Redis-ready |
-| backend/app/services/guardrails.py | ⬜ Todo | Input/output LLM checks |
-| backend/scripts/ingest.py | ⬜ Todo | PDF ingestion pipeline |
-| backend/scripts/test_retrieval.py | ⬜ Todo | Retrieval quality test |
-| backend/.env.example | ⬜ Todo | |
+| backend/app/core/config.py | ✅ Done | Settings, env vars, redis_url/redis_enabled |
+| backend/app/main.py | ✅ Done | FastAPI app, lifespan startup warmup, _check_redis() |
+| backend/app/api/routes.py | ✅ Done | /query, /ingest, /health; Pydantic validators; 503 on LLM failure |
+| backend/app/services/embedder.py | ✅ Done | OpenAI embedding wrapper |
+| backend/app/services/retriever.py | ✅ Done | ChromaDB retrieval + metadata filter |
+| backend/app/services/generator.py | ✅ Done | LiteLLM call, GPT-4o primary / Claude fallback |
+| backend/app/services/cache.py | ✅ Done | ResponseCache (dict) + RedisCache; factory selects based on REDIS_URL |
+| backend/app/services/guardrails.py | ✅ Done | Input/output LLM checks (GPT-4o-mini) |
+| backend/scripts/ingest.py | ✅ Done | PDF ingestion pipeline |
+| backend/scripts/test_retrieval.py | ✅ Done | Retrieval quality smoke test |
+| backend/.env.example | ✅ Done | Includes REDIS_URL (commented out for local dev) |
+| backend/Dockerfile | ✅ Done | uv official image, non-root user, no dev deps in prod |
+| backend/.flake8 | ✅ Done | black-compatible config (E203, W503, E501 ignored) |
+| backend/pyproject.toml | ✅ Done | black + flake8 + fakeredis in dev deps |
 | frontend (Next.js) | ⬜ Todo | Initialised, not built yet |
-| docker-compose.yml | ⬜ Todo | |
-| Data corpus ingested | ⬜ Todo | Thinkbox PDFs not yet downloaded |
+| docker-compose.yml | ✅ Done | Redis service + healthcheck; backend depends_on redis |
+| Data corpus ingested | ✅ Done | Thinkbox PDFs ingested into ChromaDB |
  
 Update this table as work progresses.
  
@@ -120,7 +123,7 @@ Thinkbox PDFs → pypdf extract text → chunk (800 tokens, 100 overlap)
 - **LiteLLM** — model gateway: OpenAI primary, Anthropic fallback, cost tracking
 - **ChromaDB** — persistent local vector store (chroma_db/ directory)
 - **LangFuse** — traces every query: latency, tokens, cost, guardrail outcomes
-- **Cache** — Python dict keyed by hash(all inputs), TTL 7 days, pre-warmed at startup
+- **Cache** — Redis in production (REDIS_URL set), dict in development; both implement the same interface; TTL 7 days; graceful degradation on Redis errors
 ---
  
 ## API specification
@@ -157,8 +160,9 @@ All fields except `question` are optional enums — see config.py for valid valu
  
 ### GET /api/health
 ```json
-{ "status": "ok", "chroma_docs": 142, "version": "0.1.0" }
+{ "status": "ok", "chroma_docs": 142, "version": "0.1.0", "redis": "ok" }
 ```
+`redis` field: `"ok"` | `"disabled"` | `"unavailable"`
  
 ### POST /api/ingest
 Protected by `X-API-Key` header. Triggers ingestion of a single document.
@@ -220,6 +224,9 @@ API_KEY=your-random-secret    # protects POST /api/ingest
 # CORS
 CORS_ORIGINS=http://localhost:3000
  
+# Redis cache (leave empty to use in-memory dict cache for local dev)
+# REDIS_URL=redis://localhost:6379/0
+ 
 # App
 APP_ENV=development           # development | production
 LOG_LEVEL=INFO
@@ -242,11 +249,11 @@ LOG_LEVEL=INFO
   fallback chains, cost tracking with zero code change to swap providers
 - **Trade-off**: Slight overhead, one extra dependency
 - **Do not refactor**: Keep LiteLLM even if it feels like overkill
-### Decision 3: Dict-based cache over Redis (May 2026)
-- **Choice**: Python dict with TTL, keyed by hash(all inputs)
-- **Why**: No extra infrastructure for v1. Interface designed for Redis drop-in
-- **Production path**: Replace cache.py backend with Redis, same interface
-- **Do not**: Add Redis to docker-compose until explicitly asked
+### Decision 3: Redis in production, dict cache in development (May 2026)
+- **Choice**: `cache.py` exposes a common interface (`get`, `set`, `clear`). On startup, `_make_cache()` checks `REDIS_URL`: set → `RedisCache` (wraps `redis-py`); unset → `ResponseCache` (dict). Docker Compose sets `REDIS_URL=redis://redis:6379/0`.
+- **Why**: Production needs a durable shared cache. Development needs zero infrastructure. Redis errors degrade gracefully to cache-miss (never 500).
+- **Testing**: `fakeredis.FakeRedis` used in tests — no real Redis needed in CI.
+- **Do not**: Remove the `ResponseCache` fallback or let Redis errors propagate to callers.
 ### Decision 4: Two-stage guardrails — input + output (May 2026)
 - **Choice**: GPT-4o-mini for both checks (cheap, fast)
 - **Why**: Input keeps tool on-topic. Output verifies every stat traces to
@@ -266,6 +273,13 @@ LOG_LEVEL=INFO
 cd backend
 cp .env.example .env          # fill in your keys
 uv run uvicorn app.main:app --reload --port 8000
+ 
+# Lint and format
+uv run black .
+uv run flake8 .
+ 
+# Tests
+uv run pytest
  
 # Ingest corpus (run once, or when adding new docs)
 uv run scripts/ingest.py
@@ -319,7 +333,7 @@ Populate as encountered using this format:
  
 - Scheduled corpus refresh — auto-ingest new Thinkbox research on publish
 - LangFuse evaluation dataset — score retrieval quality over time
-- Redis cache — swap in when deploying beyond single container
+- Redis cache — already in docker-compose; consider Redis Cluster for HA
 - Streaming responses — SSE for long answers
 - User auth — Clerk or similar if multi-tenant
 - Terraform deployment to GCP Cloud Run or AWS App Runner
@@ -331,6 +345,6 @@ Populate as encountered using this format:
 - Invent source URLs or document titles
 - Remove the LiteLLM gateway and call OpenAI SDK directly
 - Remove either guardrail stage (input or output)
-- Add Redis, Celery, or other infrastructure without being explicitly asked
+- Add Celery or other infrastructure without being explicitly asked
 - Use `import *` anywhere in the codebase
 - Commit `.env`, anything in `chroma_db/`, or anything in `data/pdfs/`
