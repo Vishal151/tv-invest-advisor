@@ -5,6 +5,22 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+_langfuse = None
+
+
+def _get_langfuse():
+    """Lazy-initialise LangFuse client. Returns None if keys not configured."""
+    global _langfuse
+    if _langfuse is None and settings.langfuse_enabled:
+        from langfuse import Langfuse
+        _langfuse = Langfuse(
+            public_key=settings.langfuse_public_key,
+            secret_key=settings.langfuse_secret_key,
+            host=settings.langfuse_host,
+        )
+    return _langfuse
+
+
 SYSTEM_PROMPT = """You are a senior TV advertising strategist with deep expertise
 in UK media planning. You advise brands and agencies on when and how to invest
 in TV advertising, drawing exclusively on Thinkbox research.
@@ -26,11 +42,7 @@ def build_prompt(
     budget_tier: str | None = None,
     primary_goal: str | None = None,
 ) -> list[dict]:
-    """
-    Builds the messages list for the LLM call.
-    Injects retrieved chunks as grounding context.
-    """
-    # Build context block from retrieved chunks
+    """Builds the messages list for the LLM call."""
     context_parts = []
     for i, chunk in enumerate(chunks, 1):
         meta = chunk["metadata"]
@@ -40,7 +52,6 @@ def build_prompt(
         )
     context = "\n\n".join(context_parts)
 
-    # Build user context from structured inputs
     user_context_parts = []
     if sector:
         user_context_parts.append(f"Sector: {sector}")
@@ -83,6 +94,7 @@ def generate(
 ) -> tuple[str, str]:
     """
     Calls LiteLLM with primary model, falls back to secondary on failure.
+    Traces to LangFuse if keys are configured.
     Returns (answer_text, model_used).
     """
     messages = build_prompt(
@@ -94,21 +106,35 @@ def generate(
         primary_goal=primary_goal,
     )
 
-    # Try primary model first
+    lf = _get_langfuse()
+    trace = lf.trace(name="query", input={"question": question, "sector": sector}) if lf else None
+
     for model in [settings.primary_model, settings.fallback_model]:
+        span = None
         try:
             logger.info(f"Calling LiteLLM with model: {model}")
+            span = trace.span(name=f"llm-{model}") if trace else None
+
             response = completion(
                 model=model,
                 messages=messages,
                 max_tokens=1000,
-                temperature=0.3,  # low temp — factual, consistent answers
+                temperature=0.3,
             )
             answer = response.choices[0].message.content
             logger.info(f"Generated {len(answer)} chars with {model}")
+
+            if span:
+                span.end(output={"answer": answer[:200], "model": model})
+            if trace:
+                trace.update(output={"model_used": model})
+
             return answer, model
+
         except Exception as e:
             logger.warning(f"Model {model} failed: {e}")
+            if span:
+                span.end(output={"error": str(e)})
             if model == settings.fallback_model:
                 raise
 
