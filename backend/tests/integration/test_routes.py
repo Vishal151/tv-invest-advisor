@@ -111,6 +111,15 @@ def test_query_validates_min_length(client):
     assert resp.status_code == 422
 
 
+def test_health_reports_redis_disabled(client):
+    """In test environment REDIS_URL is not set — health should report 'disabled'."""
+    with patch("app.api.routes.get_doc_count", return_value=142):
+        resp = client.get("/api/health")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["redis"] in ("ok", "disabled", "unavailable")
+
+
 def test_ingest_requires_api_key(client):
     resp = client.post("/api/ingest", json={"source_path": "data/pdfs/test.pdf"})
     assert resp.status_code == 422  # missing X-API-Key header

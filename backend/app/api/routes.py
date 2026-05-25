@@ -99,10 +99,13 @@ def verify_api_key(x_api_key: str = Header(...)) -> str:
 
 @router.get("/health", response_model=HealthResponse)
 async def health():
+    from app.main import _check_redis
+
     return HealthResponse(
         status="ok",
         chroma_docs=get_doc_count(),
         version=settings.version,
+        redis=_check_redis(),
     )
 
 
