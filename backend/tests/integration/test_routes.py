@@ -115,3 +115,20 @@ def test_ingest_rejects_wrong_key(client):
         headers={"X-API-Key": "wrong-key"},
     )
     assert resp.status_code == 401
+
+
+def test_ingest_valid_document(client):
+    """Ingest route should call the ingest pipeline and return chunk count."""
+    from app.api.routes import verify_api_key
+    client.app.dependency_overrides[verify_api_key] = lambda: "dev-key"
+    with patch("app.api.routes.run_ingest", return_value=5) as mock_ingest:
+        resp = client.post(
+            "/api/ingest",
+            json={"source_path": "data/pdfs/profit-ability-2.pdf"},
+            headers={"X-API-Key": "dev-key"},
+        )
+    client.app.dependency_overrides.clear()
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["chunks_added"] == 5
+    mock_ingest.assert_called_once_with("data/pdfs/profit-ability-2.pdf")

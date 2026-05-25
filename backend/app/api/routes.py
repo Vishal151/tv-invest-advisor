@@ -8,6 +8,7 @@ from app.services.cache import cache
 from app.services.retriever import retrieve, get_doc_count
 from app.services.generator import generate
 from app.services.guardrails import check_input, check_output
+from app.services.ingestor import run_ingest
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -167,4 +168,10 @@ async def query(request: QueryRequest):
 @router.post("/ingest", dependencies=[Depends(verify_api_key)])
 async def ingest(request: IngestRequest):
     logger.info(f"Ingest requested for: {request.source_path}")
-    return {"message": "Ingest endpoint ready — pipeline coming next."}
+    try:
+        chunks_added = run_ingest(request.source_path)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Ingestion complete", "chunks_added": chunks_added}
