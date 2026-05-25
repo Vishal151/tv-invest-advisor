@@ -24,9 +24,12 @@ def sample_chunks():
 @pytest.fixture
 def client():
     """Test client with ChromaDB mocked out so the app can start."""
-    with patch("app.services.retriever.get_doc_count", return_value=142), \
-         patch("app.services.retriever.get_collection"):
+    with (
+        patch("app.services.retriever.get_doc_count", return_value=142),
+        patch("app.services.retriever.get_collection"),
+    ):
         from app.main import app
+
         return TestClient(app)
 
 
@@ -42,10 +45,12 @@ def test_health_returns_ok(client):
 
 def test_query_returns_answer(client, sample_chunks):
     answer_text = "TV delivers £5.61 ROI. Key sources: Profit Ability 2."
-    with patch("app.api.routes.check_input", return_value=(True, "APPROVED")), \
-         patch("app.api.routes.retrieve", return_value=sample_chunks), \
-         patch("app.api.routes.generate", return_value=(answer_text, "gpt-4o")), \
-         patch("app.api.routes.check_output", return_value=(True, "APPROVED")):
+    with (
+        patch("app.api.routes.check_input", return_value=(True, "APPROVED")),
+        patch("app.api.routes.retrieve", return_value=sample_chunks),
+        patch("app.api.routes.generate", return_value=(answer_text, "gpt-4o")),
+        patch("app.api.routes.check_output", return_value=(True, "APPROVED")),
+    ):
 
         resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
 
@@ -65,9 +70,12 @@ def test_query_rejects_off_topic(client):
 
 def test_query_returns_cached_response(client):
     from app.services.cache import cache
+
     cached_data = {
         "answer": "Cached answer about TV.",
-        "sources": [{"title": "Profit Ability 2", "chunk": "excerpt...", "url": "https://thinkbox.tv"}],
+        "sources": [
+            {"title": "Profit Ability 2", "chunk": "excerpt...", "url": "https://thinkbox.tv"}
+        ],
         "model_used": "gpt-4o",
     }
     # The route passes all 6 kwargs to cache.get, so set must match exactly
@@ -108,6 +116,15 @@ def test_ingest_requires_api_key(client):
     assert resp.status_code == 422  # missing X-API-Key header
 
 
+def test_query_returns_503_on_llm_failure(client, sample_chunks):
+    with patch("app.api.routes.check_input", return_value=(True, "APPROVED")), patch(
+        "app.api.routes.retrieve", return_value=sample_chunks
+    ), patch("app.api.routes.generate", side_effect=RuntimeError("All models failed")):
+        resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
+    assert resp.status_code == 503
+    assert "unavailable" in resp.json()["detail"].lower()
+
+
 def test_ingest_rejects_wrong_key(client):
     resp = client.post(
         "/api/ingest",
@@ -120,6 +137,7 @@ def test_ingest_rejects_wrong_key(client):
 def test_ingest_valid_document(client):
     """Ingest route should call the ingest pipeline and return chunk count."""
     from app.api.routes import verify_api_key
+
     client.app.dependency_overrides[verify_api_key] = lambda: "dev-key"
     with patch("app.api.routes.run_ingest", return_value=5) as mock_ingest:
         resp = client.post(

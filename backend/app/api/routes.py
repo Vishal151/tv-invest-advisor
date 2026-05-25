@@ -146,14 +146,21 @@ async def query(request: QueryRequest):
         )
 
     # 4. Generate answer via LiteLLM
-    answer, model_used = generate(
-        question=request.question,
-        chunks=chunks,
-        sector=request.sector,
-        brand_stage=request.brand_stage,
-        budget_tier=request.budget_tier,
-        primary_goal=request.primary_goal,
-    )
+    try:
+        answer, model_used = generate(
+            question=request.question,
+            chunks=chunks,
+            sector=request.sector,
+            brand_stage=request.brand_stage,
+            budget_tier=request.budget_tier,
+            primary_goal=request.primary_goal,
+        )
+    except Exception as e:
+        logger.error(f"All LLM models failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail="The answer service is temporarily unavailable. Please try again shortly.",
+        )
 
     # 5. Output guardrail
     output_ok, _ = check_output(answer=answer, chunks=chunks)
