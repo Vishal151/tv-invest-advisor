@@ -1,0 +1,19 @@
+[project]
+name = "backend"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=1.5.9",
+    "fastapi>=0.136.3",
+    "httpx>=0.28.1",
+    "langfuse>=4.6.1",
+    "litellm>=1.86.0",
+    "openai>=2.38.0",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "pypdf>=6.12.1",
+    "pysqlite3-binary>=0.5.4.post2",
+    "python-dotenv>=1.2.2",
+    "requests>=2.34.2",
+    "uvicorn>=0.48.0",
+]
