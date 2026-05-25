@@ -1,0 +1,37 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+uv.lock
+
+# ChromaDB
+backend/chroma_db/
+
+# Data (source files - don't commit)
+data/pdfs/
+data/pptx/
+
+# Claude Code settings
+.claude/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
