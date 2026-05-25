@@ -1,0 +1,62 @@
+SOURCE: Demand Generator
+URL: https://www.thinkbox.tv/research/thinkbox-research/demand-generation
+PUBLISHED: 2019
+TOPIC: planning
+SECTOR: all
+
+OVERVIEW
+WPP econometric meta-analysis examining TV's role in generating consumer demand and its interaction with other media channels. The Demand Generator study synthesises evidence from multiple econometric models to demonstrate TV's function as the primary demand-generation channel in the media mix.
+
+CORE CONCEPT: DEMAND GENERATION VS DEMAND HARVESTING
+The study draws a critical distinction between two types of media activity:
+
+Demand-Generating Media (TV, brand advertising)
+Creates new desire and awareness among consumers who are not currently in-market. Builds brand salience, emotional connection, and category consideration. Effects are long-lasting, accumulating over months and years. TV is the pre-eminent demand-generating channel due to its mass reach, audio-visual impact, and trusted environment.
+
+Demand-Harvesting Media (search, affiliate, retargeting)
+Captures existing intent from consumers already considering a purchase. Highly efficient for converting warm prospects but cannot create demand from scratch. Effectiveness is dependent on the level of demand that brand-building activity has already generated upstream.
+
+THE DEMAND GENERATOR PRINCIPLE
+TV creates the demand pool that downstream digital channels convert. Without sufficient demand generation, demand-harvesting channels become less productive — they are fishing in an increasingly empty pool. The research demonstrates that:
+- Brands that reduce TV investment see declining search and affiliate performance over time
+- TV's contribution to other channels' effectiveness is measurable and substantial
+- The optimal media mix requires meaningful investment in demand generation before performance channels can operate efficiently
+
+KEY ECONOMETRIC FINDINGS
+
+TV's Multiplier Effect on Digital
+Econometric analysis across multiple WPP clients demonstrates that TV advertising creates measurable uplifts in:
+- Paid search click-through and conversion rates (TV-supported campaigns show higher quality scores)
+- Organic search volume (TV drives branded search queries)
+- Online display response rates
+- Social media engagement and follower growth
+- Website direct traffic
+
+The magnitude of these uplifts varies by category but consistently demonstrates that TV investment drives efficiency gains across the entire digital media plan.
+
+Media Investment Thresholds
+The study identifies minimum effective investment thresholds below which TV cannot build sufficient reach to generate meaningful demand. For most categories, effective TV investment requires sufficient budget to achieve meaningful weekly reach among the target audience. Under-investment produces disproportionately lower returns; campaigns that achieve threshold coverage generate non-linear efficiency gains.
+
+Long-Term vs Short-Term Balance
+Effective media planning requires balance between long-term brand investment (primarily TV) and short-term activation (performance channels). The IPA's "60/40 rule" — approximately 60% of investment in long-term brand building, 40% in short-term activation — is supported by the econometric evidence. Brands that over-index on performance channels at the expense of brand building progressively erode their demand base.
+
+SECTOR APPLICATIONS
+
+FMCG
+High purchase frequency makes FMCG particularly dependent on mental availability — being thought of in the purchase moment. TV is the most efficient builder of mental availability at scale. Demand Generator evidence shows FMCG brands that maintain TV investment retain higher market share and price elasticity than those that shift to digital-only strategies.
+
+Retail
+TV drives footfall and online traffic in retail, with measurable same-week and next-week effects. The demand generation effect is particularly pronounced in competitive retail categories where brand differentiation is essential.
+
+Financial Services
+Long consideration cycles in finance mean demand generation must work far in advance of purchase. TV's ability to build brand familiarity and trust over extended periods makes it essential for financial services brands seeking to be considered at the point of a major financial decision.
+
+Direct-to-Consumer (DTC)
+Emerging DTC brands face the challenge of building brand awareness rapidly without established distribution advantages. The Demand Generator evidence supports TV as the most efficient scaling channel for DTC brands once they have found product-market fit, enabling rapid awareness building that paid social and search cannot match at equivalent efficiency.
+
+PLANNING IMPLICATIONS
+The Demand Generator framework suggests media plans should be constructed starting with the question: "How much demand do we need to generate, and what level of TV investment is required to generate it?" Performance channel budgets should then be sized relative to the demand pool being created, rather than being planned independently.
+
+For brands new to TV: Initial investment should focus on building awareness thresholds before optimising for efficiency. Premature efficiency optimisation before sufficient brand awareness is built produces diminishing returns.
+
+For established TV advertisers: The key risk is over-rotating to performance channels during economic pressure. Maintaining a minimum brand-building investment protects the demand base that makes all other channels work.

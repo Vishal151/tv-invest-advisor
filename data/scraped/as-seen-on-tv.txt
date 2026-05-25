@@ -1,0 +1,64 @@
+SOURCE: As Seen on TV: Supercharging Your Small Business
+URL: https://www.thinkbox.tv/research/thinkbox-research/as-seen-on-tv-supercharging-your-small-business
+PUBLISHED: July 10, 2019
+TOPIC: small_business
+SECTOR: all
+
+OVERVIEW
+Thinkbox commissioned research examining how television advertising drives growth for smaller businesses, departing from previous studies focused on larger established brands. Two-pronged research approach: qualitative interviews with 17 media agencies, creative agencies, broadcasters, and advertisers; econometric analysis of 78 brands across 300+ campaigns for smaller advertisers by Data2Decisions.
+
+KEY FINDINGS
+
+Revenue Attribution
+Television constituted 66% of media budgets while generating 80% of advertising-derived sales across the 78-brand dataset, demonstrating a significant performance multiplier. Smaller brands realise outsized sales uplifts compared to larger competitors, reflecting expansion from lower baseline market penetration.
+
+Payback Timelines by Sector
+- Retail: 2 weeks post-campaign
+- Finance: 5 weeks post-campaign
+- FMCG: 7 weeks post-campaign
+Typical profit payback occurs approximately four months after campaign conclusion, accounting for sustained effects.
+
+Budget Allocation Guidance
+At £100k budgets, TV should constitute approximately 50% of media spend. Budget share should increase as businesses grow, since TV has the highest capacity before diminishing returns. At £300k weekly spend, TV's diminishing returns ceiling remains uncapped, creating advantage for concentrated campaigns reaching new audiences repeatedly.
+
+Creative Efficiency
+Twenty-second spots demonstrate optimal efficiency for smaller advertisers, balancing memorability with cost-effectiveness. Shorter formats enable greater frequency for equivalent budgets. Following branding campaigns with activation messaging increases effectiveness by 14%.
+
+WHEN TO ADOPT TV
+Businesses should consider television when they have exhausted efficient returns from existing channels. Four triggers for TV readiness:
+1. Performance plateau — existing campaigns stop delivering comparable results for equivalent investment
+2. Scaling requirements — need to expand business and access new customer pools
+3. Brand building — desire to establish stronger brand recognition
+4. Video belief — confidence that audiovisual advertising drives broader reach
+
+TIMING AND SEASONALITY
+Television pricing fluctuates annually. Optimal windows:
+- FMCG: July-August
+- Retail: December
+- Finance: February-March
+
+BARRIERS AND REALITY
+Common misconceptions vs. reality:
+- Misconception: TV is inaccessible to small advertisers. Reality: Creative production ranges £3-5k; campaigns delivering acceptable cost-per-acquisition cost tens of thousands rather than hundreds of thousands.
+- Misconception: Unaccountable spending. Reality: Attribution tools and brand tracking enable measurement of both immediate and sustained effects.
+- Misconception: Results lack tangibility. Reality: Effects manifest visibly through web traffic spikes and PPC performance improvements.
+
+STRATEGIC PRINCIPLES
+- Demand-harvesting channels (search, affiliate marketing) become inefficient quickly. Demand-generating channels like TV maintain capacity for growth at higher spending levels.
+- Advertising produces immediate impact during campaigns (approximately 3 months) plus sustained effects extending well beyond, driven by repeat purchases and delayed conversions.
+- Larger brands with greater distribution and mental availability generate superior returns on identical ad spend.
+- Staff motivation benefit: qualitative interviews revealed 10-15% uplift in performance attributable to staff motivation when advertising appears on television.
+
+CATEGORY-SPECIFIC CONSIDERATIONS
+- FMCG: Thin margins relative to units sold; advertising effectiveness measured against category-level growth. TV budget optimal window: July-August.
+- Retail: Larger transaction values enable clearer ROI attribution. Payback within 2 weeks.
+- Finance: Extended consideration cycles require sustained brand presence. Payback within 5 weeks.
+- Services: Staff motivation and supplier relationships affect overall advertising impact.
+
+IMPLEMENTATION STEPS
+1. Analyse diminishing returns curves with media partners to identify saturation points
+2. Develop clear market positioning and distinctive propositions
+3. Explore negotiated rates with agencies and media owners
+4. Optimise planning through seasonality, daypart, audience targeting, and contextual factors
+5. Ensure technical infrastructure handles traffic surges
+6. Establish measurement frameworks pre-campaign

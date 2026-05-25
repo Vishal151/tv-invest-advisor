@@ -1,0 +1,61 @@
+SOURCE: Signalling Success
+URL: https://www.thinkbox.tv/research/thinkbox-research/signalling-success
+PUBLISHED: 2020
+TOPIC: effectiveness
+SECTOR: all
+
+OVERVIEW
+Thinkbox research examining how advertising media channels convey brand signals to consumers, based on costly signalling theory. Experimental study with 3,600 nationally representative UK respondents. Design: participants viewed identical brand descriptions varying only by advertising medium. Categories tested: online retail, FMCG, mobile networks, home insurance. Channels evaluated: TV, newspapers, magazines, radio, social media, video sharing sites.
+
+KEY THEORY
+Costly signalling theory: "the perceived cost and scale of an advertising channel translates to improved brand attributes in the eyes of the consumer." Public promises principle: "Part of the benefit of advertising is that it's a public declaration of trust, reliability and authenticity. This is especially true of TV."
+
+Two signal types measured:
+- Fitness signals: financial robustness, product confidence, quality
+- Social signals: brand fame, popularity, consumer adoption
+
+MAJOR FINDINGS
+
+TV Outperforms All Channels
+TV drove the strongest fitness and social signals in all product categories tested and outperformed social media and online video across every category. Performance ranking: TV > Magazines/Radio > Newspapers > Social media/Video sharing sites. TV still delivered stronger fitness and social signals across all categories, regardless of age.
+
+Fitness Signal Strength
+- TV: 36% stronger than the average across all channels tested
+- TV: 43% of respondents rated TV-advertised brands as high quality
+- 50% of respondents rated brands that advertised on TV as financially strong
+- 50% believed TV-advertised brands demonstrated that "lots of people were buying the brand"
+- Radio: 7% above average
+- Magazines/Newspapers: 32% perceived financial strength
+- Video sharing sites: 22% quality perception
+- Social media: 19% quality perception
+
+Social Signal Performance
+- TV: 23% stronger than average in delivering social signals
+- TV: 43% rated TV-advertised brands as "successful"
+- Magazines: 6% above average
+- Social media and video sharing sites: least effective at delivering social signals (31-32% success perception)
+
+Trust Measurements
+Explicit trust levels by channel:
+- TV: 30%
+- Magazines: 29%
+- Radio: 28%
+- Video sharing sites: 19%
+TV and radio demonstrated "significantly stronger and more automatic" implicit/emotional trust responses than social platforms. "Emotional trust is deeper, and therefore more resilient, than trust based on rational thoughts."
+
+Channel Branding Effects
+TV signalling power remained constant regardless of specific channel named. Social media signalling actually decreased when specific platform names were used. Named branded channels (e.g., "The Times") increased signal perception for news brands.
+
+ADVERTISER IMPLICATIONS
+- Video platforms are "not interchangeable" despite similar formats
+- TV's perceived broadcast reach creates "common knowledge and cultural meaning"
+- Hypertargeting on social platforms prevents viewers from understanding what others see, reducing social signal power
+- For smaller/unknown brands: TV accelerates trust-building more efficiently than alternatives
+- For established brands: TV remains effective for differentiation on quality and reliability
+- During economic uncertainty: abandoning costly signalling via efficiency-focused channels may backfire
+
+PSYCHOLOGICAL FRAMEWORK
+The research references the distinction between "narrow logic" (economist efficiency focus) and "psycho-logic" (how humans actually make decisions). Findings suggest media choices tap into unconscious psychological decision-making. "Animals and humans rely on the 'psycho-logic' and social intelligence provided by costly signals to mitigate risk."
+
+METHODOLOGY NOTE
+Study conducted during COVID-19 lockdown; excludes cinema and outdoor advertising due to situational bias concerns. Used both explicit questioning and implicit timed response testing to capture both rational and emotional trust.
