@@ -132,7 +132,23 @@ def ingest_text_file(
     return total_added
 
 
+def delete_source_chunks(collection: chromadb.Collection, source_title: str) -> int:
+    """Delete all chunks for a given source_title. Returns count deleted."""
+    results = collection.get(where={"source_title": source_title}, include=[])
+    ids = results["ids"]
+    if ids:
+        collection.delete(ids=ids)
+        logger.info(f"  Deleted {len(ids)} existing chunks for '{source_title}'")
+    return len(ids)
+
+
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest scraped research text files into ChromaDB.")
+    parser.add_argument("--force", action="store_true", help="Delete and re-ingest all sources.")
+    args = parser.parse_args()
+
     backend_dir = Path(__file__).parent.parent
     data_dir = backend_dir.parent / "data" / "scraped"
 
@@ -156,6 +172,14 @@ def main():
     if not txt_files:
         logger.error(f"No .txt files found in {data_dir}")
         sys.exit(1)
+
+    if args.force:
+        logger.info("--force: deleting existing scraped chunks before re-ingesting")
+        for txt_path in txt_files:
+            text = txt_path.read_text(encoding="utf-8")
+            metadata, _ = parse_header(text)
+            if metadata.get("source_title"):
+                delete_source_chunks(collection, metadata["source_title"])
 
     total_chunks = 0
     for txt_path in txt_files:

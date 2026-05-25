@@ -4,24 +4,525 @@ PUBLISHED: May 21, 2026
 TOPIC: viewing
 SECTOR: all
 
-OVERVIEW
-Annual report on UK television viewing patterns, covering Total TV (broadcast TV plus broadcaster video on demand). Data sourced from BARB (Broadcasters' Audience Research Board).
+[Slide 1]
+ITV – There’s No Place Like ITV
+Thinkbox TV viewing report
+2025
 
-KEY STATISTICS 2025
+[Slide 2]
+Overview
+In 2025, we watched  3h 26m  of Total TV each day.
+VOD represents  69%  of Total TV viewing for 16-34s.
+Total TV advertising accounted for  85%  of the video advertising we saw each day in 2025.
+16-34s spend more time with  TV advertising  than with YouTube & TikTok's combined.
+Rob & Romesh vs…, Sky Max
 
-Daily Viewing
-In 2025, UK adults watched 3 hours 26 minutes of Total TV each day on average.
+[Slide 3]
+Over   98%   of homes have access to over 30 Mbps
+Access to broadband speeds required to support streaming TV have peaked
+The last decade has seen huge improvements in TV quality
+78 %   of main TV screens 40”+ (vs. 35.2% in 2012)
+88%   of households can access broadcaster VOD       on a TV set
+Source: Barb, Ofcom.
 
-Video on Demand Among Young Adults
-VOD represents 69% of Total TV viewing for 16-34 year olds, indicating a substantial shift toward on-demand content among younger demographics.
+[Slide 4]
+Total TV accounted for 70% of total video viewing in 2025
+4 hrs 54 mins
+Source: 2025, Barb / IPA TouchPoints 2025 / Pornhub /  UK Cinema Association / Ipsos Iris
+Total TV = Broadcaster TV, SVODs & AVODs
 
-TV Advertising Dominance
-Total TV advertising accounted for 85% of the video advertising seen each day in 2025, demonstrating television's continued dominance in the video advertising landscape.
+[Slide 5]
+Three ways to watch Total TV
+Source: 2025, Barb,  Thinkbox estimates, VOD includes Broadcaster VOD, SVOD and AVOD
 
-Young Adult TV Advertising Engagement
-The 16-34 age group spend more time with TV advertising than with YouTube and TikTok's combined output, challenging assumptions about young adult media consumption.
+[Slide 6]
+Commercial broadcasters are unrivalled for scale
+Source: Barb / Adults, all devices – 2025
+AVE TIME VIEWED PER  VIEWER  PER DAY
+AVERAGE DAILY REACH (000s)
+Adults  – All devices
+Bubble area represents total volume of daily viewing
 
-CONTEXT
-These figures represent Total TV, which includes both traditional broadcast viewing and broadcaster VOD (BVOD) platforms such as ITV X, Channel 4, and Sky. The data demonstrates that despite fragmentation in viewing habits, TV as a platform — including its digital extensions — maintains dominant share of both viewing time and advertising exposure.
+[Slide 7]
+Commercial broadcasters unrivalled for scale on the TV set
+Source: Barb / All adults, TV sets – 2025
+Other SVOD
+Other AVOD
+Twitch
+AVE TIME VIEWED PER  VIEWER  PER DAY
+AVERAGE DAILY REACH (000s)
+Bubble area represents total volume of daily viewing
+Adults – TV Set
+TikTok
 
-For media planners: TV's reach across all demographics remains unmatched. Even among 16-34s, where VOD dominates the format mix, the platform retains more advertising attention than all major social video platforms combined.
+[Slide 8]
+How TV content is viewed
+Taskmaster – Channel 4
+
+[Slide 9]
+Sports is time-sensitive so has high levels of live viewing
+Source: Barb, 2025, Adults, Live +3min. Premier League: Liverpool v Arsenal, 31 st  Aug, Sky Sports, All Devices.
+2.78  million adult viewers
+97% Live
+viewing
+(any device)
+2.69 million
+3% On-demand  viewing (any device)
+85k
+
+[Slide 10]
+Primetime drama has high levels of on-demand viewing
+Source: Barb, 2025, Adults, Live +3min. Murder Before Evensong, S1 Ep1, 7 th  Oct, Channel 5 , All Devices.
+4.03  million adult viewers
+37% Live
+viewing (any device)
+2.54m
+63% On-demand  viewing (any device)
+1.49m
+
+[Slide 11]
+Device viewing allows flexibility in watching reality TV
+Source: Barb, 2025, Adults. Love Island, S12 Ep47, 25 th  Jul, ITV2 , All Devices.
+2.41  million adult viewers
+25% Device  viewing
+1.82m
+75% TV Set  viewing
+592k
+
+[Slide 12]
+Broad appeal entertainment has high TV set viewing
+Source: Barb, 2025, Adults, Live +3min. The Great British Bake Off, S16, Ep1, 2 nd  Sep, Channel 4 , All Devices.
+6.37  million adult viewers
+4% Device
+viewing
+255k
+96% TV Set  viewing
+6.11 million
+
+[Slide 13]
+Content released as a boxset can receive high pre-broadcast viewing
+Source: Barb, 2025, Adults, Live +3min. Protection (PKA Witness Protection), ITV1, 31 st  Mar,  Online Multiple Screens, All Devices.
+7.41  million total viewers
+47% Pre-broadcast  viewing (any device)
+3.42m
+24% Live TV set  viewing
+2.16m
+29% Time-shifted  viewing (any device) within 28 days of broadcast
+1.74m
+
+[Slide 14]
+TV landscape
+The Last of Us – Sky Atlantic
+
+[Slide 15]
+Commercial linear TV daily, weekly & monthly reach
+Source: Barb, 2025, industry standard TV viewing in-home on a TV set. Reach 3min+
+
+[Slide 16]
+TV population (universe) sizes in millions
+Individuals
+Adults
+ABC1 Adults
+Men
+16-34 Adults
+Kids
+Housepersons with Kids
+61.3
+52.3
+29.9
+25.2
+14.4
+9.0
+6.9
+27.0
+Women
+Source: Barb, Dec 2025
+
+[Slide 17]
+Time lengths & advertising
+Pete Wicks: For Dogs' Sake – U&W
+
+[Slide 18]
+Time lengths & advertising
+Total TV advertising accounted for  85%  of the video advertising we saw each day in 2025 .
+16-34s spend more time with  TV advertising  than with YouTube & TikTok's combined.
+30-second TV ads consistently account for  over half  of all impacts.
+Linear TV delivered  590 billion  impacts across 2025.
+Procter & Gamble  was the biggest TV advertiser in 2025.
+984  advertisers used TV for the first time in 2025.
+Sources: Barb, Nielsen Ad Intel
+Trigger Point – ITV1
+
+[Slide 19]
+Total TV accounts for 85% of all AV  advertising  time
+Source: 2025,  Barb / Broadcaster stream data / UK Cinema Association / Ipsos Iris
+**YouTube ad time modelled at 3.33% of content time (Enders Analysis, 23 rd  October 2024) and excludes those estimated to be on the YouTube Premium tier.  *TikTok ad time modelled at 3.4% of content time using agency and broadcaster estimates.  **Other online modelled at 3.33% of content time.
+Individuals
+Ad time per day:  16:38
+85%
+12%
+
+[Slide 20]
+16-34s spend more time with  TV  advertising  than YouTube and TikTok combined
+Source: 2025,  Barb / Broadcaster stream data / UK Cinema Association / Ipsos Iris
+**YouTube ad time modelled at 3.33% of content time (Enders Analysis, 23 rd  October 2024) and excludes those estimated to be on the YouTube Premium tier.  *TikTok ad time modelled at 3.4% of content time using agency and broadcaster estimates.  **Other online modelled at 3.33% of content time.
+16-34s
+Ad time per day: 8:58
+48%
+33%
+14%
+
+[Slide 21]
+30-second TV ads consistently account for half of all impacts
+Source: Barb, 2015-2025, Individuals, Proportion of Impacts (R/W) by ad duration
+
+[Slide 22]
+The use of time-lengths differs by category
+Source: Barb, 2025, Individuals
+
+[Slide 23]
+Linear TV delivered 590 billion impacts across 2025
+Source: Barb, Individuals,  UK Full Network, 2025. Base: 30” reweighted impacts. An impact = one person viewing one TV ad in its entirety. Impacts only count when viewed at normal speed
+
+[Slide 24]
+Impacts (Billions)
+The most viewed holding companies on TV in 2025
+Source: Barb, 2025, R/W commercial impacts according to Barb reporting
+
+[Slide 25]
+598 advertisers spent less than £50k on TV in 2025
+Source: Nielsen Ad Intel, 2025
+
+[Slide 26]
+In 2025, there were 984 new to TV advertisers
+Source: Nielsen Ad Intel / Sky. *New to TV advertisers classed as those not advertising on TV within the last 5 years on Linear TV and Sky AdSmart
+
+[Slide 27]
+984 advertisers used TV for the first time in 2025
+Source: Nielsen Ad Intel / Sky – New to TV advertisers classed as those not advertising on TV 5 years prior (2020-2024) on Linear TV and Sky  AdSmart
+
+[Slide 28]
+Top programmes
+“ Celebrity Big Borther ”, ITV1
+
+[Slide 29]
+Source: Barb, 2025, Adults. TV and Online Pre-Broadcast 1-28 days.  Average audience achieved during the first 28 days of their availability.
+2025 was the year of familiar  favourites  and Adolescence
+On 16 th  November, ITV1 launched the 25 th  series of  I’m a Celebrity Get Me Out of Here ,  to an average audience of  9.7 million .
+In September, Channel 4 aired the eagerly awaited 16th season of  The Great British Bake Off  to an average audience of  6.4 million .
+In April, Sky Atlantic launched the second series of  The Last of Us  to an average audience of  1 .6 million .
+On 13 th  March, Netflix aired  Adolescence , new drama about a teen accused of murder t o an average audience of  12.7 million .
+
+[Slide 30]
+I'm a Celebrity... Get Me Out of Here!
+ITV1, 16 Nov
+9,726,894
+Top broadcaster TV programmes 2025 (All devices)
+The Celebrity Traitors
+BBC 1, 6 Nov
+14,254,334
+The Traitors
+BBC 1, 24 Jan
+9,346,391
+New Year’s Eve Fireworks
+BBC 1, 31 Dec
+9,311,132
+Strictly Come Dancing
+BBC 1, 20 Dec
+8,055,742
+Call the Midwife
+BBC 1, 12 Jan
+7,648,978
+Unforgotten
+ITV1, 9 Feb
+8,050,064
+Playing Nice
+ITV1, 5 Jan
+7,578,773
+Protection
+ITV1, 31 Mar
+7,321,610
+Silent Witness
+BBC 1, 13 Jan
+7,112,823
+Source: Barb, 2025, Adults. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 31]
+I'm a Celebrity... Get Me Out of Here!
+ITV1, 16 Nov
+2,596,235
+16-34 Top TV programmes 2025 (All devices)
+The Celebrity Traitors
+BBC 1, 6 Nov
+3,106,686
+The Traitors
+BBC 1, 17 Jan
+2,262,985
+New Year's Eve Fireworks
+BBC 1, 31 Dec
+1,823,870
+The Apprentice
+BBC 1, 6 Mar
+1,416,929
+Love Island
+ITV2, 11 Jul
+1,359,259
+The Great British Bake Off
+Channel 4, 2 Sep
+1,364,135
+Eurovision Song Contest
+BBC 1, 17 May
+1,225,224
+Amandaland
+BBC 1, 25 Dec
+1,168,353
+Love Island All Stars
+ITV2, 4 Feb
+1,157,498
+Source: Barb, 2025, 16-34. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 32]
+Unforgotten
+9 Feb
+8,050,064
+Top  ITV1  programmes 2025 (All devices)
+I'm a Celebrity... Get Me Out of Here!
+16 Nov
+9,726,894
+Playing Nice
+5 Jan
+7,578,773
+Protection
+31 Mar
+7,321,610
+Trigger Point
+26 Oct
+6,906,920
+Code of Silence
+18 May
+6,437,810
+Vera
+2 Jan
+6,887,829
+The Bay
+2 Mar
+6,344,595
+Out There
+19 Jan
+6,112,833
+UEFA Women’s Euro 2025: ENG v ITA
+22 Jul
+6,078,907
+Source: Barb, 2025, Adults. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 33]
+Patience
+9 Jan
+4,575,175
+Top  Channel 4  programmes 2025 (All devices)
+The Great British Bake Off
+16 Sep
+6,428,598
+24 Hours In Police Custody
+6 Oct
+3,696,029
+The Great British Bake Off: Festive Specials
+25 Dec
+3,495,999
+Gogglebox
+9 May
+3,401,011
+Big Fat Quiz
+26 Dec
+3,149,398
+The Great Pottery Throw Down
+9 Mar
+3,206,234
+Celebrity   Gogglebox
+6 Jun
+3,140,180
+In Flight
+12 Aug
+2,978,176
+The Great Celebrity Bake Off for SU2C
+16 Mar
+2,908,201
+Source: Barb, 2025, Adults. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 34]
+The Feud
+14 Apr
+3,916,146
+Top  Channel 5  programmes 2025 (All device)
+Murder Before Evensong
+7 Oct
+4,026,861
+All Creatures Great and Small
+25 Sep
+3,875,916
+Cooper & Fry
+18 Nov
+3,126,523
+The Game
+13 May
+3,049,685
+The Au Pair
+10 Mar
+2,609,132
+The Castaways
+26 Jan
+2,686,115
+Murder Most Puzzling
+19 Jun
+2,405,375
+Madame Blanc
+27 Mar
+2,349,948
+The Rumour
+10 Sep
+2,299,661
+Source: Barb, 2025, Adults. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 35]
+Married at First Sight UK
+E4, 2 Oct
+2,537,866
+Top  commercial non-PSB channel  programmes 2025 (non-sport)
+Love Island
+ITV2, 11 Jul
+2,777,606
+Love Island: All Stars  ITV2, 4 Feb
+2,295,623
+Married at First Sight Australia
+E4, 27 Mar
+2,228,252
+Bergerac
+U&Drama , 27 Feb
+2,130,653
+Lockerbie: A Search For Truth
+Sky Atlantic, 16 Jan
+1,738,337
+Married at First Sight UK: The Reunions
+E4, 24 Feb
+1,875,003
+The Chelsea Detective
+U&Drama, 29 May 1,722,926
+The Marlow Murder Club
+U&Drama, 19 Mar 1,694,360
+The Last Of Us
+Sky Atlantic, 20 Apr 1,601,577
+Source: Barb, 2025, Adults. Average audience figures. TV and / or Online Network. TV and Online Pre-Broadcast 1-28 days. Top performing episode only.
+
+[Slide 36]
+Source: Barb, 2025, Adults. Peak minute audience, consolidated 28 days
+Top commercial  sport programmes
+Top commercial sport:
+Women’s Euro 2025: England v Italy  – ITV1, 22 Jul  – 9,429,000
+Six Nations Championship: England v Scotland  – ITV1, 22 Feb  – 5,939,200
+Six Nations Championship: England v France –  ITV1, 8 Feb  – 5,800,200
+Top commercial non-PSB:
+UEFA Europa League: Tottenham v Manchester United – TNT Sports 1,  21 May  – 3,754,200
+Premier League: Liverpool v Manchester United – Sky Sports Main Event, 5 J an – 2,561,000
+Premier League: Manchester City v Liverpool  – Sky Sports Main Event, 23 Feb – 2,407,500
+
+[Slide 37]
+The Thursday Murder Club
+28 Aug
+9,661,971
+Top  Netflix  programmes 2025 (TV Set)
+Adolescence
+13 Mar
+12,691,496
+Harlen Coben's Missing You
+1 Jan
+6,897,047
+Wake Up Dead Man: A Knives Out Mystery
+12 Dec
+6,825,783
+Happy Gilmore 2
+25 Jul
+5,912,767
+Stranger Things
+27 Nov
+5,795,558
+Wednesday
+6 Aug
+5,882,202
+Dept. Q
+29 May
+5,781,102
+Hostage
+21 Aug
+5,732,640
+Monster: The Ed Gein Story
+3 Oct
+5,181,064
+Source: Barb, 2025, Adults.  Average audience achieved during the first 28 days of their availability. Only includes TV set viewing.  Top performing episode only.
+
+[Slide 38]
+LOL: Last One Laughing UK
+20 Mar
+6,008,952
+Top  Amazon Prime Video  programmes 2025 (TV Set)
+Clarkson’s Farm
+23 May
+7,259,234
+Reacher
+20 Feb
+4,033,557
+Heads Of State
+2 Jul
+3,103,777
+The Assassin
+25 Jul
+2,938,317
+A Working Man
+15 May
+2,431,251
+The Accountant 2
+5 Jun
+2,714,648
+Playdate
+12 Nov
+2,405,642
+The Girlfriend
+10 Sep
+2,257,737
+Fallout
+17 Dec
+2,153,202
+Source: Barb, 2025, Adults.  Average audience achieved during the first 28 days of their availability. Only includes TV set viewing.  Top performing episode only.
+
+[Slide 39]
+Thunderbolts
+27 Aug
+2,183,865
+Top  Disney+  programmes 2025 (TV Set)
+Moana 2
+12 Mar
+3,593,422
+Alien: Earth
+13 Aug
+2,005.840
+Lilo & Stitch
+3 Sep
+1,891,505
+The Fantastic Four: First Steps
+5 Nov
+1,782,008
+Captain America: Brave New World
+28 May
+1,746,603
+The Stolen Girl
+16 Apr
+1,755,028
+A Thousand Blows
+21 Feb
+1,576,368
+Star Wars: Andor
+23 Apr
+1,508,662
+High Potential
+1 Oct
+1,375,090
+Source: Barb, 2025, Adults.  Average audience achieved during the first 28 days of their availability. Only includes TV set viewing.  Top performing episode only.

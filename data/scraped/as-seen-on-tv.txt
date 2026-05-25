@@ -4,61 +4,151 @@ PUBLISHED: July 10, 2019
 TOPIC: small_business
 SECTOR: all
 
-OVERVIEW
-Thinkbox commissioned research examining how television advertising drives growth for smaller businesses, departing from previous studies focused on larger established brands. Two-pronged research approach: qualitative interviews with 17 media agencies, creative agencies, broadcasters, and advertisers; econometric analysis of 78 brands across 300+ campaigns for smaller advertisers by Data2Decisions.
+[Slide 1]
+As Seen On TV:  supercharging your small business
 
-KEY FINDINGS
+[Slide 2]
+The research
+Work Research : qualitative interviews amongst small advertisers at beginning of TV ad journey
+Data2Decisions : analysis of 78 smaller brands’ econometrics studies
+Year 1
+Year 2
+Year 3
+Year 4
+Year 5
+I N V E S T M E N T  &  G R O W T H
 
-Revenue Attribution
-Television constituted 66% of media budgets while generating 80% of advertising-derived sales across the 78-brand dataset, demonstrating a significant performance multiplier. Smaller brands realise outsized sales uplifts compared to larger competitors, reflecting expansion from lower baseline market penetration.
+[Slide 3]
+Analysis of 78 brands and 300+ campaigns
+Data2Decision econometric analysis
+45 x  FMCG brands
+169 campaigns
+Mean brand size £39m
+20 x  Retail brands
+107 campaigns
+Mean brand size £110m
+7 x  Finance brands
+15 campaigns
+Mean brand size £56m
+6 x  Services brands
+20 campaigns
+Mean brand size £87m
 
-Payback Timelines by Sector
-- Retail: 2 weeks post-campaign
-- Finance: 5 weeks post-campaign
-- FMCG: 7 weeks post-campaign
-Typical profit payback occurs approximately four months after campaign conclusion, accounting for sustained effects.
+[Slide 4]
+Business scale is number one driver of ROI
+Source: Data2Decisions ‘Top Drivers of Advertising ROI’, 2014
 
-Budget Allocation Guidance
-At £100k budgets, TV should constitute approximately 50% of media spend. Budget share should increase as businesses grow, since TV has the highest capacity before diminishing returns. At £300k weekly spend, TV's diminishing returns ceiling remains uncapped, creating advantage for concentrated campaigns reaching new audiences repeatedly.
+[Slide 5]
+Smaller brands see the biggest uplifts in sales
+TV efficiently creates  sales uplifts  even at  low levels of investment
+For a small brand with <£50m brand value a £0.5m TV campaign can  drive sales by 10%
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. All categories.
 
-Creative Efficiency
-Twenty-second spots demonstrate optimal efficiency for smaller advertisers, balancing memorability with cost-effectiveness. Shorter formats enable greater frequency for equivalent budgets. Following branding campaigns with activation messaging increases effectiveness by 14%.
+[Slide 6]
+Modelling measures the short-term and sustained impact of advertising
+Short-term effects  resulting from people in-market for a product/service and purchase soon after ad exposure
+Sustained effects  resulting from future demand pool of customers (created by exposure from previous advertising) and repeat buyers
 
-WHEN TO ADOPT TV
-Businesses should consider television when they have exhausted efficient returns from existing channels. Four triggers for TV readiness:
-1. Performance plateau — existing campaigns stop delivering comparable results for equivalent investment
-2. Scaling requirements — need to expand business and access new customer pools
-3. Brand building — desire to establish stronger brand recognition
-4. Video belief — confidence that audiovisual advertising drives broader reach
+[Slide 7]
+Principle of diminishing returns is paramount
+Sales uplift  level dependent on:
+Size of  market
+Product  accessibility
+Brand   size
+Diminishing returns  dependent on:
+Scale  of ad channels
+Creative  messaging
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Thinkbox. Data2Decisions database of smaller brands. Example from finance category
+% SALES UPLIFT
+SPEND £M
 
-TIMING AND SEASONALITY
-Television pricing fluctuates annually. Optimal windows:
-- FMCG: July-August
-- Retail: December
-- Finance: February-March
+[Slide 8]
+Optimisation should follow level of spend
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. All categories
+Optimal media channel distribution by budget
 
-BARRIERS AND REALITY
-Common misconceptions vs. reality:
-- Misconception: TV is inaccessible to small advertisers. Reality: Creative production ranges £3-5k; campaigns delivering acceptable cost-per-acquisition cost tens of thousands rather than hundreds of thousands.
-- Misconception: Unaccountable spending. Reality: Attribution tools and brand tracking enable measurement of both immediate and sustained effects.
-- Misconception: Results lack tangibility. Reality: Effects manifest visibly through web traffic spikes and PPC performance improvements.
+[Slide 9]
+Take advantage of seasonal peaks & cheaper TV periods
+SALES & TV COST INDEX
+SALES & TV COST INDEX
+SALES & TV COST INDEX
+JAN
+FEB
+MAR
+APR
+MAY
+JUN
+JUL
+AUG
+SEP
+OCT
+NOV
+DEC
+Retail
+FMCG
+Finance
+Source : ‘ As Seen on TV: supercharging your small business ’,  May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands
 
-STRATEGIC PRINCIPLES
-- Demand-harvesting channels (search, affiliate marketing) become inefficient quickly. Demand-generating channels like TV maintain capacity for growth at higher spending levels.
-- Advertising produces immediate impact during campaigns (approximately 3 months) plus sustained effects extending well beyond, driven by repeat purchases and delayed conversions.
-- Larger brands with greater distribution and mental availability generate superior returns on identical ad spend.
-- Staff motivation benefit: qualitative interviews revealed 10-15% uplift in performance attributable to staff motivation when advertising appears on television.
+[Slide 10]
+Start with low budget bursts & build up presence
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions optimisations based on database of smaller FMCG brands
+JAN
+AUG
+DEC
+MAR
+APR
+MAY
+JUN
+JUL
+FEB
+SEP
+OCT
+NOV
+Optimal laydown for different investment levels - FMCG
 
-CATEGORY-SPECIFIC CONSIDERATIONS
-- FMCG: Thin margins relative to units sold; advertising effectiveness measured against category-level growth. TV budget optimal window: July-August.
-- Retail: Larger transaction values enable clearer ROI attribution. Payback within 2 weeks.
-- Finance: Extended consideration cycles require sustained brand presence. Payback within 5 weeks.
-- Services: Staff motivation and supplier relationships affect overall advertising impact.
+[Slide 11]
+Awareness helps activation work harder
+Awareness campaigns =   generate brand awareness & define brand position
+Activation campaigns =  give a call to action, e.g. promos/sales
+Awareness messaging makes  activation work harder  for new to TV advertisers
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. Based on an average small retail brand with annual brand TV spend of £0.5m and tactical TV spend of £200k
+Activation message
+Awareness message
++14%  sales response on activation activity
+Weeks
+Weeks
 
-IMPLEMENTATION STEPS
-1. Analyse diminishing returns curves with media partners to identify saturation points
-2. Develop clear market positioning and distinctive propositions
-3. Explore negotiated rates with agencies and media owners
-4. Optimise planning through seasonality, daypart, audience targeting, and contextual factors
-5. Ensure technical infrastructure handles traffic surges
-6. Establish measurement frameworks pre-campaign
+[Slide 12]
+Shorter TV ads can deliver greater ROI for small advertisers
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. Base = 30s
+
+[Slide 13]
+TV punches above its weight in terms of sales versus spend
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. All categories.
+Share of spend
+Share of advertising-generated sales
+
+[Slide 14]
+TV delivers results quickly
+An average 4 week TV campaign builds to a  weekly sales uplift of c. 25%
+The typical  profit payback  point is at c.  4 months
+Source: ‘Supercharge: TV for small businesses’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. All categories. Based on campaign spend of £1.25m.
+4 WEEK TV CAMPAIGN
+
+[Slide 15]
+TV delivers both short-term and sustained sales effects
+ROI  is a measure of  efficiency  not  effectiveness
+The immediate & sustained effects  of TV can be  isolated & measured
+Source: ‘As Seen on TV: supercharging your small business’, May 2019, Data2Decisions/Work/Thinkbox. Data2Decisions database of smaller brands. All categories.
+Brand size
+
+[Slide 16]
+Don’t be limited by budget – be flexible!
+
+[Slide 17]
+Summary
+TV is right once  other media become less efficient
+TV builds a  future ‘demand pool’
+TV is  affordable & accountable
+The effects of TV are  immediate  for most but also  sustained
+Flexibility  is key to maximising budget

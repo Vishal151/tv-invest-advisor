@@ -4,58 +4,81 @@ PUBLISHED: 2020
 TOPIC: effectiveness
 SECTOR: all
 
-OVERVIEW
-Thinkbox research examining how advertising media channels convey brand signals to consumers, based on costly signalling theory. Experimental study with 3,600 nationally representative UK respondents. Design: participants viewed identical brand descriptions varying only by advertising medium. Categories tested: online retail, FMCG, mobile networks, home insurance. Channels evaluated: TV, newspapers, magazines, radio, social media, video sharing sites.
+[Slide 2]
+TV ads drive the strongest fitness, social and trust signals
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654)
 
-KEY THEORY
-Costly signalling theory: "the perceived cost and scale of an advertising channel translates to improved brand attributes in the eyes of the consumer." Public promises principle: "Part of the benefit of advertising is that it's a public declaration of trust, reliability and authenticity. This is especially true of TV."
+[Slide 3]
+TV drives strongest fitness & social signals
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654)
+Ave  fitness  signal
+Ave  social  signal
+FITNESS SIGNAL  (% POSITIVELY  SCORING / AGREEING TO STATEMENTS)
+SOCIAL SIGNAL  (% POSITIVELY  SCORING / AGREEING TO STATEMENTS)
+Fitness signal
+Social signal
 
-Two signal types measured:
-- Fitness signals: financial robustness, product confidence, quality
-- Social signals: brand fame, popularity, consumer adoption
+[Slide 4]
+TV ads deliver quality, self-confidence and strength signals
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654)
+FITNESS SIGNALS (% POSITIVELY SCORING / AGREEING TO STATEMENTS)
+Fitness signals
 
-MAJOR FINDINGS
+[Slide 5]
+TV ads drive the strongest popularity and success signals
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654)
+SOCIAL SIGNALS  (% POSITIVELY  SCORING / AGREEING TO STATEMENTS)
+Social signals
 
-TV Outperforms All Channels
-TV drove the strongest fitness and social signals in all product categories tested and outperformed social media and online video across every category. Performance ranking: TV > Magazines/Radio > Newspapers > Social media/Video sharing sites. TV still delivered stronger fitness and social signals across all categories, regardless of age.
+[Slide 6]
+TV, magazines & radio deliver strongest trust signal
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654)
+TRUST SIGNAL  (% POSITIVELY  SCORING)
+Average  trust  signal
+Trust to deliver on promises made
 
-Fitness Signal Strength
-- TV: 36% stronger than the average across all channels tested
-- TV: 43% of respondents rated TV-advertised brands as high quality
-- 50% of respondents rated brands that advertised on TV as financially strong
-- 50% believed TV-advertised brands demonstrated that "lots of people were buying the brand"
-- Radio: 7% above average
-- Magazines/Newspapers: 32% perceived financial strength
-- Video sharing sites: 22% quality perception
-- Social media: 19% quality perception
+[Slide 7]
+TV & radio signal the strongest emotional trust
+Source: Signalling Success, 2020, house51/Thinkbox. Base: all adults (3,654). Please see notes for detail on implicit trust calculation.
+TRUST
+% Agree
+Reaction time
+Avg RT
+100%
+0%
+High & Automatic
+Low, more effort
+High, more effort
+Low & Automatic
+Rational Trust
+Emotional Trust
+SLOW
+FAST!
 
-Social Signal Performance
-- TV: 23% stronger than average in delivering social signals
-- TV: 43% rated TV-advertised brands as "successful"
-- Magazines: 6% above average
-- Social media and video sharing sites: least effective at delivering social signals (31-32% success perception)
+[Slide 8]
+Ad signalling power by media channel – 16-34s
+Source: Signalling Success, 2020, house51/Thinkbox. Base: 16-34
 
-Trust Measurements
-Explicit trust levels by channel:
-- TV: 30%
-- Magazines: 29%
-- Radio: 28%
-- Video sharing sites: 19%
-TV and radio demonstrated "significantly stronger and more automatic" implicit/emotional trust responses than social platforms. "Emotional trust is deeper, and therefore more resilient, than trust based on rational thoughts."
+[Slide 9]
+Ad signalling power by media channel – 35-54s
+Source: Signalling Success, 2020, house51/Thinkbox. Base: 35-54
 
-Channel Branding Effects
-TV signalling power remained constant regardless of specific channel named. Social media signalling actually decreased when specific platform names were used. Named branded channels (e.g., "The Times") increased signal perception for news brands.
+[Slide 10]
+Ad signalling power by media channel – 55+
+Source: Signalling Success, 2020, house51/Thinkbox. Base: 55+
 
-ADVERTISER IMPLICATIONS
-- Video platforms are "not interchangeable" despite similar formats
-- TV's perceived broadcast reach creates "common knowledge and cultural meaning"
-- Hypertargeting on social platforms prevents viewers from understanding what others see, reducing social signal power
-- For smaller/unknown brands: TV accelerates trust-building more efficiently than alternatives
-- For established brands: TV remains effective for differentiation on quality and reliability
-- During economic uncertainty: abandoning costly signalling via efficiency-focused channels may backfire
+[Slide 11]
+Ad signalling power by media channel – online retail
+Source: Signalling Success, 2020, house51/Thinkbox. Base: online retail
 
-PSYCHOLOGICAL FRAMEWORK
-The research references the distinction between "narrow logic" (economist efficiency focus) and "psycho-logic" (how humans actually make decisions). Findings suggest media choices tap into unconscious psychological decision-making. "Animals and humans rely on the 'psycho-logic' and social intelligence provided by costly signals to mitigate risk."
+[Slide 12]
+Ad signalling power by media channel – FMCG
+Source: Signalling Success, 2020, house51/Thinkbox. Base: FMCG
 
-METHODOLOGY NOTE
-Study conducted during COVID-19 lockdown; excludes cinema and outdoor advertising due to situational bias concerns. Used both explicit questioning and implicit timed response testing to capture both rational and emotional trust.
+[Slide 13]
+Ad signalling power by media channel – mobile phone network
+Source: Signalling Success, 2020, house51/Thinkbox. Base: mobile phone network
+
+[Slide 14]
+Ad signalling power by media channel – home insurance
+Source: Signalling Success, 2020, house51/Thinkbox. Base: home insurance
