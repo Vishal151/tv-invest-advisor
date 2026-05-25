@@ -39,10 +39,13 @@ def test_retrieve_returns_chunks(mock_collection):
         distances=[0.15],
     )
 
-    with patch("app.services.retriever.chromadb.PersistentClient") as mock_client, \
-         patch("app.services.retriever.embed", return_value=[0.1] * 1536):
+    with (
+        patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
+        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+    ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
+
         chunks = retrieve(question="Does TV work?")
 
     assert len(chunks) == 1
@@ -54,10 +57,13 @@ def test_retrieve_returns_chunks(mock_collection):
 def test_retrieve_calls_embed_with_question(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
-    with patch("app.services.retriever.chromadb.PersistentClient") as mock_client, \
-         patch("app.services.retriever.embed", return_value=[0.1] * 1536) as mock_embed:
+    with (
+        patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
+        patch("app.services.retriever.embed", return_value=[0.1] * 1536) as mock_embed,
+    ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
+
         retrieve(question="When does TV pay back?")
 
     mock_embed.assert_called_once_with("When does TV pay back?")
@@ -66,10 +72,13 @@ def test_retrieve_calls_embed_with_question(mock_collection):
 def test_retrieve_applies_sector_filter(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
-    with patch("app.services.retriever.chromadb.PersistentClient") as mock_client, \
-         patch("app.services.retriever.embed", return_value=[0.1] * 1536):
+    with (
+        patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
+        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+    ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
+
         retrieve(question="q", sector="FMCG")
 
     call_kwargs = mock_collection.query.call_args.kwargs
@@ -82,10 +91,13 @@ def test_retrieve_applies_sector_filter(mock_collection):
 def test_retrieve_no_filter_when_no_sector(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
-    with patch("app.services.retriever.chromadb.PersistentClient") as mock_client, \
-         patch("app.services.retriever.embed", return_value=[0.1] * 1536):
+    with (
+        patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
+        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+    ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
+
         retrieve(question="q")
 
     call_kwargs = mock_collection.query.call_args.kwargs
@@ -95,5 +107,6 @@ def test_retrieve_no_filter_when_no_sector(mock_collection):
 def test_get_doc_count(mock_collection):
     retriever_module._collection = mock_collection
     from app.services.retriever import get_doc_count
+
     count = get_doc_count()
     assert count == 42

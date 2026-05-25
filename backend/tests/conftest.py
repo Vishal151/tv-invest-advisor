@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def sample_chunks() -> list[dict]:
     return [
         {
             "text": "TV advertising delivered an average ROI of £5.61 for every £1 spent, "
-                    "based on analysis of 141 brands across 14 categories.",
+            "based on analysis of 141 brands across 14 categories.",
             "metadata": {
                 "source_title": "Profit Ability 2",
                 "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-2",
@@ -30,7 +30,7 @@ def sample_chunks() -> list[dict]:
         },
         {
             "text": "Brands that invest in TV consistently outperform those that do not "
-                    "on measures of brand fame, trust, and mental availability.",
+            "on measures of brand fame, trust, and mental availability.",
             "metadata": {
                 "source_title": "TV is at the Heart of Effectiveness",
                 "source_url": "https://www.thinkbox.tv/research/reports/tv-is-at-the-heart-of-effectiveness-whitepaper-by-peter-field",
@@ -88,4 +88,5 @@ def test_client(mock_doc_count):
     """Returns a TestClient with all external services mocked at import time."""
     with patch("app.services.retriever.get_collection"):
         from app.main import app
+
         return TestClient(app)

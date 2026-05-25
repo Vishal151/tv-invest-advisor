@@ -12,24 +12,24 @@ Stores chunks in ChromaDB at ./chroma_db/
 
 # SQLite fix must be first
 __import__("pysqlite3")
-import sys
+import sys  # noqa: E402
+
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
-import argparse
-import hashlib
-import logging
-import os
-from pathlib import Path
+import argparse  # noqa: E402
+import hashlib  # noqa: E402
+import logging  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from pypdf import PdfReader
+import chromadb  # noqa: E402
+from chromadb.config import Settings as ChromaSettings  # noqa: E402
+from pypdf import PdfReader  # noqa: E402
 
 # Allow imports from app/
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.core.config import get_settings
-from app.services.embedder import embed_batch
+from app.core.config import get_settings  # noqa: E402
+from app.services.embedder import embed_batch  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -96,6 +96,7 @@ DOCUMENT_REGISTRY: dict[str, dict] = {
 
 # ── PDF extraction ────────────────────────────────────────────────────────────
 
+
 def extract_text_from_pdf(pdf_path: Path) -> list[tuple[str, int]]:
     """
     Extracts text from a PDF, page by page.
@@ -113,6 +114,7 @@ def extract_text_from_pdf(pdf_path: Path) -> list[tuple[str, int]]:
 
 
 # ── Chunking ──────────────────────────────────────────────────────────────────
+
 
 def chunk_text(
     text: str,
@@ -134,12 +136,14 @@ def chunk_text(
         chunk_text = " ".join(chunk_words)
 
         if len(chunk_words) > 20:  # skip very short chunks
-            chunks.append({
-                "text": chunk_text,
-                "page": page_number,
-                "word_start": start,
-                "word_end": end,
-            })
+            chunks.append(
+                {
+                    "text": chunk_text,
+                    "page": page_number,
+                    "word_start": start,
+                    "word_end": end,
+                }
+            )
 
         start += chunk_size - overlap
 
@@ -147,6 +151,7 @@ def chunk_text(
 
 
 # ── Ingestion ─────────────────────────────────────────────────────────────────
+
 
 def ingest_document(
     pdf_path: Path,
@@ -187,7 +192,7 @@ def ingest_document(
     total_added = 0
 
     for batch_start in range(0, len(all_chunks), batch_size):
-        batch = all_chunks[batch_start: batch_start + batch_size]
+        batch = all_chunks[batch_start : batch_start + batch_size]
 
         # Build IDs first so we can check what already exists
         ids = []
@@ -216,11 +221,13 @@ def ingest_document(
         for i, (chunk, _) in enumerate(zip(new_batch, embeddings)):
             chunk_index = batch_start + new_indices[i]
             documents.append(chunk["text"])
-            metadatas.append({
-                **doc_metadata,
-                "page": chunk["page"],
-                "chunk_index": chunk_index,
-            })
+            metadatas.append(
+                {
+                    **doc_metadata,
+                    "page": chunk["page"],
+                    "chunk_index": chunk_index,
+                }
+            )
 
         collection.upsert(
             ids=new_ids,
@@ -240,6 +247,7 @@ def ingest_document(
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(description="Ingest Thinkbox PDFs into ChromaDB")

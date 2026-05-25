@@ -13,6 +13,7 @@ def _get_langfuse():
     global _langfuse
     if _langfuse is None and settings.langfuse_enabled:
         from langfuse import Langfuse
+
         _langfuse = Langfuse(
             public_key=settings.langfuse_public_key,
             secret_key=settings.langfuse_secret_key,
@@ -62,11 +63,7 @@ def build_prompt(
     if primary_goal:
         user_context_parts.append(f"Primary goal: {primary_goal}")
 
-    user_context = (
-        "Brand context: " + " | ".join(user_context_parts)
-        if user_context_parts
-        else ""
-    )
+    user_context = "Brand context: " + " | ".join(user_context_parts) if user_context_parts else ""
 
     user_message = f"""{user_context}
 

@@ -56,8 +56,10 @@ def _make_litellm_response(content: str) -> MagicMock:
 
 
 def test_generate_returns_answer_and_model(sample_chunks):
-    with patch("app.services.generator.completion") as mock_completion, \
-         patch("app.services.generator._get_langfuse", return_value=None):
+    with (
+        patch("app.services.generator.completion") as mock_completion,
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
         mock_completion.return_value = _make_litellm_response(
             "TV delivers strong ROI. Key sources: Profit Ability 2."
         )
@@ -78,8 +80,10 @@ def test_generate_falls_back_on_primary_failure(sample_chunks):
             raise RuntimeError("OpenAI down")
         return _make_litellm_response(fallback_content)
 
-    with patch("app.services.generator.completion", side_effect=side_effect), \
-         patch("app.services.generator._get_langfuse", return_value=None):
+    with (
+        patch("app.services.generator.completion", side_effect=side_effect),
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
         answer, model = generate(question="q", chunks=sample_chunks)
 
     assert answer == fallback_content
@@ -89,8 +93,10 @@ def test_generate_falls_back_on_primary_failure(sample_chunks):
 
 def test_generate_does_not_crash_without_langfuse(sample_chunks):
     """Tracing is a no-op when langfuse_enabled is False — generate() must not crash."""
-    with patch("app.services.generator.completion") as mock_completion, \
-         patch("app.services.generator._get_langfuse", return_value=None):
+    with (
+        patch("app.services.generator.completion") as mock_completion,
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
         mock_completion.return_value = _make_litellm_response(
             "TV works well. Key sources: Profit Ability 2."
         )

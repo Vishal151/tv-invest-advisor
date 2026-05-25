@@ -64,6 +64,7 @@ DOCUMENT_REGISTRY: dict[str, dict] = {
 def _extract_pages(pdf_path: Path) -> list[tuple[str, int]]:
     """Returns [(page_text, page_number), ...] skipping empty pages."""
     from pypdf import PdfReader
+
     reader = PdfReader(str(pdf_path))
     pages = []
     for i, page in enumerate(reader.pages, 1):
@@ -85,10 +86,12 @@ def _chunk_text(text: str, page_number: int) -> list[dict]:
         end = min(start + chunk_size, len(words))
         chunk_words = words[start:end]
         if len(chunk_words) > 20:
-            chunks.append({
-                "text": " ".join(chunk_words),
-                "page": page_number,
-            })
+            chunks.append(
+                {
+                    "text": " ".join(chunk_words),
+                    "page": page_number,
+                }
+            )
         start += chunk_size - overlap
 
     return chunks
@@ -128,7 +131,7 @@ def run_ingest(source_path: str) -> int:
     batch_size = 50
 
     for batch_start in range(0, len(all_chunks), batch_size):
-        batch = all_chunks[batch_start: batch_start + batch_size]
+        batch = all_chunks[batch_start : batch_start + batch_size]
         embeddings = embed_batch([c["text"] for c in batch])
         ids, documents, metadatas = [], [], []
 

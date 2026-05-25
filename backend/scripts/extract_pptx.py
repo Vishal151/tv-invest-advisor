@@ -12,10 +12,8 @@ After running, re-ingest with:
 """
 
 import sys
-import re
 from pathlib import Path
 from pptx import Presentation
-from pptx.util import Pt
 
 # Map PPTX filename -> existing scraped .txt filename (for header preservation)
 PPTX_TO_TXT = {

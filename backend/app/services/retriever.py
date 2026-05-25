@@ -1,13 +1,14 @@
 # Fix for systems with SQLite < 3.35.0 (common on Linux)
 __import__("pysqlite3")
-import sys
+import sys  # noqa: E402
+
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
-import logging
-import chromadb
-from chromadb.config import Settings as ChromaSettings
-from app.core.config import get_settings
-from app.services.embedder import embed
+import logging  # noqa: E402
+import chromadb  # noqa: E402
+from chromadb.config import Settings as ChromaSettings  # noqa: E402
+from app.core.config import get_settings  # noqa: E402
+from app.services.embedder import embed  # noqa: E402
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -79,11 +80,13 @@ def retrieve(
         results["metadatas"][0],
         results["distances"][0],
     ):
-        chunks.append({
-            "text": doc,
-            "metadata": meta,
-            "distance": dist,
-        })
+        chunks.append(
+            {
+                "text": doc,
+                "metadata": meta,
+                "distance": dist,
+            }
+        )
 
     logger.info(f"Retrieved {len(chunks)} chunks for: '{question[:50]}...'")
     return chunks
@@ -102,12 +105,14 @@ def _build_where_filter(
 
     if sector:
         # Match chunks tagged for this sector OR tagged 'all'
-        conditions.append({
-            "$or": [
-                {"sector": {"$eq": sector}},
-                {"sector": {"$eq": "all"}},
-            ]
-        })
+        conditions.append(
+            {
+                "$or": [
+                    {"sector": {"$eq": sector}},
+                    {"sector": {"$eq": "all"}},
+                ]
+            }
+        )
 
     if topic:
         conditions.append({"topic": {"$eq": topic}})
