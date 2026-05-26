@@ -313,3 +313,14 @@ def test_startup_passes_development_mode():
     with patch("app.main.settings", mock_settings):
         # Should not raise in development mode
         _check_production_config()
+
+
+def test_health_includes_readiness_signals(client):
+    with patch("app.api.routes.get_doc_count", return_value=142):
+        resp = client.get("/api/health")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "llm_configured" in data
+    assert "langfuse_enabled" in data
+    assert isinstance(data["llm_configured"], bool)
+    assert isinstance(data["langfuse_enabled"], bool)

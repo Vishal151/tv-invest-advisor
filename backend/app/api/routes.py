@@ -93,6 +93,8 @@ class HealthResponse(BaseModel):
     chroma_docs: int
     version: str
     redis: str = "disabled"
+    llm_configured: bool = False
+    langfuse_enabled: bool = False
 
 
 # ── Auth dependency ───────────────────────────────────────────────────────────
@@ -116,6 +118,8 @@ async def health():
         chroma_docs=get_doc_count(),
         version=settings.version,
         redis=_check_redis(),
+        llm_configured=bool(settings.openai_api_key or settings.anthropic_api_key),
+        langfuse_enabled=settings.langfuse_enabled,
     )
 
 
