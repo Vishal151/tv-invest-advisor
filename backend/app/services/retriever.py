@@ -8,7 +8,6 @@ import logging  # noqa: E402
 import chromadb  # noqa: E402
 from chromadb.config import Settings as ChromaSettings  # noqa: E402
 from app.core.config import get_settings  # noqa: E402
-from app.services.embedder import embed  # noqa: E402
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -44,7 +43,7 @@ def get_doc_count() -> int:
         return 0
 
 
-def retrieve(
+async def retrieve(
     question: str,
     sector: str | None = None,
     brand_stage: str | None = None,
@@ -59,13 +58,15 @@ def retrieve(
 
     Returns a list of dicts: {text, metadata, distance}
     """
+    from app.services.embedder import embed
+
     collection = get_collection()
     k = top_k or settings.retrieval_top_k
 
     # Build ChromaDB where filter from structured inputs
     where = _build_where_filter(sector=sector, topic=topic)
 
-    query_embedding = embed(question)
+    query_embedding = await embed(question)
 
     results = collection.query(
         query_embeddings=[query_embedding],

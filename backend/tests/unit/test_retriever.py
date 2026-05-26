@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock
 import app.services.retriever as retriever_module
 
 
@@ -32,7 +32,7 @@ def mock_collection():
     return col
 
 
-def test_retrieve_returns_chunks(mock_collection):
+async def test_retrieve_returns_chunks(mock_collection):
     mock_collection.query.return_value = _make_chroma_result(
         docs=["TV delivers strong ROI."],
         metadatas=[{"source_title": "Profit Ability 2", "page": 1}],
@@ -41,12 +41,12 @@ def test_retrieve_returns_chunks(mock_collection):
 
     with (
         patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
-        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+        patch("app.services.embedder.embed", new=AsyncMock(return_value=[0.1] * 1536)),
     ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
 
-        chunks = retrieve(question="Does TV work?")
+        chunks = await retrieve(question="Does TV work?")
 
     assert len(chunks) == 1
     assert chunks[0]["text"] == "TV delivers strong ROI."
@@ -54,32 +54,33 @@ def test_retrieve_returns_chunks(mock_collection):
     assert chunks[0]["distance"] == 0.15
 
 
-def test_retrieve_calls_embed_with_question(mock_collection):
+async def test_retrieve_calls_embed_with_question(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
+    mock_embed = AsyncMock(return_value=[0.1] * 1536)
     with (
         patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
-        patch("app.services.retriever.embed", return_value=[0.1] * 1536) as mock_embed,
+        patch("app.services.embedder.embed", new=mock_embed),
     ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
 
-        retrieve(question="When does TV pay back?")
+        await retrieve(question="When does TV pay back?")
 
     mock_embed.assert_called_once_with("When does TV pay back?")
 
 
-def test_retrieve_applies_sector_filter(mock_collection):
+async def test_retrieve_applies_sector_filter(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
     with (
         patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
-        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+        patch("app.services.embedder.embed", new=AsyncMock(return_value=[0.1] * 1536)),
     ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
 
-        retrieve(question="q", sector="FMCG")
+        await retrieve(question="q", sector="FMCG")
 
     call_kwargs = mock_collection.query.call_args.kwargs
     where = call_kwargs["where"]
@@ -88,17 +89,17 @@ def test_retrieve_applies_sector_filter(mock_collection):
     assert "FMCG" in str(where)
 
 
-def test_retrieve_no_filter_when_no_sector(mock_collection):
+async def test_retrieve_no_filter_when_no_sector(mock_collection):
     mock_collection.query.return_value = _make_chroma_result([], [], [])
 
     with (
         patch("app.services.retriever.chromadb.PersistentClient") as mock_client,
-        patch("app.services.retriever.embed", return_value=[0.1] * 1536),
+        patch("app.services.embedder.embed", new=AsyncMock(return_value=[0.1] * 1536)),
     ):
         mock_client.return_value.get_or_create_collection.return_value = mock_collection
         from app.services.retriever import retrieve
 
-        retrieve(question="q")
+        await retrieve(question="q")
 
     call_kwargs = mock_collection.query.call_args.kwargs
     assert call_kwargs["where"] is None

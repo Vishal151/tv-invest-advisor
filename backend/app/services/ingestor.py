@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 
 from app.core.config import get_settings
-from app.services.embedder import embed_batch
 from app.services.retriever import get_collection
 
 logger = logging.getLogger(__name__)
@@ -97,12 +96,14 @@ def _chunk_text(text: str, page_number: int) -> list[dict]:
     return chunks
 
 
-def run_ingest(source_path: str) -> int:
+async def run_ingest(source_path: str) -> int:
     """
     Ingests a single PDF at source_path into ChromaDB.
     Returns the number of chunks added.
     Raises FileNotFoundError for missing files, ValueError for unknown documents.
     """
+    from app.services.embedder import embed_batch
+
     pdf_path = Path(source_path)
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {source_path}")
@@ -132,7 +133,7 @@ def run_ingest(source_path: str) -> int:
 
     for batch_start in range(0, len(all_chunks), batch_size):
         batch = all_chunks[batch_start : batch_start + batch_size]
-        embeddings = embed_batch([c["text"] for c in batch])
+        embeddings = await embed_batch([c["text"] for c in batch])
         ids, documents, metadatas = [], [], []
 
         for i, (chunk, _) in enumerate(zip(batch, embeddings)):

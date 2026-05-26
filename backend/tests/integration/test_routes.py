@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 
 @pytest.fixture
@@ -46,10 +46,10 @@ def test_health_returns_ok(client):
 def test_query_returns_answer(client, sample_chunks):
     answer_text = "TV delivers £5.61 ROI. Key sources: Profit Ability 2."
     with (
-        patch("app.api.routes.check_input", return_value=(True, "APPROVED")),
-        patch("app.api.routes.retrieve", return_value=sample_chunks),
-        patch("app.api.routes.generate", return_value=(answer_text, "gpt-4o")),
-        patch("app.api.routes.check_output", return_value=(True, "APPROVED")),
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(answer_text, "gpt-4o"))),
+        patch("app.api.routes.check_output", new=AsyncMock(return_value=(True, "APPROVED"))),
     ):
 
         resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
@@ -63,7 +63,7 @@ def test_query_returns_answer(client, sample_chunks):
 
 
 def test_query_rejects_off_topic(client):
-    with patch("app.api.routes.check_input", return_value=(False, "REJECTED")):
+    with patch("app.api.routes.check_input", new=AsyncMock(return_value=(False, "REJECTED"))):
         resp = client.post("/api/query", json={"question": "Write me a poem about dogs"})
     assert resp.status_code == 400
 
@@ -125,10 +125,62 @@ def test_ingest_requires_api_key(client):
     assert resp.status_code == 422  # missing X-API-Key header
 
 
+def test_query_retries_generation_when_output_guardrail_rejects(client, sample_chunks):
+    from app.services.cache import cache
+
+    cache.clear()
+    first_answer = "Answer with questionable stat."
+    second_answer = "Grounded answer from retry. Key sources: Profit Ability 2."
+    generate_mock = AsyncMock(side_effect=[(first_answer, "gpt-4o"), (second_answer, "gpt-4o")])
+    check_output_mock = AsyncMock(side_effect=[(False, "REJECTED"), (True, "APPROVED")])
+
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", generate_mock),
+        patch("app.api.routes.check_output", check_output_mock),
+    ):
+        resp = client.post(
+            "/api/query",
+            json={"question": "When does linear TV deliver its best ROI for FMCG retry test?"},
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["answer"] == second_answer
+    cache.clear()
+    assert generate_mock.call_count == 2
+    assert generate_mock.call_args_list[1].kwargs.get("strict_grounding") is True
+
+
+def test_query_returns_safe_fallback_when_guardrail_rejects_twice(client, sample_chunks):
+    from app.api.routes import SAFE_FALLBACK_ANSWER
+    from app.services.cache import cache
+
+    cache.clear()
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=("bad answer", "gpt-4o"))),
+        patch("app.api.routes.check_output", new=AsyncMock(return_value=(False, "REJECTED"))),
+    ):
+        resp = client.post(
+            "/api/query",
+            json={"question": "When does linear TV deliver its best ROI for FMCG fallback test?"},
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["answer"] == SAFE_FALLBACK_ANSWER
+    cache.clear()
+
+
 def test_query_returns_503_on_llm_failure(client, sample_chunks):
-    with patch("app.api.routes.check_input", return_value=(True, "APPROVED")), patch(
-        "app.api.routes.retrieve", return_value=sample_chunks
-    ), patch("app.api.routes.generate", side_effect=RuntimeError("All models failed")):
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch(
+            "app.api.routes.generate", new=AsyncMock(side_effect=RuntimeError("All models failed"))
+        ),
+    ):
         resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
     assert resp.status_code == 503
     assert "unavailable" in resp.json()["detail"].lower()
@@ -148,7 +200,7 @@ def test_ingest_valid_document(client):
     from app.api.routes import verify_api_key
 
     client.app.dependency_overrides[verify_api_key] = lambda: "dev-key"
-    with patch("app.api.routes.run_ingest", return_value=5) as mock_ingest:
+    with patch("app.api.routes.run_ingest", new=AsyncMock(return_value=5)) as mock_ingest:
         resp = client.post(
             "/api/ingest",
             json={"source_path": "data/pdfs/profit-ability-2.pdf"},

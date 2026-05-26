@@ -1,5 +1,5 @@
 import logging
-from litellm import completion
+from litellm import acompletion
 from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,13 @@ Rules you must follow:
 5. End every response with a 'Key sources' list referencing the documents used.
 """
 
+STRICT_GROUNDING_ADDENDUM = """
+Extra rules for this attempt:
+- Quote or closely paraphrase only statistics that appear verbatim in the research context.
+- If the context does not contain a specific number, do not state one — describe qualitatively instead.
+- Keep the answer focused and cite document titles in Key sources.
+"""
+
 
 def build_prompt(
     question: str,
@@ -42,6 +49,7 @@ def build_prompt(
     brand_stage: str | None = None,
     budget_tier: str | None = None,
     primary_goal: str | None = None,
+    strict_grounding: bool = False,
 ) -> list[dict]:
     """Builds the messages list for the LLM call."""
     context_parts = []
@@ -75,19 +83,21 @@ Research context:
 Please provide a specific, evidence-based answer using only the research above.
 Include a 'Key sources' section at the end."""
 
+    system = SYSTEM_PROMPT + (STRICT_GROUNDING_ADDENDUM if strict_grounding else "")
     return [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system},
         {"role": "user", "content": user_message},
     ]
 
 
-def generate(
+async def generate(
     question: str,
     chunks: list[dict],
     sector: str | None = None,
     brand_stage: str | None = None,
     budget_tier: str | None = None,
     primary_goal: str | None = None,
+    strict_grounding: bool = False,
 ) -> tuple[str, str]:
     """
     Calls LiteLLM with primary model, falls back to secondary on failure.
@@ -101,37 +111,58 @@ def generate(
         brand_stage=brand_stage,
         budget_tier=budget_tier,
         primary_goal=primary_goal,
+        strict_grounding=strict_grounding,
     )
 
     lf = _get_langfuse()
-    trace = lf.trace(name="query", input={"question": question, "sector": sector}) if lf else None
+    root_obs = None
+    if lf:
+        try:
+            root_obs = lf.start_observation(
+                name="query",
+                input={"question": question, "sector": sector},
+            )
+        except Exception as e:
+            logger.warning(f"Langfuse observation start failed: {e}")
 
     for model in [settings.primary_model, settings.fallback_model]:
-        span = None
+        gen_obs = None
         try:
             logger.info(f"Calling LiteLLM with model: {model}")
-            span = trace.span(name=f"llm-{model}") if trace else None
+            if root_obs:
+                gen_obs = root_obs.start_observation(
+                    name=f"llm-{model}",
+                    as_type="generation",
+                    model=model,
+                )
 
-            response = completion(
+            response = await acompletion(
                 model=model,
                 messages=messages,
                 max_tokens=1000,
                 temperature=0.3,
+                timeout=60,
             )
             answer = response.choices[0].message.content
             logger.info(f"Generated {len(answer)} chars with {model}")
 
-            if span:
-                span.end(output={"answer": answer[:200], "model": model})
-            if trace:
-                trace.update(output={"model_used": model})
+            if gen_obs:
+                gen_obs.update(output={"answer": answer[:200], "model": model})
+                gen_obs.end()
+            if root_obs:
+                root_obs.update(output={"model_used": model})
+                root_obs.end()
 
             return answer, model
 
         except Exception as e:
             logger.warning(f"Model {model} failed: {e}")
-            if span:
-                span.end(output={"error": str(e)})
+            if gen_obs:
+                try:
+                    gen_obs.update(output={"error": str(e)}, level="ERROR")
+                    gen_obs.end()
+                except Exception:
+                    logger.debug("Langfuse failed to record model error", exc_info=True)
             if model == settings.fallback_model:
                 raise
 

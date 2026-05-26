@@ -13,6 +13,12 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter()
 
+SAFE_FALLBACK_ANSWER = (
+    "Based on Thinkbox research, TV advertising is consistently shown "
+    "to be the most effective channel for driving long-term profit growth. "
+    "Please refine your question for a more specific answer."
+)
+
 
 # ── Request / Response models ─────────────────────────────────────────────────
 
@@ -124,7 +130,7 @@ async def query(request: QueryRequest):
         return QueryResponse(**cached, cached=True)
 
     # 2. Input guardrail
-    approved, reason = check_input(
+    approved, reason = await check_input(
         question=request.question,
         sector=request.sector,
         brand_stage=request.brand_stage,
@@ -137,7 +143,7 @@ async def query(request: QueryRequest):
         )
 
     # 3. Retrieve relevant chunks
-    chunks = retrieve(
+    chunks = await retrieve(
         question=request.question,
         sector=request.sector,
         brand_stage=request.brand_stage,
@@ -150,7 +156,7 @@ async def query(request: QueryRequest):
 
     # 4. Generate answer via LiteLLM
     try:
-        answer, model_used = generate(
+        answer, model_used = await generate(
             question=request.question,
             chunks=chunks,
             sector=request.sector,
@@ -165,15 +171,32 @@ async def query(request: QueryRequest):
             detail="The answer service is temporarily unavailable. Please try again shortly.",
         )
 
-    # 5. Output guardrail
-    output_ok, _ = check_output(answer=answer, chunks=chunks)
+    # 5. Output guardrail (retry once with stricter grounding before generic fallback)
+    output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
     if not output_ok:
-        logger.warning("Output guardrail rejected response — returning safe fallback")
-        answer = (
-            "Based on Thinkbox research, TV advertising is consistently shown "
-            "to be the most effective channel for driving long-term profit growth. "
-            "Please refine your question for a more specific answer."
+        logger.warning(
+            f"Output guardrail rejected response ({reject_reason}) — retrying with strict grounding"
         )
+        try:
+            answer, model_used = await generate(
+                question=request.question,
+                chunks=chunks,
+                sector=request.sector,
+                brand_stage=request.brand_stage,
+                budget_tier=request.budget_tier,
+                primary_goal=request.primary_goal,
+                strict_grounding=True,
+            )
+            output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
+        except Exception as e:
+            logger.error(f"Strict regeneration failed: {e}")
+            output_ok = False
+
+    if not output_ok:
+        logger.warning(
+            f"Output guardrail rejected after retry ({reject_reason}) — returning safe fallback"
+        )
+        answer = SAFE_FALLBACK_ANSWER
 
     # 6. Build sources list
     sources = [
@@ -208,7 +231,7 @@ async def query(request: QueryRequest):
 async def ingest(request: IngestRequest):
     logger.info(f"Ingest requested for: {request.source_path}")
     try:
-        chunks_added = run_ingest(request.source_path)
+        chunks_added = await run_ingest(request.source_path)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
