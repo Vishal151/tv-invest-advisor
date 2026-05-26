@@ -17,6 +17,7 @@ import sys  # noqa: E402
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
 import argparse  # noqa: E402
+import asyncio  # noqa: E402
 import hashlib  # noqa: E402
 import logging  # noqa: E402
 from pathlib import Path  # noqa: E402
@@ -153,7 +154,7 @@ def chunk_text(
 # ── Ingestion ─────────────────────────────────────────────────────────────────
 
 
-def ingest_document(
+async def ingest_document(
     pdf_path: Path,
     collection: chromadb.Collection,
     doc_metadata: dict,
@@ -214,7 +215,7 @@ def ingest_document(
 
         new_batch = [batch[i] for i in new_indices]
         new_ids = [ids[i] for i in new_indices]
-        embeddings = embed_batch([c["text"] for c in new_batch])
+        embeddings = await embed_batch([c["text"] for c in new_batch])
 
         documents = []
         metadatas = []
@@ -249,7 +250,7 @@ def ingest_document(
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 
-def main():
+async def main():
     parser = argparse.ArgumentParser(description="Ingest Thinkbox PDFs into ChromaDB")
     parser.add_argument(
         "--file",
@@ -307,7 +308,7 @@ def main():
             )
             continue
 
-        chunks_added = ingest_document(pdf_path, collection, doc_metadata)
+        chunks_added = await ingest_document(pdf_path, collection, doc_metadata)
         total_chunks += chunks_added
 
     logger.info(f"\n✓ Ingestion complete — {total_chunks} total chunks added")
@@ -315,4 +316,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -15,6 +15,7 @@ import sys  # noqa: E402
 
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
+import asyncio  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -50,7 +51,7 @@ SMOKE_QUERIES = [
 ]
 
 
-def run_smoke_test():
+async def run_smoke_test():
     total_docs = get_doc_count()
     print(f"\nChromaDB collection: {total_docs} chunks\n")
 
@@ -64,7 +65,7 @@ def run_smoke_test():
         if query["sector"]:
             print(f"  Sector filter: {query['sector']}")
 
-        chunks = retrieve(question=query["question"], sector=query["sector"], top_k=3)
+        chunks = await retrieve(question=query["question"], sector=query["sector"], top_k=3)
 
         if not chunks:
             print("  FAIL: No chunks returned\n")
@@ -96,4 +97,4 @@ def run_smoke_test():
 
 
 if __name__ == "__main__":
-    run_smoke_test()
+    asyncio.run(run_smoke_test())
