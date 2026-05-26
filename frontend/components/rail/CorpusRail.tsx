@@ -1,3 +1,70 @@
 'use client'
+
+const CORPUS = [
+  { title: 'Profit Ability 2',        year: 2024, topic: 'ROI',            chunks: 24, blurb: '141 brands · £5.61 ROI/£1' },
+  { title: 'Profit Ability 1',        year: 2018, topic: 'ROI',            chunks: 22, blurb: 'Short- vs long-term payback' },
+  { title: 'Peter Field white paper', year: 2024, topic: 'Effectiveness',  chunks: 18, blurb: '10 years of IPA data' },
+  { title: 'Payback 4',               year: 2014, topic: 'Planning',       chunks: 20, blurb: 'Seasonal windows by sector' },
+  { title: 'TV Viewing Report',       year: 2024, topic: 'Viewing',        chunks: 16, blurb: 'BVOD 29% of 16–34' },
+  { title: 'Signalling Success',      year: 2020, topic: 'Effectiveness',  chunks: 12, blurb: 'Brand fame, trust, mental availability' },
+  { title: 'Demand Generator',        year: 2019, topic: 'Planning',       chunks: 16, blurb: 'WPP econometric meta-analysis' },
+  { title: 'As Seen on TV',           year: 2019, topic: 'Small business', chunks: 14, blurb: '300+ campaigns · 4-month payback' },
+]
+
 type Props = { collapsed: boolean; onToggle: () => void }
-export function CorpusRail(_props: Props) { return null }
+
+export function CorpusRail({ collapsed, onToggle }: Props) {
+  if (collapsed) {
+    return (
+      <div style={{ width: '56px', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '16px', gap: '12px' }}>
+        <button type="button" onClick={onToggle} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cue-ink-3)', fontSize: '16px' }}>›</button>
+        <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cue-ink-3)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+          Corpus
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 10px', borderBottom: '1px solid var(--cue-rule)' }}>
+        <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cue-ink-3)', fontWeight: 500 }}>Corpus</span>
+        <button type="button" onClick={onToggle} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cue-ink-3)', fontSize: '16px' }}>‹</button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', padding: '12px', borderBottom: '1px solid var(--cue-rule-2)' }}>
+        {[
+          { n: '8',   label: 'Reports' },
+          { n: '142', label: 'Chunks' },
+          { n: '6',   label: 'Topics' },
+        ].map((s) => (
+          <div key={s.label} style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '24px', color: 'var(--cue-accent)', fontWeight: 500 }}>{s.n}</div>
+            <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cue-ink-3)' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {CORPUS.map((doc) => (
+          <div
+            key={doc.title}
+            style={{ display: 'flex', gap: '10px', padding: '10px', borderRadius: '6px', border: '1px solid transparent' }}
+          >
+            <div style={{ width: '36px', minWidth: '36px', height: '44px', background: 'var(--cue-paper)', border: '1px solid var(--cue-rule)', borderTop: '3px solid var(--cue-accent)', borderRadius: '4px', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: '3px 4px' }}>
+              <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '8px', color: 'var(--cue-ink-4)' }}>{doc.year}</span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '13px', fontWeight: 500, color: 'var(--cue-ink)', lineHeight: 1.3, marginBottom: '4px' }}>{doc.title}</div>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '3px' }}>
+                <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--cue-accent-ink)', background: 'var(--cue-accent-soft)', padding: '1px 5px', borderRadius: '3px' }}>{doc.topic}</span>
+                <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9px', color: 'var(--cue-ink-4)' }}>{doc.chunks} chunks</span>
+              </div>
+              <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '11px', color: 'var(--cue-ink-3)' }}>{doc.blurb}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
