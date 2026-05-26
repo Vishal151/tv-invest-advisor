@@ -1,4 +1,5 @@
 import logging
+import re
 from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 
@@ -13,6 +14,15 @@ from app.services.ingestor import run_ingest
 logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter()
+
+_STAT_PATTERN = re.compile(
+    r"[\d,.]+\s*(%|£|\$|x\b|ROI|ROAS|billion|million|thousand)", re.IGNORECASE
+)
+
+
+def _answer_contains_statistic(answer: str) -> bool:
+    """True if answer includes a number that looks like a quantitative claim."""
+    return bool(_STAT_PATTERN.search(answer))
 
 SAFE_FALLBACK_ANSWER = (
     "Based on Thinkbox research, TV advertising is consistently shown "
@@ -187,9 +197,9 @@ async def query(request: Request, body: QueryRequest):
 
     # 5. Output guardrail (retry once with stricter grounding before generic fallback)
     output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
-    if not output_ok:
+    if not output_ok and _answer_contains_statistic(answer):
         logger.warning(
-            f"Output guardrail rejected response ({reject_reason}) — retrying with strict grounding"
+            f"Output guardrail rejected stat-containing response ({reject_reason}) — retrying"
         )
         try:
             answer, model_used = await generate(
@@ -205,6 +215,10 @@ async def query(request: Request, body: QueryRequest):
         except Exception as e:
             logger.error(f"Strict regeneration failed: {e}")
             output_ok = False
+    elif not output_ok:
+        logger.warning(
+            f"Output guardrail rejected qualitative response ({reject_reason}) — skipping retry"
+        )
 
     if not output_ok:
         logger.warning(

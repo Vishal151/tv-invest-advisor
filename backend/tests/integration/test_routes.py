@@ -155,8 +155,8 @@ def test_query_retries_generation_when_output_guardrail_rejects(client, sample_c
     from app.services.cache import cache
 
     cache.clear()
-    first_answer = "Answer with questionable stat."
-    second_answer = "Grounded answer from retry. Key sources: Profit Ability 2."
+    first_answer = "TV delivers £5.61 ROI for every £1 spent."
+    second_answer = "Grounded answer from retry. TV delivers £5.61 ROI. Key sources: Profit Ability 2."
     generate_mock = AsyncMock(side_effect=[(first_answer, "gpt-4o"), (second_answer, "gpt-4o")])
     check_output_mock = AsyncMock(side_effect=[(False, "REJECTED"), (True, "APPROVED")])
 
@@ -350,3 +350,20 @@ def test_health_includes_readiness_signals(client):
     assert "langfuse_enabled" in data
     assert isinstance(data["llm_configured"], bool)
     assert isinstance(data["langfuse_enabled"], bool)
+
+
+def test_no_retry_for_qualitative_answer_without_statistics(client, sample_chunks):
+    """Output guardrail rejection on a qualitative answer must NOT trigger regeneration."""
+    qualitative_answer = "TV advertising builds brand awareness over time."
+    generate_mock = AsyncMock(return_value=(qualitative_answer, "gpt-4o"))
+
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", generate_mock),
+        patch("app.api.routes.check_output", new=AsyncMock(return_value=(False, "REJECTED"))),
+    ):
+        resp = client.post("/api/query", json={"question": "How does TV build brand?"})
+
+    assert resp.status_code == 200
+    assert generate_mock.call_count == 1, "generate() must be called only once for qualitative answer"
