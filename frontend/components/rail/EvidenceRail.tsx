@@ -1,11 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { SourceCard } from '@/components/atoms/SourceCard'
 import { useStore } from '@/lib/store'
 import type { Source } from '@/lib/types'
-
-const TOPICS = ['All', 'ROI', 'Planning', 'Effectiveness', 'Viewing', 'Small business']
 
 type Props = {
   sources:   Source[]
@@ -14,12 +11,7 @@ type Props = {
 }
 
 export function EvidenceRail({ sources, collapsed, onToggle }: Props) {
-  const [activeTopic, setActiveTopic] = useState('All')
   const { activeCitation, setActiveSource, activeSource } = useStore()
-
-  const filtered = activeTopic === 'All'
-    ? sources
-    : sources.filter((s) => s.topic === activeTopic)
 
   if (collapsed) {
     return (
@@ -59,32 +51,8 @@ export function EvidenceRail({ sources, collapsed, onToggle }: Props) {
         <button type="button" onClick={onToggle} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cue-ink-3)', fontSize: '16px' }}>‹</button>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', padding: '10px 12px', borderBottom: '1px solid var(--cue-rule-2)' }}>
-        {TOPICS.map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setActiveTopic(t)}
-            style={{
-              padding:       '3px 8px',
-              borderRadius:  '999px',
-              border:        '1px solid var(--cue-rule)',
-              background:    activeTopic === t ? 'var(--cue-accent-soft)' : 'transparent',
-              color:         activeTopic === t ? 'var(--cue-accent-ink)' : 'var(--cue-ink-3)',
-              fontFamily:    'var(--cue-mono)',
-              fontSize:      '9.5px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              cursor:        'pointer',
-            }}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {filtered.map((src) => (
+        {sources.map((src) => (
           <SourceCard
             key={src.n}
             source={src}

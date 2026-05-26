@@ -104,7 +104,7 @@ export function CueApp() {
               })}
 
               {(phase === 'thinking' || phase === 'streaming') && (
-                <StreamingBubble traceSteps={[]} streamedText="" done={false} />
+                <StreamingBubble streamedText="" done={false} />
               )}
             </div>
           </div>

@@ -87,12 +87,9 @@ export const useStore = create<AppStore>((set, get) => ({
 
     set((s) => ({
       composerInput: '',
-      phase:         'thinking',
+      phase:         'streaming',
       thread: { ...s.thread, turns: [...s.thread.turns, userTurn] },
     }))
-
-    await new Promise((r) => setTimeout(r, 400))
-    set({ phase: 'streaming' })
 
     const result = await queryApi({ question, brief: thread.brief })
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -114,11 +111,9 @@ export const useStore = create<AppStore>((set, get) => ({
     }
 
     set((s) => ({
-      phase:  'answered',
+      phase:  'idle',
       thread: { ...s.thread, turns: [...s.thread.turns, assistantTurn] },
     }))
-
-    setTimeout(() => set({ phase: 'idle' }), 100)
   },
 
   async retry() {
