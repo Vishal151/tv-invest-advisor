@@ -72,6 +72,9 @@ class Source(BaseModel):
     title: str
     chunk: str
     url: str
+    page: int | None = None
+    topic: str | None = None
+    distance: float | None = None
 
 
 class QueryResponse(BaseModel):
@@ -209,6 +212,9 @@ async def query(request: Request, body: QueryRequest):
             title=c["metadata"].get("source_title", "Thinkbox Research"),
             chunk=c["text"][:200] + "...",
             url=c["metadata"].get("source_url", "https://thinkbox.tv/research"),
+            page=c["metadata"].get("page"),
+            topic=c["metadata"].get("topic"),
+            distance=round(c.get("distance", 0.0), 4),
         )
         for c in chunks
     ]

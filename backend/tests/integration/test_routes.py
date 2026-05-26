@@ -242,3 +242,23 @@ def test_safe_fallback_is_not_cached(client, sample_chunks):
     )
     assert cached is None, "Safe fallback answer must not be cached"
     cache.clear()
+
+
+def test_query_sources_include_page_topic_distance(client, sample_chunks):
+    answer_text = "TV delivers ROI. Key sources: Profit Ability 2."
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(answer_text, "gpt-4o"))),
+        patch("app.api.routes.check_output", new=AsyncMock(return_value=(True, "APPROVED"))),
+    ):
+        resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
+
+    assert resp.status_code == 200
+    source = resp.json()["sources"][0]
+    assert "page" in source
+    assert "topic" in source
+    assert "distance" in source
+    assert source["page"] == 12
+    assert source["topic"] == "ROI"
+    assert source["distance"] == 0.12
