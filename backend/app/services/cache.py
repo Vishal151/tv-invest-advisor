@@ -125,3 +125,21 @@ def _make_cache() -> ResponseCache | RedisCache:
 
 
 cache = _make_cache()
+
+
+def check_redis_status() -> str:
+    """Returns 'ok', 'disabled', or 'unavailable'. Safe to call at any time."""
+    from app.core.config import get_settings
+
+    s = get_settings()
+    if not s.redis_enabled:
+        return "disabled"
+    if not isinstance(cache, RedisCache):
+        return "disabled"
+    import redis as redis_lib
+
+    try:
+        cache._client.ping()
+        return "ok"
+    except redis_lib.RedisError:
+        return "unavailable"

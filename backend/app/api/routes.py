@@ -111,13 +111,13 @@ def verify_api_key(x_api_key: str = Header(...)) -> str:
 
 @router.get("/health", response_model=HealthResponse)
 async def health():
-    from app.main import _check_redis
+    from app.services.cache import check_redis_status
 
     return HealthResponse(
         status="ok",
         chroma_docs=get_doc_count(),
         version=settings.version,
-        redis=_check_redis(),
+        redis=check_redis_status(),
         llm_configured=bool(settings.openai_api_key or settings.anthropic_api_key),
         langfuse_enabled=settings.langfuse_enabled,
     )

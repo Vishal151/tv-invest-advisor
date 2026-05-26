@@ -30,21 +30,6 @@ def _check_production_config() -> None:
         raise RuntimeError("At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set")
 
 
-def _check_redis() -> str:
-    """Returns 'ok', 'disabled', or 'unavailable'."""
-    if not settings.redis_enabled:
-        return "disabled"
-    from app.services.cache import cache, RedisCache
-
-    if not isinstance(cache, RedisCache):
-        return "disabled"
-    import redis as redis_lib
-
-    try:
-        cache._client.ping()
-        return "ok"
-    except redis_lib.RedisError:
-        return "unavailable"
 
 
 @asynccontextmanager
@@ -62,7 +47,9 @@ async def lifespan(app: FastAPI):
         logger.warning(f"ChromaDB warmup failed: {e}")
 
     # Check Redis connectivity at startup
-    redis_status = _check_redis()
+    from app.services.cache import check_redis_status
+
+    redis_status = check_redis_status()
     logger.info(f"Redis: {redis_status}")
     if settings.redis_enabled and redis_status == "unavailable":
         logger.warning("Redis is configured but unreachable — cache will fail gracefully")
