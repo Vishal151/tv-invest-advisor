@@ -164,6 +164,12 @@ async def generate(
                 except Exception:
                     logger.debug("Langfuse failed to record model error", exc_info=True)
             if model == settings.fallback_model:
+                if root_obs:
+                    try:
+                        root_obs.update(output={"error": "all models failed"}, level="ERROR")
+                        root_obs.end()
+                    except Exception:
+                        pass
                 raise
 
     raise RuntimeError("All models failed")
