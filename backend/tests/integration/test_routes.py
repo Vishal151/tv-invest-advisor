@@ -262,3 +262,54 @@ def test_query_sources_include_page_topic_distance(client, sample_chunks):
     assert source["page"] == 12
     assert source["topic"] == "ROI"
     assert source["distance"] == 0.12
+
+
+def test_startup_raises_in_production_with_dev_api_key():
+    """Startup must refuse to run in production if API_KEY is the dev default."""
+    from unittest.mock import Mock, patch
+    from app.main import _check_production_config
+
+    # Mock settings with production=True and api_key="dev-key"
+    mock_settings = Mock()
+    mock_settings.is_production = True
+    mock_settings.api_key = "dev-key"
+    mock_settings.openai_api_key = "sk-test"
+    mock_settings.anthropic_api_key = ""
+
+    with patch("app.main.settings", mock_settings):
+        with pytest.raises(RuntimeError, match="API_KEY must be set in production"):
+            _check_production_config()
+
+
+def test_startup_raises_in_production_with_no_llm_keys():
+    """Startup must refuse if no LLM keys configured in production."""
+    from unittest.mock import Mock, patch
+    from app.main import _check_production_config
+
+    # Mock settings with production=True and no LLM keys
+    mock_settings = Mock()
+    mock_settings.is_production = True
+    mock_settings.api_key = "valid-prod-key"
+    mock_settings.openai_api_key = ""
+    mock_settings.anthropic_api_key = ""
+
+    with patch("app.main.settings", mock_settings):
+        with pytest.raises(RuntimeError, match="At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set"):
+            _check_production_config()
+
+
+def test_startup_passes_development_mode():
+    """Startup should skip checks in development mode."""
+    from unittest.mock import Mock, patch
+    from app.main import _check_production_config
+
+    # Mock settings with development=False and dev-key, no LLM keys
+    mock_settings = Mock()
+    mock_settings.is_production = False
+    mock_settings.api_key = "dev-key"
+    mock_settings.openai_api_key = ""
+    mock_settings.anthropic_api_key = ""
+
+    with patch("app.main.settings", mock_settings):
+        # Should not raise in development mode
+        _check_production_config()

@@ -18,6 +18,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _check_production_config() -> None:
+    """Raises RuntimeError if required production settings are missing or insecure."""
+    if not settings.is_production:
+        return
+    if settings.api_key == "dev-key":
+        raise RuntimeError(
+            "API_KEY must be set in production — 'dev-key' is not a valid production secret"
+        )
+    if not settings.openai_api_key and not settings.anthropic_api_key:
+        raise RuntimeError("At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set")
+
+
 def _check_redis() -> str:
     """Returns 'ok', 'disabled', or 'unavailable'."""
     if not settings.redis_enabled:
@@ -37,6 +49,7 @@ def _check_redis() -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _check_production_config()
     logger.info(f"Starting TV Investment Advisor v{settings.version} [{settings.app_env}]")
 
     # Warm up ChromaDB — initialises connection so first request isn't slow
@@ -53,6 +66,12 @@ async def lifespan(app: FastAPI):
     logger.info(f"Redis: {redis_status}")
     if settings.redis_enabled and redis_status == "unavailable":
         logger.warning("Redis is configured but unreachable — cache will fail gracefully")
+
+    # Warn on missing LLM keys in development
+    if not settings.openai_api_key:
+        logger.warning("OPENAI_API_KEY is not set — LLM calls will fail")
+    if not settings.anthropic_api_key:
+        logger.warning("ANTHROPIC_API_KEY is not set — fallback model unavailable")
 
     yield
     logger.info("Shutting down")
