@@ -15,7 +15,7 @@ const config: Config = {
       },
     }],
   },
-  testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
+  testMatch: ['**/__tests__/**/*.test.{ts,tsx}'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
 }
 
