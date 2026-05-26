@@ -104,7 +104,14 @@ async def run_ingest(source_path: str) -> int:
     """
     from app.services.embedder import embed_batch
 
-    pdf_path = Path(source_path)
+    pdf_path = Path(source_path).resolve()
+    allowed_dir = Path("data/pdfs").resolve()
+
+    if not str(pdf_path).startswith(str(allowed_dir) + "/") and pdf_path != allowed_dir:
+        raise ValueError(
+            f"source_path '{source_path}' is outside the allowed directory 'data/pdfs'"
+        )
+
     if not pdf_path.exists():
         raise FileNotFoundError(f"PDF not found: {source_path}")
 
