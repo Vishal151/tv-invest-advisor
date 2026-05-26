@@ -143,3 +143,36 @@ def test_filter_returns_empty_when_all_poor():
     chunks = [{"text": "Off topic", "metadata": {}, "distance": 0.9}]
     result = _filter_by_distance(chunks, threshold=0.75)
     assert result == []
+
+
+def test_enriched_query_includes_all_context():
+    from app.services.retriever import _build_enriched_query
+
+    q = _build_enriched_query(
+        question="When should I advertise on TV?",
+        sector="FMCG",
+        brand_stage="scale-up",
+        primary_goal="brand",
+        tv_history="never",
+        budget_tier="100k-500k",
+    )
+    assert "FMCG" in q
+    assert "scale-up" in q
+    assert "brand" in q
+    assert "When should I advertise on TV?" in q
+
+
+def test_enriched_query_with_no_context_returns_question():
+    from app.services.retriever import _build_enriched_query
+
+    q = _build_enriched_query(question="When should I advertise on TV?")
+    assert q == "When should I advertise on TV?"
+
+
+def test_enriched_query_omits_none_fields():
+    from app.services.retriever import _build_enriched_query
+
+    q = _build_enriched_query(question="TV ROI?", sector="FMCG")
+    assert "FMCG" in q
+    assert "None" not in q
+    assert "brand_stage" not in q

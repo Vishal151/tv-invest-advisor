@@ -147,6 +147,9 @@ async def query(request: QueryRequest):
         question=request.question,
         sector=request.sector,
         brand_stage=request.brand_stage,
+        primary_goal=request.primary_goal,
+        tv_history=request.tv_history,
+        budget_tier=request.budget_tier,
     )
     if not chunks:
         raise HTTPException(

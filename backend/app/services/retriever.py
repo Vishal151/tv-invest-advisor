@@ -48,10 +48,38 @@ def _filter_by_distance(chunks: list[dict], threshold: float) -> list[dict]:
     return [c for c in chunks if c["distance"] <= threshold]
 
 
+def _build_enriched_query(
+    question: str,
+    sector: str | None = None,
+    brand_stage: str | None = None,
+    primary_goal: str | None = None,
+    tv_history: str | None = None,
+    budget_tier: str | None = None,
+) -> str:
+    """Prepend structured context to the question before embedding for better vector alignment."""
+    parts = []
+    if sector:
+        parts.append(f"Sector: {sector}")
+    if brand_stage:
+        parts.append(f"Brand stage: {brand_stage}")
+    if primary_goal:
+        parts.append(f"Goal: {primary_goal}")
+    if tv_history:
+        parts.append(f"TV history: {tv_history}")
+    if budget_tier:
+        parts.append(f"Budget: {budget_tier}")
+    if not parts:
+        return question
+    return f"{' | '.join(parts)}. {question}"
+
+
 async def retrieve(
     question: str,
     sector: str | None = None,
     brand_stage: str | None = None,
+    primary_goal: str | None = None,
+    tv_history: str | None = None,
+    budget_tier: str | None = None,
     topic: str | None = None,
     top_k: int | None = None,
 ) -> list[dict]:
@@ -71,7 +99,15 @@ async def retrieve(
     # Build ChromaDB where filter from structured inputs
     where = _build_where_filter(sector=sector, topic=topic)
 
-    query_embedding = await embed(question)
+    enriched = _build_enriched_query(
+        question=question,
+        sector=sector,
+        brand_stage=brand_stage,
+        primary_goal=primary_goal,
+        tv_history=tv_history,
+        budget_tier=budget_tier,
+    )
+    query_embedding = await embed(enriched)
 
     results = collection.query(
         query_embeddings=[query_embedding],
