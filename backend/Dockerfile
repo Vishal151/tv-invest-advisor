@@ -3,6 +3,10 @@ RUN pip install uv --quiet
 
 WORKDIR /app
 
+# Match host uid/gid on Linux/WSL so bind-mounted chroma_db is writable (see .env.example)
+ARG APP_UID=1001
+ARG APP_GID=1001
+
 # Copy lockfiles first — layer cached until deps change
 COPY pyproject.toml uv.lock ./
 
@@ -13,12 +17,12 @@ RUN uv sync --frozen --no-group dev --no-install-project
 COPY app/ ./app/
 COPY scripts/ ./scripts/
 
-# Create volume mount points and non-root user
 RUN mkdir -p chroma_db data/pdfs \
-    && adduser --disabled-password --no-create-home --gecos "" --uid 1001 appuser \
+    && groupadd -g "${APP_GID}" appuser \
+    && useradd -u "${APP_UID}" -g appuser --no-create-home --shell /usr/sbin/nologin appuser \
     && chown -R appuser:appuser /app
 
-USER appuser
+USER ${APP_UID}
 
 ENV UV_CACHE_DIR=/app/.cache/uv
 

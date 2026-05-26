@@ -56,6 +56,7 @@ class Settings(BaseSettings):
 
     # ── RAG settings ─────────────────────────────────────────────────────────
     retrieval_top_k: int = 5  # chunks returned per query
+    retrieval_distance_threshold: float = 0.75  # cosine distance; chunks above this are discarded
     chunk_size: int = 800  # tokens per chunk
     chunk_overlap: int = 100  # overlap between chunks
 

@@ -8,18 +8,106 @@ Built as a portfolio project targeting AI backend engineer roles — demonstrati
 
 ## Architecture
 
+Cue is a RAG application: a Next.js chat UI calls a FastAPI backend that retrieves Thinkbox research from ChromaDB, generates grounded answers via LiteLLM, and caches responses in Redis (or an in-memory dict when `REDIS_URL` is unset).
+
+### Deployment
+
+**Local dev** — Next.js serves the UI on `:3000`; the browser calls FastAPI on `:8000` via `NEXT_PUBLIC_API_URL`. **Docker** — nginx serves the static export and proxies `/api/*` to the backend; Redis backs the cache.
+
+```mermaid
+flowchart TB
+    subgraph dev["Local development"]
+        BrowserDev["Browser"]
+        NextDev["Next.js dev server :3000"]
+        APIdev["FastAPI :8000"]
+        BrowserDev -->|"UI"| NextDev
+        BrowserDev -->|"POST /api/query"| APIdev
+    end
+
+    subgraph prod["Docker Compose (production)"]
+        BrowserProd["Browser :80"]
+        Nginx["nginx<br/>static export + /api proxy"]
+        APIprod["FastAPI backend"]
+        Redis["Redis"]
+        ChromaProd["ChromaDB<br/>chroma_db/"]
+        BrowserProd --> Nginx
+        Nginx -->|"/api/*"| APIprod
+        APIprod --> Redis
+        APIprod --> ChromaProd
+    end
+
+    subgraph external["External services"]
+        OpenAI["OpenAI<br/>embeddings + LLMs"]
+        Anthropic["Anthropic<br/>fallback LLM"]
+        LangFuse["LangFuse<br/>traces & costs"]
+    end
+
+    ChromaDev["ChromaDB<br/>chroma_db/"]
+    APIdev --> ChromaDev
+    APIdev --> OpenAI
+    APIdev --> Anthropic
+    APIdev --> LangFuse
+    APIprod --> OpenAI
+    APIprod --> Anthropic
+    APIprod --> LangFuse
 ```
-Browser (Next.js)
-    │
-    │  POST /api/query
-    ▼
-FastAPI
-    ├── Cache lookup (Redis / in-memory dict)
-    ├── Input guardrail  (GPT-4o-mini — is this on-topic?)
-    ├── ChromaDB retrieval (top-5 chunks, metadata-filtered)
-    ├── LiteLLM → GPT-4o (primary) / Claude 3.5 Sonnet (fallback)
-    ├── Output guardrail (GPT-4o-mini — are citations grounded?)
-    └── Cache write (TTL 7 days)
+
+### Query pipeline
+
+Structured brief fields (`sector`, `brand_stage`, etc.) shape cache keys and ChromaDB metadata filters alongside the freeform question.
+
+```mermaid
+flowchart TD
+    UI["Next.js UI<br/>Zustand store → lib/api.ts"]
+    API["POST /api/query<br/>FastAPI routes.py"]
+
+    UI -->|"question + brief"| API
+
+    API --> CacheGet{"Cache lookup<br/>Redis or dict"}
+    CacheGet -->|hit| ReturnCached["Return cached answer"]
+    CacheGet -->|miss| InputGuard["Input guardrail<br/>GPT-4o-mini via LiteLLM"]
+    InputGuard -->|rejected| Refuse["400 — off-topic refusal"]
+    InputGuard -->|approved| Retrieve["ChromaDB retrieval<br/>embed query + top-5 chunks, metadata filter"]
+    Retrieve --> Chroma[(ChromaDB<br/>thinkbox_docs)]
+    Chroma --> Generate["Answer generation<br/>LiteLLM → GPT-4o → Claude fallback"]
+    Generate --> OutputGuard["Output guardrail<br/>GPT-4o-mini — stats grounded?"]
+    OutputGuard -->|failed| SafeFallback["Safe template answer"]
+    OutputGuard -->|approved| BuildSources["Build source citations"]
+    SafeFallback --> BuildSources
+    BuildSources --> CacheSet["Cache write<br/>TTL 7 days"]
+    CacheSet --> ReturnFresh["Return answer + sources"]
+    Generate -.->|traces| LF[LangFuse]
+
+    ReturnCached --> UI
+    ReturnFresh --> UI
+    Refuse --> UI
+```
+
+### Frontend structure
+
+```mermaid
+flowchart LR
+    Page["app/page.tsx"] --> CueApp["CueApp"]
+    CueApp --> Store["Zustand store<br/>lib/store.ts"]
+    Store --> ApiClient["lib/api.ts"]
+    CueApp --> Composer["Composer + Brief chips"]
+    CueApp --> Thread["Thread bubbles<br/>answer / refusal / error"]
+    CueApp --> Rails["EvidenceRail + CorpusRail"]
+    CueApp --> Overlays["HistoryDrawer + ExportModal"]
+    ApiClient -->|"POST /api/query"| Backend["FastAPI"]
+```
+
+### Offline ingestion
+
+Run manually via `scripts/ingest.py` or `POST /api/ingest` (API key required).
+
+```mermaid
+flowchart LR
+    PDFs["Thinkbox PDFs<br/>data/pdfs/"] --> Ingest["ingest.py / ingestor.py"]
+    Ingest --> Extract["pypdf text extract"]
+    Extract --> Chunk["Chunk 800 tokens<br/>100 overlap"]
+    Chunk --> EmbedIngest["OpenAI embeddings<br/>text-embedding-3-small"]
+    EmbedIngest --> Upsert["ChromaDB upsert<br/>metadata: topic, sector, page"]
 ```
 
 ## Tech Stack
@@ -58,10 +146,13 @@ npm run dev            # http://localhost:3000
 
 ```bash
 cp backend/.env.example backend/.env   # fill in API keys
+cp .env.example .env                   # set UID/GID so ChromaDB bind mount is writable
 docker-compose up --build
 ```
 
-The backend runs at `http://localhost:8000`. The frontend dev server proxies API calls to it.
+The root `.env` sets `UID` and `GID` to match your host user (required on Linux/WSL so `./backend/chroma_db` is not read-only inside the container). Run `id -u` and `id -g` if unsure.
+
+The backend runs at `http://localhost:8000`. Set `NEXT_PUBLIC_API_URL=http://localhost:8000` in `frontend/.env.local` so the browser can reach the API (see `frontend/README.md`).
 
 ### Ingest the corpus
 

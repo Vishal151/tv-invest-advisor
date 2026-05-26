@@ -111,3 +111,35 @@ def test_get_doc_count(mock_collection):
 
     count = get_doc_count()
     assert count == 42
+
+
+def test_filter_removes_low_confidence_chunks():
+    from app.services.retriever import _filter_by_distance
+
+    chunks = [
+        {"text": "TV ROI", "metadata": {}, "distance": 0.2},
+        {"text": "Unrelated", "metadata": {}, "distance": 0.85},
+        {"text": "Brand building", "metadata": {}, "distance": 0.5},
+    ]
+    result = _filter_by_distance(chunks, threshold=0.75)
+    assert len(result) == 2
+    assert all(c["distance"] <= 0.75 for c in result)
+
+
+def test_filter_returns_all_when_none_exceed_threshold():
+    from app.services.retriever import _filter_by_distance
+
+    chunks = [
+        {"text": "TV ROI", "metadata": {}, "distance": 0.1},
+        {"text": "Brand", "metadata": {}, "distance": 0.3},
+    ]
+    result = _filter_by_distance(chunks, threshold=0.75)
+    assert len(result) == 2
+
+
+def test_filter_returns_empty_when_all_poor():
+    from app.services.retriever import _filter_by_distance
+
+    chunks = [{"text": "Off topic", "metadata": {}, "distance": 0.9}]
+    result = _filter_by_distance(chunks, threshold=0.75)
+    assert result == []

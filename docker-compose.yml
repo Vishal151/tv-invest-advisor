@@ -12,6 +12,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        APP_UID: ${UID:-1001}
+        APP_GID: ${GID:-1001}
+    user: "${UID:-1001}:${GID:-1001}"
     env_file:
       - ./backend/.env
     environment:

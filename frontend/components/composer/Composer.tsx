@@ -35,7 +35,7 @@ export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled 
         border:       '1px solid var(--cue-rule)',
         background:   'var(--cue-paper)',
         boxShadow:    '0 4px 24px -8px rgb(0 0 0 / 0.08)',
-        overflow:     'hidden',
+        overflow:     'visible',
       }}
     >
       <div

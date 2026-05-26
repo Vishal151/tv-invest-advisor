@@ -43,6 +43,11 @@ def get_doc_count() -> int:
         return 0
 
 
+def _filter_by_distance(chunks: list[dict], threshold: float) -> list[dict]:
+    """Remove chunks whose cosine distance exceeds the threshold."""
+    return [c for c in chunks if c["distance"] <= threshold]
+
+
 async def retrieve(
     question: str,
     sector: str | None = None,
@@ -88,6 +93,10 @@ async def retrieve(
                 "distance": dist,
             }
         )
+
+    chunks = _filter_by_distance(chunks, threshold=settings.retrieval_distance_threshold)
+    if not chunks:
+        logger.warning(f"All retrieved chunks exceeded distance threshold for: '{question[:50]}'")
 
     logger.info(f"Retrieved {len(chunks)} chunks for: '{question[:50]}...'")
     return chunks

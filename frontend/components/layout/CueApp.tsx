@@ -109,7 +109,16 @@ export function CueApp() {
             </div>
           </div>
 
-          <div style={{ padding: '16px 24px 20px', borderTop: '1px solid var(--cue-rule-2)', background: 'var(--cue-paper)' }}>
+          <div
+            style={{
+              padding:    '16px 24px 20px',
+              borderTop:  '1px solid var(--cue-rule-2)',
+              background: 'var(--cue-paper)',
+              overflow:   'visible',
+              position:   'relative',
+              zIndex:     2,
+            }}
+          >
             <Composer
               brief={thread.brief}
               setBrief={setBrief}
