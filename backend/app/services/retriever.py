@@ -43,6 +43,26 @@ def get_doc_count() -> int:
         return 0
 
 
+def get_corpus_summary() -> list[dict]:
+    """Returns per-document chunk counts from the ChromaDB collection."""
+    try:
+        collection = get_collection()
+        result = collection.get(include=["metadatas"])
+        counts: dict[str, dict] = {}
+        for meta in result["metadatas"]:
+            title = meta.get("source_title", "Unknown")
+            if title not in counts:
+                counts[title] = {
+                    "source_title": title,
+                    "chunks": 0,
+                    "topic": meta.get("topic", ""),
+                }
+            counts[title]["chunks"] += 1
+        return sorted(counts.values(), key=lambda x: x["source_title"])
+    except Exception:
+        return []
+
+
 def _filter_by_distance(chunks: list[dict], threshold: float) -> list[dict]:
     """Remove chunks whose cosine distance exceeds the threshold."""
     return [c for c in chunks if c["distance"] <= threshold]

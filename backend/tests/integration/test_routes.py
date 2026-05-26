@@ -367,3 +367,15 @@ def test_no_retry_for_qualitative_answer_without_statistics(client, sample_chunk
 
     assert resp.status_code == 200
     assert generate_mock.call_count == 1, "generate() must be called only once for qualitative answer"
+
+
+def test_corpus_lists_ingested_documents(client):
+    with patch("app.api.routes.get_corpus_summary", return_value=[
+        {"source_title": "Profit Ability 2", "chunks": 45, "topic": "ROI"},
+    ]):
+        resp = client.get("/api/corpus")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert data[0]["source_title"] == "Profit Ability 2"
+    assert "chunks" in data[0]

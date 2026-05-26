@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 from app.core.config import get_settings
 from app.core.limiter import limiter
 from app.services.cache import cache
-from app.services.retriever import retrieve, get_doc_count
+from app.services.retriever import retrieve, get_doc_count, get_corpus_summary
 from app.services.generator import generate
 from app.services.guardrails import check_input, check_output
 from app.services.ingestor import run_ingest
@@ -131,6 +131,12 @@ async def health():
         llm_configured=bool(settings.openai_api_key or settings.anthropic_api_key),
         langfuse_enabled=settings.langfuse_enabled,
     )
+
+
+@router.get("/corpus")
+async def corpus():
+    """Lists all ingested documents and their chunk counts."""
+    return get_corpus_summary()
 
 
 @router.post("/query", response_model=QueryResponse)
