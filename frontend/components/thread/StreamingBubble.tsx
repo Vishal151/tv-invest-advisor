@@ -3,7 +3,7 @@
 import { Trace } from '@/components/atoms/Trace'
 
 type Props = {
-  traceSteps:   string[]
+  traceSteps?:  string[]
   streamedText: string
   done:         boolean
 }

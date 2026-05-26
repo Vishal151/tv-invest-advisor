@@ -12,13 +12,12 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
     env_file:
       - ./backend/.env
     environment:
       - APP_ENV=production
       - REDIS_URL=redis://redis:6379/0
+      - CORS_ORIGINS=http://localhost,http://localhost:3000
     volumes:
       - ./backend/chroma_db:/app/chroma_db
       - ./data/pdfs:/app/data/pdfs:ro
@@ -38,3 +37,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
