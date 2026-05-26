@@ -87,7 +87,7 @@ export const useStore = create<AppStore>((set, get) => ({
 
     set((s) => ({
       composerInput: '',
-      phase:         'streaming',
+      phase:         'loading',
       thread: { ...s.thread, turns: [...s.thread.turns, userTurn] },
     }))
 

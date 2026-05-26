@@ -51,7 +51,7 @@ export type Thread = {
   brief: Brief
 }
 
-export type Phase = 'idle' | 'thinking' | 'streaming' | 'answered'
+export type Phase = 'idle' | 'thinking' | 'loading' | 'answered'
 
 export type QueryResult =
   | { kind: 'answer';  answer: Answer }
