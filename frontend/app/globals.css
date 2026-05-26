@@ -32,9 +32,9 @@
   --cue-danger-soft:  oklch(0.62 0.18 30 / 0.15);
   --cue-danger-ink:   oklch(0.46 0.14 30);
 
-  --cue-serif: "Newsreader", "Source Serif 4", Georgia, serif;
-  --cue-sans:  "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --cue-mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --cue-serif: var(--font-newsreader, "Newsreader", "Source Serif 4", Georgia, serif);
+  --cue-sans:  var(--font-ibm-plex-sans, "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif);
+  --cue-mono:  var(--font-ibm-plex-mono, "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace);
 }
 
 @theme inline {
