@@ -1,8 +1,9 @@
 import logging
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Header, Depends, Request
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.services.cache import cache
 from app.services.retriever import retrieve, get_doc_count
 from app.services.generator import generate
@@ -116,24 +117,25 @@ async def health():
 
 
 @router.post("/query", response_model=QueryResponse)
-async def query(request: QueryRequest):
+@limiter.limit("20/minute")
+async def query(request: Request, body: QueryRequest):
     # 1. Cache lookup
     cached = cache.get(
-        question=request.question,
-        sector=request.sector,
-        brand_stage=request.brand_stage,
-        tv_history=request.tv_history,
-        primary_goal=request.primary_goal,
-        budget_tier=request.budget_tier,
+        question=body.question,
+        sector=body.sector,
+        brand_stage=body.brand_stage,
+        tv_history=body.tv_history,
+        primary_goal=body.primary_goal,
+        budget_tier=body.budget_tier,
     )
     if cached:
         return QueryResponse(**cached, cached=True)
 
     # 2. Input guardrail
     approved, reason = await check_input(
-        question=request.question,
-        sector=request.sector,
-        brand_stage=request.brand_stage,
+        question=body.question,
+        sector=body.sector,
+        brand_stage=body.brand_stage,
     )
     if not approved:
         raise HTTPException(
@@ -144,12 +146,12 @@ async def query(request: QueryRequest):
 
     # 3. Retrieve relevant chunks
     chunks = await retrieve(
-        question=request.question,
-        sector=request.sector,
-        brand_stage=request.brand_stage,
-        primary_goal=request.primary_goal,
-        tv_history=request.tv_history,
-        budget_tier=request.budget_tier,
+        question=body.question,
+        sector=body.sector,
+        brand_stage=body.brand_stage,
+        primary_goal=body.primary_goal,
+        tv_history=body.tv_history,
+        budget_tier=body.budget_tier,
     )
     if not chunks:
         raise HTTPException(
@@ -160,12 +162,12 @@ async def query(request: QueryRequest):
     # 4. Generate answer via LiteLLM
     try:
         answer, model_used = await generate(
-            question=request.question,
+            question=body.question,
             chunks=chunks,
-            sector=request.sector,
-            brand_stage=request.brand_stage,
-            budget_tier=request.budget_tier,
-            primary_goal=request.primary_goal,
+            sector=body.sector,
+            brand_stage=body.brand_stage,
+            budget_tier=body.budget_tier,
+            primary_goal=body.primary_goal,
         )
     except Exception as e:
         logger.error(f"All LLM models failed: {e}")
@@ -182,12 +184,12 @@ async def query(request: QueryRequest):
         )
         try:
             answer, model_used = await generate(
-                question=request.question,
+                question=body.question,
                 chunks=chunks,
-                sector=request.sector,
-                brand_stage=request.brand_stage,
-                budget_tier=request.budget_tier,
-                primary_goal=request.primary_goal,
+                sector=body.sector,
+                brand_stage=body.brand_stage,
+                budget_tier=body.budget_tier,
+                primary_goal=body.primary_goal,
                 strict_grounding=True,
             )
             output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
@@ -220,12 +222,12 @@ async def query(request: QueryRequest):
     if answer != SAFE_FALLBACK_ANSWER:
         cache.set(
             value=result,
-            question=request.question,
-            sector=request.sector,
-            brand_stage=request.brand_stage,
-            tv_history=request.tv_history,
-            primary_goal=request.primary_goal,
-            budget_tier=request.budget_tier,
+            question=body.question,
+            sector=body.sector,
+            brand_stage=body.brand_stage,
+            tv_history=body.tv_history,
+            primary_goal=body.primary_goal,
+            budget_tier=body.budget_tier,
         )
 
     return QueryResponse(**result, cached=False)
