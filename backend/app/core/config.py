@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     # ── App ──────────────────────────────────────────────────────────────────
     app_env: Literal["development", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    log_format: Literal["text", "json"] = "text"
     version: str = "0.1.0"
 
     # ── CORS ─────────────────────────────────────────────────────────────────

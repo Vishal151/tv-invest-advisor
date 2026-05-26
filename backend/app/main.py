@@ -1,9 +1,13 @@
 import logging
+import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
+import structlog
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 
 from app.core.config import get_settings
 from app.core.limiter import limiter
@@ -11,10 +15,40 @@ from app.api.routes import router
 
 settings = get_settings()
 
-logging.basicConfig(
-    level=settings.log_level,
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-)
+
+def _configure_logging() -> None:
+    processors = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+    ]
+    if settings.log_format == "json":
+        processors.append(structlog.processors.JSONRenderer())
+    else:
+        processors.append(structlog.dev.ConsoleRenderer())
+
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(
+            getattr(logging, settings.log_level)
+        ),
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+    )
+    logging.basicConfig(level=settings.log_level)
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        structlog.contextvars.clear_contextvars()
+        structlog.contextvars.bind_contextvars(request_id=request_id)
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+
+_configure_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -76,6 +110,7 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
