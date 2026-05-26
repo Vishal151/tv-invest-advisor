@@ -20,4 +20,6 @@ RUN mkdir -p chroma_db data/pdfs \
 
 USER appuser
 
+ENV UV_CACHE_DIR=/app/.cache/uv
+
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
