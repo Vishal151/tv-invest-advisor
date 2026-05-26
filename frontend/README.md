@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cue — Frontend
 
-## Getting Started
+Next.js 16 frontend for the Cue TV Investment Advisor. Builds to a static export served by the FastAPI backend.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** — App Router, static export (`output: 'export'`)
+- **React 19** — client components with `'use client'`
+- **TypeScript** — strict mode
+- **Tailwind CSS v4** — design tokens via CSS custom properties (oklch)
+- **Zustand v5** — global app state (turns, brief, phase)
+- **Jest 29 + React Testing Library 16** — 62 tests
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm test           # run all tests
+npm run build      # static export → out/
+npm run lint       # eslint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Learn More
+In production the frontend is served from the same origin as the API, so relative URLs are used automatically when `NEXT_PUBLIC_API_URL` is unset.
 
-To learn more about Next.js, take a look at the following resources:
+## Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+frontend/
+├── app/
+│   ├── layout.tsx        # Root layout — Google Fonts, metadata
+│   ├── page.tsx          # Entry point — renders <CueApp />
+│   └── globals.css       # Cue design tokens + Tailwind import
+├── components/
+│   ├── atoms/            # Headline, Citation, Chart, Trace, SourceCard …
+│   ├── composer/         # Chip (brief selector), Composer (input bar)
+│   ├── thread/           # UserBubble, AssistantBubble, RefusalCard, ErrorCard
+│   ├── rail/             # EvidenceRail, CorpusRail
+│   └── layout/           # Topbar, EmptyState, CueApp (app shell)
+├── overlays/             # HistoryDrawer, ExportModal
+├── lib/
+│   ├── types.ts          # Brief, Answer, Turn, QueryResult types
+│   ├── api.ts            # queryApi() — maps backend response to UI types
+│   └── store.ts          # Zustand store — turns, brief, phase, overlays
+└── __tests__/            # Mirrors component structure
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Design Tokens
 
-## Deploy on Vercel
+All colours are defined as CSS custom properties in `app/globals.css` using the oklch colour space:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Token | Usage |
+|-------|-------|
+| `--cue-paper` / `--cue-paper-2/3` | Background surfaces |
+| `--cue-ink` / `--cue-ink-2/3/4` | Text hierarchy |
+| `--cue-accent` / `--cue-accent-soft` | Primary interactive colour (terracotta) |
+| `--cue-success` / `--cue-warn` / `--cue-danger` | Status colours |
+| `--cue-serif` / `--cue-sans` / `--cue-mono` | Font stacks |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Build for Production
+
+```bash
+npm run build
+```
+
+Outputs to `out/`. The FastAPI backend serves this directory as static files. The Docker Compose setup handles this automatically.

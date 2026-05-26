@@ -21,6 +21,9 @@ data/pptx/
 # Claude Code settings
 .claude/
 
+# Design reference material
+design_handoff_cue/
+
 # Node
 frontend/node_modules/
 frontend/.next/

@@ -45,7 +45,7 @@ frontend, Docker Compose.
 | backend/Dockerfile | ✅ Done | uv official image, non-root user, no dev deps in prod |
 | backend/.flake8 | ✅ Done | black-compatible config (E203, W503, E501 ignored) |
 | backend/pyproject.toml | ✅ Done | black + flake8 + fakeredis in dev deps |
-| frontend (Next.js) | ⬜ Todo | Initialised, not built yet |
+| frontend (Next.js) | ✅ Done | Next.js 16, React 19, Tailwind v4, Zustand v5, 62 tests |
 | docker-compose.yml | ✅ Done | Redis service + healthcheck; backend depends_on redis |
 | Data corpus ingested | ✅ Done | Thinkbox PDFs ingested into ChromaDB |
  
