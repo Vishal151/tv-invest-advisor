@@ -98,6 +98,32 @@ def test_query_returns_cached_response(client):
     cache.clear()
 
 
+def test_cache_hit_ignores_leading_trailing_whitespace(client, sample_chunks):
+    """Questions with surrounding whitespace should share the cache with the trimmed version."""
+    from app.services.cache import cache
+
+    cache.clear()
+    cached_data = {
+        "answer": "Cached TV answer.",
+        "sources": [
+            {"title": "PA2", "chunk": "excerpt...", "url": "https://thinkbox.tv",
+             "page": 1, "topic": "ROI", "distance": 0.2}
+        ],
+        "model_used": "gpt-4o",
+    }
+    cache.set(
+        cached_data,
+        question="Does TV work for FMCG?",
+        sector=None, brand_stage=None, tv_history=None, primary_goal=None, budget_tier=None,
+    )
+    # Question has 10 chars minimum for validation, padded version still valid
+    resp = client.post("/api/query", json={"question": "Does TV work for FMCG?"})
+    assert resp.status_code == 200
+    assert resp.json()["cached"] is True
+    assert resp.json()["answer"] == "Cached TV answer."
+    cache.clear()
+
+
 def test_query_rejects_invalid_sector(client):
     resp = client.post(
         "/api/query",

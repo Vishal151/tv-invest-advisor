@@ -126,9 +126,11 @@ async def health():
 @router.post("/query", response_model=QueryResponse)
 @limiter.limit("20/minute")
 async def query(request: Request, body: QueryRequest):
+    question = body.question.strip()
+
     # 1. Cache lookup
     cached = cache.get(
-        question=body.question,
+        question=question,
         sector=body.sector,
         brand_stage=body.brand_stage,
         tv_history=body.tv_history,
@@ -140,7 +142,7 @@ async def query(request: Request, body: QueryRequest):
 
     # 2. Input guardrail
     approved, reason = await check_input(
-        question=body.question,
+        question=question,
         sector=body.sector,
         brand_stage=body.brand_stage,
     )
@@ -153,7 +155,7 @@ async def query(request: Request, body: QueryRequest):
 
     # 3. Retrieve relevant chunks
     chunks = await retrieve(
-        question=body.question,
+        question=question,
         sector=body.sector,
         brand_stage=body.brand_stage,
         primary_goal=body.primary_goal,
@@ -169,7 +171,7 @@ async def query(request: Request, body: QueryRequest):
     # 4. Generate answer via LiteLLM
     try:
         answer, model_used = await generate(
-            question=body.question,
+            question=question,
             chunks=chunks,
             sector=body.sector,
             brand_stage=body.brand_stage,
@@ -191,7 +193,7 @@ async def query(request: Request, body: QueryRequest):
         )
         try:
             answer, model_used = await generate(
-                question=body.question,
+                question=question,
                 chunks=chunks,
                 sector=body.sector,
                 brand_stage=body.brand_stage,
@@ -232,7 +234,7 @@ async def query(request: Request, body: QueryRequest):
     if answer != SAFE_FALLBACK_ANSWER:
         cache.set(
             value=result,
-            question=body.question,
+            question=question,
             sector=body.sector,
             brand_stage=body.brand_stage,
             tv_history=body.tv_history,
