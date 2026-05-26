@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* ── Cue Design Tokens ───────────────────────────────────────────────── */
+:root {
+  --cue-paper:        oklch(0.975 0.008 75);
+  --cue-paper-2:      oklch(0.955 0.010 75);
+  --cue-paper-3:      oklch(0.930 0.012 75);
+
+  --cue-ink:          oklch(0.20  0.012 60);
+  --cue-ink-2:        oklch(0.35  0.012 60);
+  --cue-ink-3:        oklch(0.55  0.012 60);
+  --cue-ink-4:        oklch(0.72  0.010 60);
+
+  --cue-rule:         oklch(0.85  0.012 70);
+  --cue-rule-2:       oklch(0.92  0.010 70);
+
+  --cue-accent:       oklch(0.55  0.16  28);
+  --cue-accent-soft:  oklch(0.55  0.16  28 / 0.10);
+  --cue-accent-ink:   oklch(0.32  0.12  28);
+
+  --cue-slate:        oklch(0.45  0.06 240);
+
+  --cue-success:      oklch(0.55 0.16 145);
+  --cue-success-soft: oklch(0.85 0.08 145 / 0.30);
+  --cue-success-ink:  oklch(0.36 0.10 145);
+
+  --cue-warn:         oklch(0.60 0.17 50);
+  --cue-warn-soft:    oklch(0.60 0.17 50 / 0.15);
+  --cue-warn-ink:     oklch(0.42 0.14 50);
+
+  --cue-danger:       oklch(0.62 0.18 30);
+  --cue-danger-soft:  oklch(0.62 0.18 30 / 0.15);
+  --cue-danger-ink:   oklch(0.46 0.14 30);
+
+  --cue-serif: "Newsreader", "Source Serif 4", Georgia, serif;
+  --cue-sans:  "IBM Plex Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --cue-mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@theme inline {
+  --font-serif: var(--cue-serif);
+  --font-sans:  var(--cue-sans);
+  --font-mono:  var(--cue-mono);
+}
+
+html, body {
+  height: 100%;
+  background: var(--cue-paper);
+  color: var(--cue-ink);
+  font-family: var(--cue-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Print styles for Export modal ───────────────────────────────────── */
+@media print {
+  body > *:not(.cue-export-sheet) { display: none !important; }
+  .cue-export-sheet { display: block !important; box-shadow: none !important; }
+}
