@@ -86,3 +86,10 @@ async def test_check_output_fails_open_on_error(sample_chunks):
     ):
         approved, reason = await check_output(answer="anything", chunks=sample_chunks)
     assert approved is True
+
+
+def test_parse_guardrail_decision_fails_open_on_ambiguous():
+    assert _parse_guardrail_decision("Maybe this is fine?") is True
+    assert _parse_guardrail_decision("") is True
+    assert _parse_guardrail_decision("APPROVED - on topic") is True
+    assert _parse_guardrail_decision("REJECTED - off topic") is False
