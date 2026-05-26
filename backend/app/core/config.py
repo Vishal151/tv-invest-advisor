@@ -57,8 +57,8 @@ class Settings(BaseSettings):
     # ── RAG settings ─────────────────────────────────────────────────────────
     retrieval_top_k: int = 5  # chunks returned per query
     retrieval_distance_threshold: float = 0.75  # cosine distance; chunks above this are discarded
-    chunk_size: int = 800  # tokens per chunk
-    chunk_overlap: int = 100  # overlap between chunks
+    chunk_size: int = 800  # words per chunk (~1000-1100 tokens; not exact token count)
+    chunk_overlap: int = 100  # word overlap between chunks
 
     # ── Cache ────────────────────────────────────────────────────────────────
     cache_ttl_seconds: int = 60 * 60 * 24 * 7  # 7 days
