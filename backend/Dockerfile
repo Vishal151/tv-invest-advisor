@@ -1,5 +1,5 @@
-# Use official uv image as build base (avoids pip install uv)
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+FROM python:3.13-slim
+RUN pip install uv --quiet
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY scripts/ ./scripts/
 
 # Create volume mount points and non-root user
 RUN mkdir -p chroma_db data/pdfs \
-    && adduser --disabled-password --no-create-home --uid 1001 appuser \
+    && adduser --disabled-password --no-create-home --gecos "" --uid 1001 appuser \
     && chown -R appuser:appuser /app
 
 USER appuser
