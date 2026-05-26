@@ -211,3 +211,34 @@ def test_ingest_valid_document(client):
     data = resp.json()
     assert data["chunks_added"] == 5
     mock_ingest.assert_called_once_with("data/pdfs/profit-ability-2.pdf")
+
+
+def test_safe_fallback_is_not_cached(client, sample_chunks):
+    """When safe fallback is returned, it must NOT be written to cache."""
+    from app.api.routes import SAFE_FALLBACK_ANSWER
+    from app.services.cache import cache
+
+    cache.clear()
+    question = "Unique fallback cache test question xyz?"
+
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=("bad answer", "gpt-4o"))),
+        patch("app.api.routes.check_output", new=AsyncMock(return_value=(False, "REJECTED"))),
+    ):
+        resp = client.post("/api/query", json={"question": question})
+
+    assert resp.status_code == 200
+    assert resp.json()["answer"] == SAFE_FALLBACK_ANSWER
+
+    cached = cache.get(
+        question=question,
+        sector=None,
+        brand_stage=None,
+        tv_history=None,
+        primary_goal=None,
+        budget_tier=None,
+    )
+    assert cached is None, "Safe fallback answer must not be cached"
+    cache.clear()

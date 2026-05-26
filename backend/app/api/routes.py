@@ -208,21 +208,22 @@ async def query(request: QueryRequest):
         for c in chunks
     ]
 
-    # 7. Cache and return
+    # 7. Cache and return (skip cache write for safe fallback — retry should be attempted next time)
     result = {
         "answer": answer,
         "sources": [s.model_dump() for s in sources],
         "model_used": model_used,
     }
-    cache.set(
-        value=result,
-        question=request.question,
-        sector=request.sector,
-        brand_stage=request.brand_stage,
-        tv_history=request.tv_history,
-        primary_goal=request.primary_goal,
-        budget_tier=request.budget_tier,
-    )
+    if answer != SAFE_FALLBACK_ANSWER:
+        cache.set(
+            value=result,
+            question=request.question,
+            sector=request.sector,
+            brand_stage=request.brand_stage,
+            tv_history=request.tv_history,
+            primary_goal=request.primary_goal,
+            budget_tier=request.budget_tier,
+        )
 
     return QueryResponse(**result, cached=False)
 
