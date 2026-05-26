@@ -291,7 +291,7 @@ tv-invest-advisor/
 
 **Redis / dict cache** — `cache.py` exposes a `get`/`set`/`clear` interface. `REDIS_URL` set → `RedisCache`; unset → `ResponseCache` (dict). Redis errors degrade gracefully to cache-miss, never 500. `fakeredis` in tests — no real Redis needed in CI.
 
-**Static export** — `frontend/` builds to static files (`output: 'export'`), served by FastAPI in production. One deployment unit, no Node.js runtime needed in production.
+**Static export + nginx reverse proxy** — `frontend/` builds to static files (`output: 'export'`). In production (`docker compose up`), nginx serves the static export on `:80` and proxies `/api/*` to FastAPI. In local development, run Next.js dev server (`npm run dev`) on `:3000` and FastAPI on `:8000` separately. No Node.js runtime in production.
 
 ---
 
