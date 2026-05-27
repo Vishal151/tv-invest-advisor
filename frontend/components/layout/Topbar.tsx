@@ -2,6 +2,23 @@
 
 import { useStore } from '@/lib/store'
 
+function SignalBars() {
+  return (
+    <svg
+      width="16"
+      height="14"
+      viewBox="0 0 19 14"
+      aria-hidden="true"
+      style={{ display: 'block', flexShrink: 0 }}
+    >
+      <rect x="0"  y="10" width="3" height="4"  rx="1" fill="var(--cue-accent)" opacity="0.4" />
+      <rect x="5"  y="7"  width="3" height="7"  rx="1" fill="var(--cue-accent)" opacity="0.6" />
+      <rect x="10" y="4"  width="3" height="10" rx="1" fill="var(--cue-accent)" opacity="0.8" />
+      <rect x="15" y="0"  width="3" height="14" rx="1" fill="var(--cue-accent)" />
+    </svg>
+  )
+}
+
 type Props = { threadTitle?: string }
 
 export function Topbar({ threadTitle }: Props) {
@@ -33,7 +50,7 @@ export function Topbar({ threadTitle }: Props) {
           ☰
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--cue-accent)', display: 'inline-block' }} />
+          <SignalBars />
           <span style={{ fontFamily: 'var(--cue-serif)', fontSize: '16px', fontWeight: 500, color: 'var(--cue-ink)' }}>Cue</span>
           <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--cue-ink-3)' }}>
             TV Investment Advisor
