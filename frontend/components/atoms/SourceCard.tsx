@@ -61,9 +61,40 @@ export function SourceCard({ source, highlight = false, compact = false }: Props
             {source.title}
           </span>
         </div>
-        {(source.year > 0 || source.page > 0) && (
-          <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10.5px', color: 'var(--cue-ink-3)', marginBottom: '4px' }}>
-            {source.year > 0 && `${source.year}`}{source.page > 0 && ` · p.${source.page}`}
+        {(source.topic || source.page > 0) && (
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '4px' }}>
+            {source.topic && (
+              <span
+                style={{
+                  fontFamily:   'var(--cue-mono)',
+                  fontSize:     '10px',
+                  padding:      '1px 6px',
+                  borderRadius: '10px',
+                  background:   'var(--cue-accent-soft)',
+                  color:        'var(--cue-accent-ink)',
+                  fontWeight:   600,
+                  letterSpacing:'0.04em',
+                  textTransform:'uppercase',
+                }}
+              >
+                {source.topic}
+              </span>
+            )}
+            {source.page > 0 && (
+              <span
+                style={{
+                  fontFamily:   'var(--cue-mono)',
+                  fontSize:     '10px',
+                  padding:      '1px 6px',
+                  borderRadius: '10px',
+                  background:   'var(--cue-paper-3)',
+                  color:        'var(--cue-ink-3)',
+                  border:       '1px solid var(--cue-rule)',
+                }}
+              >
+                p.{source.page}
+              </span>
+            )}
           </div>
         )}
         <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12.5px', color: 'var(--cue-ink-2)', lineHeight: 1.45, marginBottom: '6px' }}>
