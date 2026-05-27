@@ -67,11 +67,13 @@ export function CueApp() {
                   return <UserBubble key={i} question={turn.question} brief={turn.brief} time={turn.time} />
                 }
                 if (turn.role === 'assistant') {
+                  const isLastAssistant = thread.turns.slice(i + 1).every((t) => t.role !== 'assistant')
                   return (
                     <AssistantBubble
                       key={i}
                       answer={turn.answer}
                       time={turn.time}
+                      isLast={isLastAssistant}
                       onFollowup={(q) => { setComposerInput(q); ask() }}
                     />
                   )

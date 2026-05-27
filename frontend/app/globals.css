@@ -53,8 +53,18 @@ html, body {
 
 /* ── Print styles for Export modal ───────────────────────────────────── */
 @media print {
-  body > *:not(.cue-export-sheet) { display: none !important; }
-  .cue-export-sheet { display: block !important; box-shadow: none !important; }
+  body * { visibility: hidden; }
+  .cue-export-sheet,
+  .cue-export-sheet * { visibility: visible; }
+  .cue-export-sheet {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
 }
 
 /* broadcast rings loading animation */

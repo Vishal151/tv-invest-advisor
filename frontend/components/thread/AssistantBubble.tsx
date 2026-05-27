@@ -13,10 +13,11 @@ import { useStore } from '@/lib/store'
 type Props = {
   answer:     Answer
   time:       string
+  isLast:     boolean
   onFollowup: (q: string) => void
 }
 
-export function AssistantBubble({ answer, time, onFollowup }: Props) {
+export function AssistantBubble({ answer, time, isLast, onFollowup }: Props) {
   const setActiveCitation = useStore((s) => s.setActiveCitation)
 
   return (
@@ -59,6 +60,22 @@ export function AssistantBubble({ answer, time, onFollowup }: Props) {
           {answer.chart && <Chart chart={answer.chart} />}
         </div>
 
+        {answer.checklist && answer.checklist.length > 0 && (
+          <div style={{ borderTop: '1px solid var(--cue-rule)', paddingTop: '14px' }}>
+            <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--cue-ink-3)', marginBottom: '10px' }}>
+              Key considerations
+            </div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {answer.checklist.map((item, i) => (
+                <li key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                  <span style={{ color: 'var(--cue-accent)', fontFamily: 'var(--cue-mono)', fontSize: '11px', lineHeight: '1.6', flexShrink: 0 }}>✓</span>
+                  <span style={{ fontFamily: 'var(--cue-serif)', fontSize: '14.5px', color: 'var(--cue-ink-2)', lineHeight: 1.5 }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {answer.callout && (
           <Callout label={answer.callout.label} body={answer.callout.body} />
         )}
@@ -84,7 +101,7 @@ export function AssistantBubble({ answer, time, onFollowup }: Props) {
           ))}
         </div>
 
-        <Followups items={answer.followups} onPick={onFollowup} />
+        {isLast && <Followups items={answer.followups} onPick={onFollowup} />}
       </div>
     </div>
   )

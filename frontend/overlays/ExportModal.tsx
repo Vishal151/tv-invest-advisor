@@ -1,15 +1,16 @@
 'use client'
 
 import { useStore } from '@/lib/store'
+import type { Turn } from '@/lib/types'
 
 export function ExportModal() {
   const { exportOpen, setExportOpen, thread } = useStore()
 
   if (!exportOpen) return null
 
-  const lastAnswer = [...thread.turns].reverse().find((t) => t.role === 'assistant')
-  const answer = lastAnswer?.role === 'assistant' ? lastAnswer.answer : null
-  const lastQuestion = [...thread.turns].reverse().find((t) => t.role === 'user')?.question ?? ''
+  const answerTurns = thread.turns.filter((t): t is Extract<Turn, { role: 'assistant' | 'user' }> =>
+    t.role === 'user' || t.role === 'assistant'
+  )
   const brief = thread.brief
 
   return (
@@ -67,6 +68,7 @@ export function ExportModal() {
               gap:           '24px',
             }}
           >
+            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e5e0d4', paddingBottom: '20px' }}>
               <div>
                 <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '20px', fontWeight: 500, color: 'var(--cue-ink)' }}>Cue</div>
@@ -77,6 +79,7 @@ export function ExportModal() {
               </div>
             </div>
 
+            {/* Brief */}
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', fontFamily: 'var(--cue-mono)' }}>
               <tbody>
                 {[
@@ -94,48 +97,63 @@ export function ExportModal() {
               </tbody>
             </table>
 
-            {lastQuestion && (
-              <h2 style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '26px', fontWeight: 500, color: 'var(--cue-ink)', lineHeight: 1.2 }}>
-                {lastQuestion}
-              </h2>
-            )}
-
-            {answer && (
-              <>
-                {answer.stats.length > 0 && (
-                  <div>
-                    <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'var(--cue-serif)', color: 'var(--cue-accent)' }}>
-                      {answer.stats[0].value}
-                    </span>
-                    {' '}
-                    <span style={{ fontSize: '14px', color: 'var(--cue-ink-2)' }}>
-                      {answer.stats[0].unit}
-                    </span>
-                  </div>
-                )}
-                {answer.summary.map((p, i) => (
-                  <p key={i} style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '14px', lineHeight: 1.6, color: 'var(--cue-ink-2)' }}>{p}</p>
-                ))}
-                {answer.sources.length > 0 && (
-                  <div>
-                    <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cue-ink-3)', marginBottom: '12px', borderTop: '1px solid #e5e0d4', paddingTop: '16px' }}>
-                      Sources
-                    </div>
-                    {answer.sources.map((s) => (
-                      <div key={s.n} style={{ marginBottom: '12px' }}>
-                        <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '13px', fontWeight: 500 }}>[{s.n}] {s.title}{s.year > 0 && ` (${s.year})`}</div>
-                        <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12px', color: 'var(--cue-ink-3)', margin: '3px 0' }}>"{s.quote}"</div>
-                        <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', color: 'var(--cue-ink-4)' }}>{s.url}</div>
+            {/* All Q&A turns */}
+            {answerTurns.map((turn, i) => {
+              if (turn.role === 'user') {
+                return (
+                  <h2 key={i} style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '22px', fontWeight: 500, color: 'var(--cue-ink)', lineHeight: 1.2, borderTop: i > 0 ? '1px solid #e5e0d4' : undefined, paddingTop: i > 0 ? '20px' : undefined }}>
+                    {turn.question}
+                  </h2>
+                )
+              }
+              if (turn.role === 'assistant') {
+                const { answer } = turn
+                return (
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {answer.stats.length > 0 && (
+                      <div>
+                        <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'var(--cue-serif)', color: 'var(--cue-accent)' }}>
+                          {answer.stats[0].value}
+                        </span>
+                        {' '}
+                        <span style={{ fontSize: '14px', color: 'var(--cue-ink-2)' }}>
+                          {answer.stats[0].unit}
+                        </span>
                       </div>
+                    )}
+                    {answer.summary.map((p, pi) => (
+                      <p key={pi} style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '14px', lineHeight: 1.6, color: 'var(--cue-ink-2)' }}>{p}</p>
                     ))}
+                    {'checklist' in answer && Array.isArray((answer as { checklist?: string[] }).checklist) && (answer as { checklist?: string[] }).checklist!.length > 0 && (
+                      <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {(answer as { checklist?: string[] }).checklist!.map((item, ci) => (
+                          <li key={ci} style={{ fontFamily: 'var(--cue-serif)', fontSize: '13px', color: 'var(--cue-ink-2)', lineHeight: 1.5 }}>{item}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {answer.sources.length > 0 && (
+                      <div>
+                        <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--cue-ink-3)', marginBottom: '8px', borderTop: '1px solid #e5e0d4', paddingTop: '12px' }}>
+                          Sources
+                        </div>
+                        {answer.sources.map((s) => (
+                          <div key={s.n} style={{ marginBottom: '10px' }}>
+                            <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '13px', fontWeight: 500 }}>[{s.n}] {s.title}{s.page > 0 ? ` · p.${s.page}` : ''}</div>
+                            <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12px', color: 'var(--cue-ink-3)', margin: '3px 0' }}>"{s.quote}"</div>
+                            <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', color: 'var(--cue-ink-4)' }}>{s.url}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </>
-            )}
+                )
+              }
+              return null
+            })}
 
             <div style={{ marginTop: 'auto', borderTop: '1px solid #e5e0d4', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--cue-mono)', fontSize: '9.5px', color: 'var(--cue-ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               <span>Grounded in Thinkbox research · cue.advisor</span>
-              <span>Page 1 of 1</span>
+              <span>Generated {new Date().toLocaleDateString('en-GB')}</span>
             </div>
           </div>
         </div>

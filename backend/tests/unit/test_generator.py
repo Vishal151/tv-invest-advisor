@@ -236,4 +236,4 @@ async def test_generate_falls_back_on_invalid_json(sample_chunks):
     ):
         answer, model = await generate(question="Does TV work?", chunks=sample_chunks)
 
-    assert answer == {"summary": [prose], "stats": [], "chart": None, "followups": []}
+    assert answer == {"summary": [prose], "stats": [], "chart": None, "checklist": None, "followups": []}

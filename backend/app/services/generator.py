@@ -48,6 +48,10 @@ You must respond with a single JSON object matching this exact schema:
       { "label": "Digital", "value": 3.21 }
     ]
   },
+  "checklist": [
+    "Set a minimum 12-month commitment to see compounding brand effect",
+    "Allocate at least 60% of budget to TV for maximum base effects"
+  ],
   "followups": [
     "How does this change for a DTC brand?",
     "What is the minimum budget to see TV ROI?"
@@ -58,6 +62,7 @@ Schema rules:
 - "summary": 2–4 paragraphs of prose. Citation superscripts [1], [2] etc. may appear inline.
 - "stats": 1–3 key statistics found verbatim in the research context. Order them to match their first mention in summary (stat[0] surfaces after summary[0], stat[1] after summary[1], etc.). Use an empty list if no concrete statistics are available.
 - "chart": include ONLY when the answer compares 2+ values across channels, time periods, or categories. Set to null for qualitative answers. Bar values must come from the research context — never invented.
+- "checklist": 3–5 concise, actionable bullet points — include ONLY when the question asks for planning guidance, key considerations, a checklist, or how to evaluate an investment. Set to null for factual or ROI comparison questions. Each item should be a practical decision a planner can act on.
 - "followups": 2–3 short follow-up questions a planner might naturally ask next. Use an empty list if none relevant.
 
 Rules you must follow:
@@ -132,11 +137,12 @@ def _parse_response(raw: str) -> dict:
             raise ValueError("summary is not a list")
         parsed.setdefault("stats", [])
         parsed.setdefault("chart", None)
+        parsed.setdefault("checklist", None)
         parsed.setdefault("followups", [])
         return parsed
     except Exception:
         logger.warning("Failed to parse LLM response as JSON — using fallback dict")
-        return {"summary": [raw], "stats": [], "chart": None, "followups": []}
+        return {"summary": [raw], "stats": [], "chart": None, "checklist": None, "followups": []}
 
 
 async def generate(

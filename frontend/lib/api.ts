@@ -5,7 +5,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 type RawStat = { value: string; unit: string; context: string; source: string; page: number }
 type RawChartBar = { label: string; value: number; highlight?: boolean }
 type RawChart = { title: string; source: string; unit: string; bars: RawChartBar[] }
-type RawStructuredAnswer = { summary: string[]; stats: RawStat[]; chart: RawChart | null; followups: string[] }
+type RawStructuredAnswer = { summary: string[]; stats: RawStat[]; chart: RawChart | null; followups: string[]; checklist: string[] | null }
 type RawSource = { title: string; chunk: string; url: string; page: number; topic: string; distance: number }
 type RawResponse = { answer: RawStructuredAnswer; sources: RawSource[]; cached: boolean; model_used: string }
 
@@ -23,6 +23,7 @@ function mapResponse(raw: RawResponse, generationMs: number): QueryResult {
         page:    s.page ?? 0,
       })),
       summary:   a.summary ?? [],
+      checklist: a.checklist?.length ? a.checklist : null,
       callout:   null,
       chart:     a.chart
         ? {

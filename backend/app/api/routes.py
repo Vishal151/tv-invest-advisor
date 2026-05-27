@@ -103,6 +103,7 @@ class StructuredAnswer(BaseModel):
     summary: list[str]
     stats: list[AnswerStat] = []
     chart: AnswerChart | None = None
+    checklist: list[str] | None = None
     followups: list[str] = []
 
 

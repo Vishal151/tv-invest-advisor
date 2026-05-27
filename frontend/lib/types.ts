@@ -26,6 +26,7 @@ export type Chart    = { title: string; source: string; unit: string; bars: Char
 export type Answer = {
   stats:     Stat[]
   summary:   string[]
+  checklist: string[] | null
   callout:   Callout | null
   chart:     Chart | null
   sources:   Source[]
