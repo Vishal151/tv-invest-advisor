@@ -29,7 +29,7 @@ function mapResponse(raw: RawResponse, generationMs: number): QueryResult {
             title:  a.chart.title,
             source: a.chart.source,
             unit:   a.chart.unit,
-            bars:   a.chart.bars.map((b) => ({
+            bars:   (a.chart.bars ?? []).map((b) => ({
               label:     b.label,
               value:     b.value,
               highlight: b.highlight ?? false,
