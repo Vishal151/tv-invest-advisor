@@ -22,7 +22,7 @@ export function StreamingBubble({ traceSteps = DEFAULT_TRACE_STEPS }: Props) {
       setStepIdx((i) => (i + 1) % traceSteps.length)
     }, 1200)
     return () => clearInterval(id)
-  }, [traceSteps.length])
+  }, [traceSteps])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>

@@ -7,7 +7,7 @@ function SignalBars() {
     <svg
       width="16"
       height="14"
-      viewBox="0 0 19 14"
+      viewBox="0 0 16 14"
       aria-hidden="true"
       style={{ display: 'block', flexShrink: 0 }}
     >
