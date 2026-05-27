@@ -115,7 +115,7 @@ Research context:
 {context}
 
 Please provide a specific, evidence-based answer using only the research above.
-Include a 'Key sources' section at the end."""
+Return only the JSON object — no markdown fences, no preamble, no trailing text."""
 
     system = SYSTEM_PROMPT + (STRICT_GROUNDING_ADDENDUM if strict_grounding else "")
     return [
@@ -130,6 +130,9 @@ def _parse_response(raw: str) -> dict:
         parsed = json.loads(raw)
         if not isinstance(parsed.get("summary"), list):
             raise ValueError("summary is not a list")
+        parsed.setdefault("stats", [])
+        parsed.setdefault("chart", None)
+        parsed.setdefault("followups", [])
         return parsed
     except Exception:
         logger.warning("Failed to parse LLM response as JSON — using fallback dict")
