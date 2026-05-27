@@ -3,12 +3,12 @@ import { StreamingBubble } from '@/components/thread/StreamingBubble'
 
 const steps = ['Parsing brief', 'Retrieving chunks']
 
-test('renders trace steps', () => {
-  const { container } = render(<StreamingBubble traceSteps={steps} streamedText="" done={false} />)
+test('renders with default trace steps', () => {
+  const { container } = render(<StreamingBubble />)
   expect(container.firstChild).toBeTruthy()
 })
 
-test('shows streamed text when present', () => {
-  render(<StreamingBubble traceSteps={steps} streamedText="TV delivers" done={false} />)
-  expect(screen.getByText(/TV delivers/)).toBeInTheDocument()
+test('renders with custom trace steps', () => {
+  render(<StreamingBubble traceSteps={steps} />)
+  expect(screen.getByText('Parsing brief')).toBeInTheDocument()
 })

@@ -1,22 +1,29 @@
 'use client'
 
-import { Trace } from '@/components/atoms/Trace'
-
-type Props = {
-  traceSteps?:  string[]
-  streamedText: string
-  done:         boolean
-}
+import { useState, useEffect } from 'react'
 
 const DEFAULT_TRACE_STEPS = [
   'Parsing brief',
-  'Filtering corpus by topic',
-  'Retrieving relevant chunks…',
+  'Filtering corpus',
+  'Retrieving relevant chunks',
   'Grounding answer in sources',
   'Verifying citations',
 ]
 
-export function StreamingBubble({ traceSteps = DEFAULT_TRACE_STEPS, streamedText, done }: Props) {
+type Props = {
+  traceSteps?: string[]
+}
+
+export function StreamingBubble({ traceSteps = DEFAULT_TRACE_STEPS }: Props) {
+  const [stepIdx, setStepIdx] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setStepIdx((i) => (i + 1) % traceSteps.length)
+    }, 1200)
+    return () => clearInterval(id)
+  }, [traceSteps.length])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
       <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', color: 'var(--cue-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -30,39 +37,32 @@ export function StreamingBubble({ traceSteps = DEFAULT_TRACE_STEPS, streamedText
           background:    'var(--cue-paper)',
           border:        '1px solid var(--cue-rule)',
           borderRadius:  '4px 14px 14px 14px',
-          padding:       '22px 24px',
+          padding:       '28px 24px',
           display:       'flex',
           flexDirection: 'column',
+          alignItems:    'center',
           gap:           '16px',
         }}
       >
-        <Trace steps={traceSteps} />
-
-        {streamedText && (
-          <p
-            style={{
-              margin:     0,
-              fontFamily: 'var(--cue-serif)',
-              fontSize:   '16.5px',
-              lineHeight: 1.55,
-              color:      'var(--cue-ink-2)',
-            }}
-          >
-            {streamedText}
-            {!done && (
-              <span
-                style={{
-                  display:       'inline-block',
-                  width:         '2px',
-                  height:        '1em',
-                  background:    'var(--cue-accent)',
-                  marginLeft:    '2px',
-                  verticalAlign: 'text-bottom',
-                }}
-              />
-            )}
-          </p>
-        )}
+        <div style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className={`cue-ring-${n}`}
+              style={{
+                position:    'absolute',
+                width:       `${n * 16}px`,
+                height:      `${n * 16}px`,
+                border:      '1.5px solid var(--cue-accent)',
+                borderRadius:'50%',
+              }}
+            />
+          ))}
+          <div style={{ width: '6px', height: '6px', background: 'var(--cue-accent)', borderRadius: '50%', position: 'relative', zIndex: 1 }} />
+        </div>
+        <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '11px', color: 'var(--cue-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {traceSteps[stepIdx]}
+        </div>
       </div>
     </div>
   )

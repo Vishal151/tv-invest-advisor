@@ -104,7 +104,7 @@ export function CueApp() {
               })}
 
               {(phase === 'thinking' || phase === 'loading') && (
-                <StreamingBubble streamedText="" done={false} />
+                <StreamingBubble />
               )}
             </div>
           </div>
