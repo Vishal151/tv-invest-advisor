@@ -2,31 +2,50 @@ import type { Brief, QueryResult } from './types'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 
-type RawSource = { title: string; chunk: string; url: string }
-type RawResponse = { answer: string; sources: RawSource[]; cached: boolean; model_used: string }
+type RawStat = { value: string; unit: string; context: string; source: string; page: number }
+type RawChartBar = { label: string; value: number; highlight?: boolean }
+type RawChart = { title: string; source: string; unit: string; bars: RawChartBar[] }
+type RawStructuredAnswer = { summary: string[]; stats: RawStat[]; chart: RawChart | null; followups: string[] }
+type RawSource = { title: string; chunk: string; url: string; page: number; topic: string; distance: number }
+type RawResponse = { answer: RawStructuredAnswer; sources: RawSource[]; cached: boolean; model_used: string }
 
 function mapResponse(raw: RawResponse, generationMs: number): QueryResult {
-  const summary = raw.answer
-    .split(/\n\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean)
+  const { answer: a } = raw
 
   return {
     kind: 'answer',
     answer: {
-      headline:  null,
-      summary,
+      stats: (a.stats ?? []).map((s) => ({
+        value:   s.value,
+        unit:    s.unit,
+        context: s.context,
+        source:  s.source,
+        page:    s.page ?? 0,
+      })),
+      summary:   a.summary ?? [],
       callout:   null,
-      chart:     null,
-      followups: [],
+      chart:     a.chart
+        ? {
+            title:  a.chart.title,
+            source: a.chart.source,
+            unit:   a.chart.unit,
+            bars:   a.chart.bars.map((b) => ({
+              label:     b.label,
+              value:     b.value,
+              highlight: b.highlight ?? false,
+            })),
+          }
+        : null,
+      followups: a.followups ?? [],
       sources: raw.sources.map((s, i) => ({
         n:     i + 1,
         title: s.title,
         year:  0,
-        page:  0,
+        page:  s.page ?? 0,
         url:   s.url,
         quote: s.chunk,
-        topic: '',
+        topic: s.topic ?? '',
+        score: s.distance,
       })),
       meta: {
         model:        raw.model_used,

@@ -5,12 +5,17 @@ global.fetch = mockFetch
 
 beforeEach(() => mockFetch.mockReset())
 
-test('queryApi maps flat response to Answer shape', async () => {
+test('queryApi maps structured response to Answer shape', async () => {
   mockFetch.mockResolvedValueOnce({
     ok: true,
     json: async () => ({
-      answer: 'TV delivers £5.61 ROI.\n\nSecond paragraph.',
-      sources: [{ title: 'Profit Ability 2', chunk: 'TV delivered...', url: 'https://thinkbox.tv' }],
+      answer: {
+        summary: ['TV delivers £5.61 ROI.', 'Second paragraph.'],
+        stats: [{ value: '£5.61', unit: 'ROI per £1 spent', context: 'Average across 141 brands', source: 'Profit Ability 2', page: 12 }],
+        chart: null,
+        followups: [],
+      },
+      sources: [{ title: 'Profit Ability 2', chunk: 'TV delivered...', url: 'https://thinkbox.tv', page: 12, topic: 'ROI', distance: 0.12 }],
       cached: false,
       model_used: 'gpt-4o',
     }),
@@ -25,6 +30,8 @@ test('queryApi maps flat response to Answer shape', async () => {
   if (result.kind !== 'answer') return
   expect(result.answer.summary).toHaveLength(2)
   expect(result.answer.summary[0]).toBe('TV delivers £5.61 ROI.')
+  expect(result.answer.stats).toHaveLength(1)
+  expect(result.answer.stats[0].value).toBe('£5.61')
   expect(result.answer.sources).toHaveLength(1)
   expect(result.answer.sources[0].title).toBe('Profit Ability 2')
   expect(result.answer.meta.model).toBe('gpt-4o')

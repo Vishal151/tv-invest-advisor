@@ -17,13 +17,14 @@ export type Source = {
   score?: number
 }
 
+export type Stat     = { value: string; unit: string; context: string; source: string; page: number }
 export type Headline = { stat: string; unit: string; caption: string }
 export type Callout  = { label: string; body: string }
 export type ChartBar = { label: string; value: number; highlight?: boolean }
 export type Chart    = { title: string; source: string; unit: string; bars: ChartBar[] }
 
 export type Answer = {
-  headline:  Headline | null
+  stats:     Stat[]
   summary:   string[]
   callout:   Callout | null
   chart:     Chart | null
