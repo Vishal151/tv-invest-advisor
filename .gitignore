@@ -28,6 +28,12 @@ frontend/node_modules/
 frontend/.next/
 frontend/out/
 
+# Worktrees
+.worktrees/
+
+# Superpowers brainstorm sessions
+.superpowers/
+
 # IDE
 .vscode/
 .idea/
