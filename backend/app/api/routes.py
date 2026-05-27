@@ -78,6 +78,28 @@ class QueryRequest(BaseModel):
         return v
 
 
+class AnswerStat(BaseModel):
+    value: str
+    unit: str
+    context: str
+    source: str
+    page: int = 0
+
+
+class AnswerChart(BaseModel):
+    title: str
+    source: str
+    unit: str
+    bars: list[dict]  # each bar: {label: str, value: float, highlight?: bool}
+
+
+class StructuredAnswer(BaseModel):
+    summary: list[str]
+    stats: list[AnswerStat] = []
+    chart: AnswerChart | None = None
+    followups: list[str] = []
+
+
 class Source(BaseModel):
     title: str
     chunk: str
@@ -88,7 +110,7 @@ class Source(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    answer: str
+    answer: StructuredAnswer
     sources: list[Source]
     cached: bool
     model_used: str
@@ -202,8 +224,10 @@ async def query(request: Request, body: QueryRequest):
         )
 
     # 5. Output guardrail (retry once with stricter grounding before generic fallback)
-    output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
-    if not output_ok and _answer_contains_statistic(answer):
+    answer_prose = "\n\n".join(answer["summary"])
+    output_ok, reject_reason = await check_output(answer=answer_prose, chunks=chunks)
+    is_fallback = False
+    if not output_ok and _answer_contains_statistic(answer_prose):
         logger.warning(
             f"Output guardrail rejected stat-containing response ({reject_reason}) — retrying"
         )
@@ -217,7 +241,8 @@ async def query(request: Request, body: QueryRequest):
                 primary_goal=body.primary_goal,
                 strict_grounding=True,
             )
-            output_ok, reject_reason = await check_output(answer=answer, chunks=chunks)
+            answer_prose = "\n\n".join(answer["summary"])
+            output_ok, reject_reason = await check_output(answer=answer_prose, chunks=chunks)
         except Exception as e:
             logger.error(f"Strict regeneration failed: {e}")
             output_ok = False
@@ -230,7 +255,8 @@ async def query(request: Request, body: QueryRequest):
         logger.warning(
             f"Output guardrail rejected after retry ({reject_reason}) — returning safe fallback"
         )
-        answer = SAFE_FALLBACK_ANSWER
+        is_fallback = True
+        answer = {"summary": [SAFE_FALLBACK_ANSWER], "stats": [], "chart": None, "followups": []}
 
     # 6. Build sources list
     sources = [
@@ -251,7 +277,7 @@ async def query(request: Request, body: QueryRequest):
         "sources": [s.model_dump() for s in sources],
         "model_used": model_used,
     }
-    if answer != SAFE_FALLBACK_ANSWER:
+    if not is_fallback:
         cache.set(
             value=result,
             question=question,

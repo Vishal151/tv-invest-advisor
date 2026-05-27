@@ -45,10 +45,11 @@ def test_health_returns_ok(client):
 
 def test_query_returns_answer(client, sample_chunks):
     answer_text = "TV delivers £5.61 ROI. Key sources: Profit Ability 2."
+    structured = {"summary": [answer_text], "stats": [], "chart": None, "followups": []}
     with (
         patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
         patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
-        patch("app.api.routes.generate", new=AsyncMock(return_value=(answer_text, "gpt-4o"))),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(structured, "gpt-4o"))),
         patch("app.api.routes.check_output", new=AsyncMock(return_value=(True, "APPROVED"))),
     ):
 
@@ -56,7 +57,7 @@ def test_query_returns_answer(client, sample_chunks):
 
     assert resp.status_code == 200
     data = resp.json()
-    assert data["answer"] == answer_text
+    assert data["answer"]["summary"][0] == answer_text
     assert data["model_used"] == "gpt-4o"
     assert data["cached"] is False
     assert len(data["sources"]) == 1
@@ -72,7 +73,7 @@ def test_query_returns_cached_response(client):
     from app.services.cache import cache
 
     cached_data = {
-        "answer": "Cached answer about TV.",
+        "answer": {"summary": ["Cached answer about TV."], "stats": [], "chart": None, "followups": []},
         "sources": [
             {"title": "Profit Ability 2", "chunk": "excerpt...", "url": "https://thinkbox.tv"}
         ],
@@ -93,7 +94,7 @@ def test_query_returns_cached_response(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["cached"] is True
-    assert data["answer"] == "Cached answer about TV."
+    assert data["answer"]["summary"][0] == "Cached answer about TV."
 
     cache.clear()
 
@@ -104,7 +105,7 @@ def test_cache_hit_ignores_leading_trailing_whitespace(client, sample_chunks):
 
     cache.clear()
     cached_data = {
-        "answer": "Cached TV answer.",
+        "answer": {"summary": ["Cached TV answer."], "stats": [], "chart": None, "followups": []},
         "sources": [
             {"title": "PA2", "chunk": "excerpt...", "url": "https://thinkbox.tv",
              "page": 1, "topic": "ROI", "distance": 0.2}
@@ -120,7 +121,7 @@ def test_cache_hit_ignores_leading_trailing_whitespace(client, sample_chunks):
     resp = client.post("/api/query", json={"question": "Does TV work for FMCG?"})
     assert resp.status_code == 200
     assert resp.json()["cached"] is True
-    assert resp.json()["answer"] == "Cached TV answer."
+    assert resp.json()["answer"]["summary"][0] == "Cached TV answer."
     cache.clear()
 
 
@@ -157,7 +158,9 @@ def test_query_retries_generation_when_output_guardrail_rejects(client, sample_c
     cache.clear()
     first_answer = "TV delivers £5.61 ROI for every £1 spent."
     second_answer = "Grounded answer from retry. TV delivers £5.61 ROI. Key sources: Profit Ability 2."
-    generate_mock = AsyncMock(side_effect=[(first_answer, "gpt-4o"), (second_answer, "gpt-4o")])
+    first_structured = {"summary": [first_answer], "stats": [], "chart": None, "followups": []}
+    second_structured = {"summary": [second_answer], "stats": [], "chart": None, "followups": []}
+    generate_mock = AsyncMock(side_effect=[(first_structured, "gpt-4o"), (second_structured, "gpt-4o")])
     check_output_mock = AsyncMock(side_effect=[(False, "REJECTED"), (True, "APPROVED")])
 
     with (
@@ -172,7 +175,7 @@ def test_query_retries_generation_when_output_guardrail_rejects(client, sample_c
         )
 
     assert resp.status_code == 200
-    assert resp.json()["answer"] == second_answer
+    assert resp.json()["answer"]["summary"][0] == second_answer
     cache.clear()
     assert generate_mock.call_count == 2
     assert generate_mock.call_args_list[1].kwargs.get("strict_grounding") is True
@@ -183,10 +186,11 @@ def test_query_returns_safe_fallback_when_guardrail_rejects_twice(client, sample
     from app.services.cache import cache
 
     cache.clear()
+    bad_structured = {"summary": ["bad answer"], "stats": [], "chart": None, "followups": []}
     with (
         patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
         patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
-        patch("app.api.routes.generate", new=AsyncMock(return_value=("bad answer", "gpt-4o"))),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(bad_structured, "gpt-4o"))),
         patch("app.api.routes.check_output", new=AsyncMock(return_value=(False, "REJECTED"))),
     ):
         resp = client.post(
@@ -195,7 +199,7 @@ def test_query_returns_safe_fallback_when_guardrail_rejects_twice(client, sample
         )
 
     assert resp.status_code == 200
-    assert resp.json()["answer"] == SAFE_FALLBACK_ANSWER
+    assert resp.json()["answer"]["summary"][0] == SAFE_FALLBACK_ANSWER
     cache.clear()
 
 
@@ -246,17 +250,18 @@ def test_safe_fallback_is_not_cached(client, sample_chunks):
 
     cache.clear()
     question = "Unique fallback cache test question xyz?"
+    bad_structured = {"summary": ["bad answer"], "stats": [], "chart": None, "followups": []}
 
     with (
         patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
         patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
-        patch("app.api.routes.generate", new=AsyncMock(return_value=("bad answer", "gpt-4o"))),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(bad_structured, "gpt-4o"))),
         patch("app.api.routes.check_output", new=AsyncMock(return_value=(False, "REJECTED"))),
     ):
         resp = client.post("/api/query", json={"question": question})
 
     assert resp.status_code == 200
-    assert resp.json()["answer"] == SAFE_FALLBACK_ANSWER
+    assert resp.json()["answer"]["summary"][0] == SAFE_FALLBACK_ANSWER
 
     cached = cache.get(
         question=question,
@@ -272,10 +277,11 @@ def test_safe_fallback_is_not_cached(client, sample_chunks):
 
 def test_query_sources_include_page_topic_distance(client, sample_chunks):
     answer_text = "TV delivers ROI. Key sources: Profit Ability 2."
+    structured = {"summary": [answer_text], "stats": [], "chart": None, "followups": []}
     with (
         patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
         patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
-        patch("app.api.routes.generate", new=AsyncMock(return_value=(answer_text, "gpt-4o"))),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(structured, "gpt-4o"))),
         patch("app.api.routes.check_output", new=AsyncMock(return_value=(True, "APPROVED"))),
     ):
         resp = client.post("/api/query", json={"question": "When does TV advertising work?"})
@@ -355,7 +361,8 @@ def test_health_includes_readiness_signals(client):
 def test_no_retry_for_qualitative_answer_without_statistics(client, sample_chunks):
     """Output guardrail rejection on a qualitative answer must NOT trigger regeneration."""
     qualitative_answer = "TV advertising builds brand awareness over time."
-    generate_mock = AsyncMock(return_value=(qualitative_answer, "gpt-4o"))
+    structured = {"summary": [qualitative_answer], "stats": [], "chart": None, "followups": []}
+    generate_mock = AsyncMock(return_value=(structured, "gpt-4o"))
 
     with (
         patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
