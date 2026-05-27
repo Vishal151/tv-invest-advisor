@@ -86,11 +86,17 @@ class AnswerStat(BaseModel):
     page: int = 0
 
 
+class AnswerChartBar(BaseModel):
+    label: str
+    value: float
+    highlight: bool = False
+
+
 class AnswerChart(BaseModel):
     title: str
     source: str
     unit: str
-    bars: list[dict]  # each bar: {label: str, value: float, highlight?: bool}
+    bars: list[AnswerChartBar]
 
 
 class StructuredAnswer(BaseModel):

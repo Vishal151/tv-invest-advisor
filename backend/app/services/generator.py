@@ -188,7 +188,7 @@ async def generate(
             call_kwargs = dict(
                 model=model,
                 messages=messages,
-                max_tokens=1000,
+                max_tokens=1500,
                 temperature=0.3,
                 timeout=60,
             )
