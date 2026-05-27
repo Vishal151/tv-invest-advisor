@@ -1,4 +1,5 @@
 import asyncio
+import json
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 from app.services.generator import build_prompt, generate
@@ -67,25 +68,33 @@ def test_generate_is_async():
 
 
 async def test_generate_returns_answer_and_model(sample_chunks):
+    valid_json = json.dumps({
+        "summary": ["TV delivers strong ROI backed by Thinkbox research."],
+        "stats": [],
+        "chart": None,
+        "followups": [],
+    })
     with (
         patch(
             "app.services.generator.acompletion",
-            new=AsyncMock(
-                return_value=_make_litellm_response(
-                    "TV delivers strong ROI. Key sources: Profit Ability 2."
-                )
-            ),
+            new=AsyncMock(return_value=_make_litellm_response(valid_json)),
         ),
         patch("app.services.generator._get_langfuse", return_value=None),
     ):
         answer, model = await generate(question="Does TV work?", chunks=sample_chunks)
 
-    assert "ROI" in answer
+    assert isinstance(answer, dict)
+    assert "summary" in answer
     assert model == "gpt-4o"
 
 
 async def test_generate_falls_back_on_primary_failure(sample_chunks):
-    fallback_content = "Based on research, TV works. Key sources: Profit Ability 2."
+    fallback_json = json.dumps({
+        "summary": ["Based on research, TV works well."],
+        "stats": [],
+        "chart": None,
+        "followups": [],
+    })
     call_count = 0
 
     async def side_effect(**kwargs):
@@ -93,7 +102,7 @@ async def test_generate_falls_back_on_primary_failure(sample_chunks):
         call_count += 1
         if "gpt-4o" in kwargs.get("model", ""):
             raise RuntimeError("OpenAI down")
-        return _make_litellm_response(fallback_content)
+        return _make_litellm_response(fallback_json)
 
     with (
         patch("app.services.generator.acompletion", side_effect=side_effect),
@@ -101,7 +110,8 @@ async def test_generate_falls_back_on_primary_failure(sample_chunks):
     ):
         answer, model = await generate(question="q", chunks=sample_chunks)
 
-    assert answer == fallback_content
+    assert isinstance(answer, dict)
+    assert answer["summary"] == ["Based on research, TV works well."]
     assert model != "gpt-4o"
     assert call_count == 2
 
@@ -114,14 +124,17 @@ async def test_generate_uses_langfuse_v4_observation_api(sample_chunks):
     mock_lf.start_observation.return_value = mock_root
     mock_root.start_observation.return_value = mock_gen
 
+    valid_json = json.dumps({
+        "summary": ["TV delivers strong ROI."],
+        "stats": [],
+        "chart": None,
+        "followups": [],
+    })
+
     with (
         patch(
             "app.services.generator.acompletion",
-            new=AsyncMock(
-                return_value=_make_litellm_response(
-                    "TV delivers strong ROI. Key sources: Profit Ability 2."
-                )
-            ),
+            new=AsyncMock(return_value=_make_litellm_response(valid_json)),
         ),
         patch("app.services.generator._get_langfuse", return_value=mock_lf),
     ):
@@ -144,16 +157,83 @@ async def test_generate_uses_langfuse_v4_observation_api(sample_chunks):
 
 async def test_generate_does_not_crash_without_langfuse(sample_chunks):
     """Tracing is a no-op when langfuse_enabled is False — generate() must not crash."""
+    valid_json = json.dumps({
+        "summary": ["TV works well."],
+        "stats": [],
+        "chart": None,
+        "followups": [],
+    })
     with (
         patch(
             "app.services.generator.acompletion",
-            new=AsyncMock(
-                return_value=_make_litellm_response(
-                    "TV works well. Key sources: Profit Ability 2."
-                )
-            ),
+            new=AsyncMock(return_value=_make_litellm_response(valid_json)),
         ),
         patch("app.services.generator._get_langfuse", return_value=None),
     ):
         answer, model = await generate(question="q", chunks=sample_chunks)
-        assert "TV works" in answer
+        assert isinstance(answer, dict)
+        assert "TV works" in answer["summary"][0]
+
+
+async def test_generate_returns_parsed_json(sample_chunks):
+    """generate() returns a parsed dict with expected keys when LLM returns valid JSON."""
+    valid_json = json.dumps({
+        "summary": ["TV delivers £5.61 ROI per £1 spent [1].", "Long-term effects amplify returns."],
+        "stats": [
+            {
+                "value": "£5.61",
+                "unit": "ROI per £1 spent",
+                "context": "Average across 141 brands and 14 categories",
+                "source": "Profit Ability 2",
+                "page": 12,
+            }
+        ],
+        "chart": {
+            "title": "Average ROI per £1 · by channel",
+            "source": "Profit Ability 2",
+            "unit": "£",
+            "bars": [
+                {"label": "TV", "value": 5.61, "highlight": True},
+                {"label": "Digital", "value": 3.21},
+            ],
+        },
+        "followups": [
+            "How does this change for a DTC brand?",
+            "What is the minimum budget to see TV ROI?",
+        ],
+    })
+
+    with (
+        patch(
+            "app.services.generator.acompletion",
+            new=AsyncMock(return_value=_make_litellm_response(valid_json)),
+        ),
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
+        answer, model = await generate(question="What is the ROI for TV?", chunks=sample_chunks)
+
+    assert isinstance(answer, dict)
+    assert "summary" in answer
+    assert "stats" in answer
+    assert "chart" in answer
+    assert "followups" in answer
+    assert len(answer["summary"]) == 2
+    assert answer["stats"][0]["value"] == "£5.61"
+    assert answer["chart"]["bars"][0]["label"] == "TV"
+    assert len(answer["followups"]) == 2
+
+
+async def test_generate_falls_back_on_invalid_json(sample_chunks):
+    """generate() returns fallback dict when LLM returns plain prose (not JSON)."""
+    prose = "TV delivers strong returns. Based on Thinkbox research, brands see 5x ROI."
+
+    with (
+        patch(
+            "app.services.generator.acompletion",
+            new=AsyncMock(return_value=_make_litellm_response(prose)),
+        ),
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
+        answer, model = await generate(question="Does TV work?", chunks=sample_chunks)
+
+    assert answer == {"summary": [prose], "stats": [], "chart": None, "followups": []}

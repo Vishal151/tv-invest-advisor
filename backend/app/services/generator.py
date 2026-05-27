@@ -1,3 +1,4 @@
+import json
 import logging
 from litellm import acompletion
 from app.core.config import get_settings
@@ -26,19 +27,52 @@ SYSTEM_PROMPT = """You are a senior TV advertising strategist with deep expertis
 in UK media planning. You advise brands and agencies on when and how to invest
 in TV advertising, drawing exclusively on Thinkbox research.
 
+You must respond with a single JSON object matching this exact schema:
+{
+  "summary": ["paragraph 1", "paragraph 2"],
+  "stats": [
+    {
+      "value": "£5.61",
+      "unit": "ROI per £1 spent",
+      "context": "Average across 141 brands and 14 categories",
+      "source": "Profit Ability 2",
+      "page": 12
+    }
+  ],
+  "chart": {
+    "title": "Average ROI per £1 · by channel",
+    "source": "Profit Ability 2",
+    "unit": "£",
+    "bars": [
+      { "label": "TV", "value": 5.61, "highlight": true },
+      { "label": "Digital", "value": 3.21 }
+    ]
+  },
+  "followups": [
+    "How does this change for a DTC brand?",
+    "What is the minimum budget to see TV ROI?"
+  ]
+}
+
+Schema rules:
+- "summary": 2–4 paragraphs of prose. Citation superscripts [1], [2] etc. may appear inline.
+- "stats": 1–3 key statistics found verbatim in the research context. Order them to match their first mention in summary (stat[0] surfaces after summary[0], stat[1] after summary[1], etc.). Use an empty list if no concrete statistics are available.
+- "chart": include ONLY when the answer compares 2+ values across channels, time periods, or categories. Set to null for qualitative answers. Bar values must come from the research context — never invented.
+- "followups": 2–3 short follow-up questions a planner might naturally ask next. Use an empty list if none relevant.
+
 Rules you must follow:
 1. Only cite statistics and findings from the provided research context.
 2. Never invent figures, ROI numbers, or study names.
 3. Always ground your advice in the specific context provided.
 4. Be direct and practical — you are a planner giving real advice.
-5. End every response with a 'Key sources' list referencing the documents used.
+5. Return only the JSON object — no markdown fences, no preamble.
 """
 
 STRICT_GROUNDING_ADDENDUM = """
 Extra rules for this attempt:
 - Quote or closely paraphrase only statistics that appear verbatim in the research context.
 - If the context does not contain a specific number, do not state one — describe qualitatively instead.
-- Keep the answer focused and cite document titles in Key sources.
+- The JSON schema must still be followed exactly — return the same JSON structure.
 """
 
 
@@ -90,6 +124,18 @@ Include a 'Key sources' section at the end."""
     ]
 
 
+def _parse_response(raw: str) -> dict:
+    """Parse LLM response to structured dict. Falls back gracefully on bad JSON."""
+    try:
+        parsed = json.loads(raw)
+        if not isinstance(parsed.get("summary"), list):
+            raise ValueError("summary is not a list")
+        return parsed
+    except Exception:
+        logger.warning("Failed to parse LLM response as JSON — using fallback dict")
+        return {"summary": [raw], "stats": [], "chart": None, "followups": []}
+
+
 async def generate(
     question: str,
     chunks: list[dict],
@@ -98,11 +144,11 @@ async def generate(
     budget_tier: str | None = None,
     primary_goal: str | None = None,
     strict_grounding: bool = False,
-) -> tuple[str, str]:
+) -> tuple[dict, str]:
     """
     Calls LiteLLM with primary model, falls back to secondary on failure.
     Traces to LangFuse if keys are configured.
-    Returns (answer_text, model_used).
+    Returns (answer_dict, model_used).
     """
     messages = build_prompt(
         question=question,
@@ -136,18 +182,24 @@ async def generate(
                     model=model,
                 )
 
-            response = await acompletion(
+            call_kwargs = dict(
                 model=model,
                 messages=messages,
                 max_tokens=1000,
                 temperature=0.3,
                 timeout=60,
             )
-            answer = response.choices[0].message.content
-            logger.info(f"Generated {len(answer)} chars with {model}")
+            if model == settings.primary_model:
+                call_kwargs["response_format"] = {"type": "json_object"}
+
+            response = await acompletion(**call_kwargs)
+            raw = response.choices[0].message.content
+            answer = _parse_response(raw)
+            logger.info(f"Generated response with {model}")
 
             if gen_obs:
-                gen_obs.update(output={"answer": answer[:200], "model": model})
+                summary_preview = answer["summary"][0][:200] if answer["summary"] else ""
+                gen_obs.update(output={"answer": summary_preview, "model": model})
                 gen_obs.end()
             if root_obs:
                 root_obs.update(output={"model_used": model})
