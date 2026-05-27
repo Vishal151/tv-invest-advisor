@@ -102,10 +102,15 @@ export function ExportModal() {
 
             {answer && (
               <>
-                {answer.headline && (
+                {answer.stats.length > 0 && (
                   <div>
-                    <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '40px', fontWeight: 500, color: 'var(--cue-accent)' }}>{answer.headline.stat}</div>
-                    <div style={{ fontFamily: 'var(--cue-sans)', fontSize: '13px', color: 'var(--cue-ink-2)' }}>{answer.headline.unit}</div>
+                    <span style={{ fontSize: '32px', fontWeight: 700, fontFamily: 'var(--cue-serif)', color: 'var(--cue-accent)' }}>
+                      {answer.stats[0].value}
+                    </span>
+                    {' '}
+                    <span style={{ fontSize: '14px', color: 'var(--cue-ink-2)' }}>
+                      {answer.stats[0].unit}
+                    </span>
                   </div>
                 )}
                 {answer.summary.map((p, i) => (

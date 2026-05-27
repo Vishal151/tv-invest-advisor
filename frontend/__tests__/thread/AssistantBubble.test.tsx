@@ -3,7 +3,7 @@ import { AssistantBubble } from '@/components/thread/AssistantBubble'
 import type { Answer } from '@/lib/types'
 
 const answer: Answer = {
-  headline: { stat: '£5.61', unit: 'ROI per £1', caption: 'Profit Ability 2' },
+  stats: [{ value: '£5.61', unit: 'ROI per £1', context: 'TV advertising', source: 'Profit Ability 2', page: 14 }],
   summary: ['TV delivers strong ROI [1].', 'Second paragraph.'],
   callout: { label: 'What this means', body: 'Concentrate spend in bursts.' },
   chart: null,
@@ -12,7 +12,7 @@ const answer: Answer = {
   meta: { model:'gpt-4o', cached:false, retrievalMs:400, generationMs:2000, chunksUsed:4 },
 }
 
-test('renders headline stat', () => {
+test('renders first stat value', () => {
   render(<AssistantBubble answer={answer} time="11:43" onFollowup={jest.fn()} />)
   expect(screen.getByText('£5.61')).toBeInTheDocument()
 })

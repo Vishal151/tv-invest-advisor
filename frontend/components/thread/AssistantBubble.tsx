@@ -1,7 +1,8 @@
 'use client'
 
+import { Fragment } from 'react'
 import type { Answer } from '@/lib/types'
-import { Headline } from '@/components/atoms/Headline'
+import { StatPill } from '@/components/atoms/StatPill'
 import { ProseWithCites } from '@/components/atoms/ProseWithCites'
 import { Callout } from '@/components/atoms/Callout'
 import { Chart } from '@/components/atoms/Chart'
@@ -41,31 +42,26 @@ export function AssistantBubble({ answer, time, onFollowup }: Props) {
           gap:          '16px',
         }}
       >
-        {answer.headline && (
-          <Headline stat={answer.headline.stat} unit={answer.headline.unit} caption={answer.headline.caption} />
-        )}
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {answer.summary.map((para, i) => (
-            <p
-              key={i}
-              style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '16.5px', lineHeight: 1.55, color: 'var(--cue-ink-2)' }}
-            >
-              <ProseWithCites
-                text={para}
-                onCiteClick={(n) => setActiveCitation(n)}
-                onCiteHover={(n) => setActiveCitation(n)}
-                onCiteLeave={() => setActiveCitation(null)}
-              />
-            </p>
+            <Fragment key={i}>
+              <p style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '16.5px', lineHeight: 1.55, color: 'var(--cue-ink-2)' }}>
+                <ProseWithCites
+                  text={para}
+                  onCiteClick={(n) => setActiveCitation(n)}
+                  onCiteHover={(n) => setActiveCitation(n)}
+                  onCiteLeave={() => setActiveCitation(null)}
+                />
+              </p>
+              {answer.stats[i] && <StatPill stat={answer.stats[i]} />}
+            </Fragment>
           ))}
+          {answer.chart && <Chart chart={answer.chart} />}
         </div>
 
         {answer.callout && (
           <Callout label={answer.callout.label} body={answer.callout.body} />
         )}
-
-        {answer.chart && <Chart chart={answer.chart} />}
 
         <div style={{ display: 'flex', gap: '8px', paddingTop: '12px', borderTop: '1px dashed var(--cue-rule-2)' }}>
           {['Copy', 'Regenerate'].map((label) => (
