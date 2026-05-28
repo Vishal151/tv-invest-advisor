@@ -1,7 +1,9 @@
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
@@ -120,3 +122,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+
+_static_dir = os.getenv("STATIC_DIR", "")
+if _static_dir and os.path.isdir(_static_dir):
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")

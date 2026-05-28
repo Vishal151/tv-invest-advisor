@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_UID: ${UID:-1001}
+        APP_GID: ${GID:-1001}
+    user: "${UID:-1001}:${GID:-1001}"
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./backend/.env
+        required: false
+    volumes:
+      - ./backend/chroma_db:/app/chroma_db
+      - ./data/pdfs:/app/data/pdfs:ro
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
