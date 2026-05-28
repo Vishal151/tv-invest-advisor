@@ -53,14 +53,17 @@ html, body {
 
 /* ── Print styles for Export modal ───────────────────────────────────── */
 @media print {
+  @page { size: A4 portrait; margin: 15mm; }
+
   body * { visibility: hidden; }
   .cue-export-sheet,
   .cue-export-sheet * { visibility: visible; }
   .cue-export-sheet {
-    position: fixed !important;
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
+    min-height: unset !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     overflow: visible !important;
