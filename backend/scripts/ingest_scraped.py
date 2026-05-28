@@ -15,6 +15,7 @@ import sys  # noqa: E402
 
 sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
+import asyncio  # noqa: E402
 import hashlib  # noqa: E402
 import logging  # noqa: E402
 from pathlib import Path  # noqa: E402
@@ -74,7 +75,7 @@ def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> list[str
     return chunks
 
 
-def ingest_text_file(
+async def ingest_text_file(
     txt_path: Path,
     collection: chromadb.Collection,
 ) -> int:
@@ -118,7 +119,7 @@ def ingest_text_file(
 
         new_chunks = [batch[i] for i in new_indices]
         new_ids = [ids[i] for i in new_indices]
-        embeddings = embed_batch(new_chunks)
+        embeddings = await embed_batch(new_chunks)
 
         documents, metadatas = [], []
         for i, (chunk, _) in enumerate(zip(new_chunks, embeddings)):
@@ -188,7 +189,7 @@ def main():
 
     total_chunks = 0
     for txt_path in txt_files:
-        total_chunks += ingest_text_file(txt_path, collection)
+        total_chunks += asyncio.run(ingest_text_file(txt_path, collection))
 
     logger.info(f"\nIngestion complete — {total_chunks} chunks added")
     logger.info(f"Collection now has {collection.count()} chunks")
