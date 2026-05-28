@@ -248,3 +248,14 @@ async def test_generate_raises_on_invalid_json(sample_chunks):
     ):
         with pytest.raises(Exception):
             await generate(question="Does TV work?", chunks=sample_chunks)
+
+
+def test_build_prompt_wraps_chunks_in_xml_tags(sample_chunks):
+    """Chunks must be wrapped in XML data tags to prevent prompt injection."""
+    messages = build_prompt("What is TV ROI?", sample_chunks)
+    user_content = messages[-1]["content"]
+    assert "<chunk" in user_content
+    assert "</chunk>" in user_content
+    assert sample_chunks[0]["text"] in user_content
+    # No bare [1] Source: ... format should remain
+    assert "[1] Source:" not in user_content
