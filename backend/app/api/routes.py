@@ -123,7 +123,8 @@ def verify_api_key(x_api_key: str = Header(...)) -> str:
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health():
+@limiter.limit("100/minute")
+async def health(request: Request):
     from app.services.cache import check_redis_status
 
     return HealthResponse(
@@ -137,7 +138,8 @@ async def health():
 
 
 @router.get("/corpus")
-async def corpus():
+@limiter.limit("100/minute")
+async def corpus(request: Request):
     """Lists all ingested documents and their chunk counts."""
     return get_corpus_summary()
 
@@ -273,10 +275,11 @@ async def query(request: Request, body: QueryRequest):
 
 
 @router.post("/ingest", dependencies=[Depends(verify_api_key)])
-async def ingest(request: IngestRequest):
-    logger.info(f"Ingest requested for: {request.source_path}")
+@limiter.limit("5/minute")
+async def ingest(request: Request, body: IngestRequest):
+    logger.info(f"Ingest requested for: {body.source_path}")
     try:
-        chunks_added = await run_ingest(request.source_path)
+        chunks_added = await run_ingest(body.source_path)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
