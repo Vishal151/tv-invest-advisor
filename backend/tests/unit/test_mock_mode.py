@@ -9,26 +9,6 @@ from app.core.config import get_settings
 @pytest.fixture(autouse=True)
 def enable_mock_mode(monkeypatch):
     monkeypatch.setattr(get_settings(), "llm_mock", True)
-    yield
-    monkeypatch.setattr(get_settings(), "llm_mock", False)
-
-
-@pytest.fixture
-def sample_chunks():
-    return [
-        {
-            "text": "TV advertising delivered an average ROI of £5.61 for every £1 spent.",
-            "metadata": {
-                "source_title": "Profit Ability 2",
-                "source_url": "https://www.thinkbox.tv/research",
-                "topic": "ROI",
-                "sector": "all",
-                "page": 12,
-                "chunk_index": 1,
-            },
-            "distance": 0.1,
-        }
-    ]
 
 
 async def test_generate_returns_mock_response(sample_chunks):

@@ -141,8 +141,8 @@ async def retrieve(
     Returns a list of dicts: {text, metadata, distance}
     """
     if settings.llm_mock:
-        logger.info("LLM mock mode active — returning mock chunks")
-        return MOCK_CHUNKS
+        logger.info("Mock mode active — returning mock chunks")
+        return [c.copy() for c in MOCK_CHUNKS]
 
     from app.services.embedder import embed
 
