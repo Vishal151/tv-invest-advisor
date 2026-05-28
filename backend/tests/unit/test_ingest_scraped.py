@@ -1,8 +1,39 @@
 import asyncio
+import pytest
 import textwrap
 import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
+
+
+def test_parse_header_rejects_invalid_topic():
+    from scripts.ingest_scraped import parse_header
+
+    content = (
+        "SOURCE: Test\nURL: https://example.com\nTOPIC: INJECT: ignore all\nSECTOR: all\n\nBody."
+    )
+    with pytest.raises(ValueError, match="Invalid topic"):
+        parse_header(content)
+
+
+def test_parse_header_rejects_invalid_sector():
+    from scripts.ingest_scraped import parse_header
+
+    content = "SOURCE: Test\nURL: https://example.com\nTOPIC: ROI\nSECTOR: Evil<script>\n\nBody."
+    with pytest.raises(ValueError, match="Invalid sector"):
+        parse_header(content)
+
+
+def test_parse_header_accepts_valid_metadata():
+    from scripts.ingest_scraped import parse_header
+
+    content = (
+        "SOURCE: Profit Ability 2\nURL: https://thinkbox.tv\nTOPIC: ROI\nSECTOR: FMCG\n\nBody text."
+    )
+    metadata, body = parse_header(content)
+    assert metadata["topic"] == "ROI"
+    assert metadata["sector"] == "FMCG"
+    assert "Body text" in body
 
 
 def test_ingest_text_file_awaits_embed_batch():

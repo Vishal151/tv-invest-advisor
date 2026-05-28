@@ -32,6 +32,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+VALID_TOPICS = {"ROI", "small_business", "effectiveness", "planning", "creative", "viewing"}
+VALID_SECTORS = {"FMCG", "Retail", "Finance", "Auto", "Telco", "Travel", "DTC", "Other", "all"}
+
 
 def parse_header(text: str) -> tuple[dict, str]:
     """
@@ -56,6 +59,11 @@ def parse_header(text: str) -> tuple[dict, str]:
         elif line.strip() == "" and i > 0 and metadata:
             body_start = i + 1
             break
+
+    if "topic" in metadata and metadata["topic"] not in VALID_TOPICS:
+        raise ValueError(f"Invalid topic '{metadata['topic']}'. Valid: {sorted(VALID_TOPICS)}")
+    if "sector" in metadata and metadata["sector"] not in VALID_SECTORS:
+        raise ValueError(f"Invalid sector '{metadata['sector']}'. Valid: {sorted(VALID_SECTORS)}")
 
     body = "\n".join(lines[body_start:]).strip()
     return metadata, body
