@@ -12,3 +12,14 @@ FROM nginx:alpine
 COPY --from=builder /app/out /usr/share/nginx/html
 COPY nginx/nginx.dev.conf /etc/nginx/conf.d/default.conf
 COPY nginx/nginx.conf /etc/nginx/nginx.prod.conf
+
+# Run as non-root — nginx:alpine includes the 'nginx' user
+RUN chown -R nginx:nginx /var/cache/nginx \
+    && chown -R nginx:nginx /var/log/nginx \
+    && chown -R nginx:nginx /etc/nginx/conf.d \
+    && touch /var/run/nginx.pid \
+    && chown -R nginx:nginx /var/run/nginx.pid
+USER nginx
+
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
