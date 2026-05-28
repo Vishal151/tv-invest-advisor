@@ -12,6 +12,35 @@ from app.core.config import get_settings  # noqa: E402
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+MOCK_CHUNKS: list[dict] = [
+    {
+        "text": "TV advertising delivered an average ROI of £5.61 for every £1 spent, "
+                "based on analysis of 141 brands across 14 categories.",
+        "metadata": {
+            "source_title": "Profit Ability 2",
+            "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-2",
+            "topic": "ROI",
+            "sector": "all",
+            "page": 12,
+            "chunk_index": 1,
+        },
+        "distance": 0.1,
+    },
+    {
+        "text": "Brands that invest in TV consistently outperform those that do not "
+                "on measures of brand fame, trust, and mental availability.",
+        "metadata": {
+            "source_title": "TV is at the Heart of Effectiveness",
+            "source_url": "https://www.thinkbox.tv/research/reports/tv-is-at-the-heart-of-effectiveness-whitepaper-by-peter-field",
+            "topic": "effectiveness",
+            "sector": "all",
+            "page": 8,
+            "chunk_index": 14,
+        },
+        "distance": 0.18,
+    },
+]
+
 _client = None
 _collection = None
 
@@ -111,6 +140,10 @@ async def retrieve(
 
     Returns a list of dicts: {text, metadata, distance}
     """
+    if settings.llm_mock:
+        logger.info("LLM mock mode active — returning mock chunks")
+        return MOCK_CHUNKS
+
     from app.services.embedder import embed
 
     collection = get_collection()

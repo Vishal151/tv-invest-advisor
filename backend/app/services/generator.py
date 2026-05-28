@@ -80,6 +80,25 @@ Extra rules for this attempt:
 - The JSON schema must still be followed exactly — return the same JSON structure.
 """
 
+MOCK_ANSWER: dict = {
+    "summary": [
+        "Mock: TV advertising delivers strong ROI based on Thinkbox research.",
+        "Mock: Brands investing consistently in TV outperform those that don't.",
+    ],
+    "stats": [
+        {
+            "value": "£5.61",
+            "unit": "ROI per £1 spent",
+            "context": "Average across 141 brands and 14 categories",
+            "source": "Profit Ability 2",
+            "page": 12,
+        }
+    ],
+    "chart": None,
+    "checklist": None,
+    "followups": ["What is the best sector for TV advertising?"],
+}
+
 
 def build_prompt(
     question: str,
@@ -148,6 +167,10 @@ async def generate(
     Traces to LangFuse if keys are configured.
     Returns (answer_dict, model_used).
     """
+    if settings.llm_mock:
+        logger.info("LLM mock mode active — returning deterministic response")
+        return MOCK_ANSWER.copy(), "mock"
+
     messages = build_prompt(
         question=question,
         chunks=chunks,

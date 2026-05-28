@@ -79,6 +79,9 @@ async def check_input(
     Checks if the query is on-topic before hitting the main LLM.
     Returns (is_approved, reason).
     """
+    if settings.llm_mock:
+        return True, "APPROVED"
+
     context_parts = []
     if sector:
         context_parts.append(f"sector={sector}")
@@ -114,6 +117,9 @@ async def check_output(
     Verifies the generated answer is grounded in the retrieved chunks.
     Returns (is_approved, reason).
     """
+    if settings.llm_mock:
+        return True, "APPROVED"
+
     prompt = OUTPUT_GUARD_PROMPT.format(
         chunks=_format_chunks_for_review(chunks),
         answer=answer,
