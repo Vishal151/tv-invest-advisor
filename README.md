@@ -8,7 +8,7 @@ Built as a portfolio project targeting AI backend engineer roles — demonstrati
 
 ## Demo
 
-<video src="docs/demo/demo.webm" controls width="100%"></video>
+![Cue demo](docs/demo/demo.gif)
 
 <table>
 <tr>
