@@ -6,6 +6,49 @@ Built as a portfolio project targeting AI backend engineer roles — demonstrati
 
 ---
 
+## Demo
+
+<video src="docs/demo/demo.webm" controls width="100%"></video>
+
+<table>
+<tr>
+<td width="50%">
+
+**Empty state** — suggested prompts and corpus rail
+
+![Empty state](docs/demo/01-empty-state.png)
+
+</td>
+<td width="50%">
+
+**Question typed** — context chips set, Ask enabled
+
+![Question typed](docs/demo/03-question-typed.png)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Answer** — stat pill, source citations, follow-ups
+
+![Answer](docs/demo/04-answer.png)
+
+</td>
+<td width="50%">
+
+**PDF export** — A4 preview with brief summary and sources
+
+![Export modal](docs/demo/05-export-modal.png)
+
+</td>
+</tr>
+</table>
+
+> Screenshots and video captured via `cd e2e && npm run capture-demo` (uses `LLM_MOCK=true` — no API keys required).
+
+---
+
 ## Architecture
 
 Cue is a RAG application: a Next.js chat UI calls a FastAPI backend that retrieves Thinkbox research from ChromaDB, generates grounded answers via LiteLLM, and caches responses in Redis (or an in-memory dict when `REDIS_URL` is unset).
