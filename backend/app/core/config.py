@@ -53,7 +53,6 @@ class Settings(BaseSettings):
 
     # Embedding model
     embedding_model: str = "text-embedding-3-small"
-    embedding_dimensions: int = 1536
 
     # ── LangFuse observability ────────────────────────────────────────────────
     langfuse_public_key: str = Field(default="", description="LangFuse public key")

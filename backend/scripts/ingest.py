@@ -137,14 +137,7 @@ def chunk_text(
         chunk_text = " ".join(chunk_words)
 
         if len(chunk_words) > 20:  # skip very short chunks
-            chunks.append(
-                {
-                    "text": chunk_text,
-                    "page": page_number,
-                    "word_start": start,
-                    "word_end": end,
-                }
-            )
+            chunks.append({"text": chunk_text, "page": page_number})
 
         start += chunk_size - overlap
 

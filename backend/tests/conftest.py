@@ -4,14 +4,6 @@ from unittest.mock import patch
 
 
 @pytest.fixture
-def mock_settings(monkeypatch):
-    """Override settings so tests never need real env vars."""
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-key")
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
-    monkeypatch.setenv("API_KEY", "test-api-key")
-
-
-@pytest.fixture
 def sample_chunks() -> list[dict]:
     """Realistic chunk data matching ChromaDB retrieval output."""
     return [
@@ -42,13 +34,6 @@ def sample_chunks() -> list[dict]:
             "distance": 0.18,
         },
     ]
-
-
-@pytest.fixture
-def mock_retrieve(sample_chunks):
-    """Patches retriever.retrieve to return sample_chunks."""
-    with patch("app.services.retriever.retrieve", return_value=sample_chunks) as m:
-        yield m
 
 
 @pytest.fixture
