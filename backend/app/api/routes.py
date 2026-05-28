@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import get_settings
 from app.core.limiter import limiter
-from app.models import AnswerStat, AnswerChartBar, AnswerChart, StructuredAnswer
+from app.models import StructuredAnswer
 from app.services.cache import cache
 from app.services.retriever import retrieve, get_doc_count, get_corpus_summary
 from app.services.generator import generate
