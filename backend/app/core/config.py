@@ -52,7 +52,10 @@ class Settings(BaseSettings):
     langfuse_host: str = "https://cloud.langfuse.com"
 
     # ── Mock mode ──────────────────────────────────────────────────────────────
-    llm_mock: bool = Field(default=False, description="Return deterministic mock responses. Set LLM_MOCK=true for offline dev/E2E.")
+    llm_mock: bool = Field(
+        default=False,
+        description="Return deterministic mock responses. Set LLM_MOCK=true for offline dev/E2E.",
+    )
 
     # ── ChromaDB ─────────────────────────────────────────────────────────────
     chroma_db_path: str = "./chroma_db"

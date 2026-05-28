@@ -3,7 +3,6 @@ import pytest
 import fakeredis
 from app.services.cache import ResponseCache, RedisCache
 
-
 # ── DictCache (ResponseCache) tests ──────────────────────────────────────────
 
 

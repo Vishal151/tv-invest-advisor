@@ -73,7 +73,12 @@ def test_query_returns_cached_response(client):
     from app.services.cache import cache
 
     cached_data = {
-        "answer": {"summary": ["Cached answer about TV."], "stats": [], "chart": None, "followups": []},
+        "answer": {
+            "summary": ["Cached answer about TV."],
+            "stats": [],
+            "chart": None,
+            "followups": [],
+        },
         "sources": [
             {"title": "Profit Ability 2", "chunk": "excerpt...", "url": "https://thinkbox.tv"}
         ],
@@ -107,15 +112,25 @@ def test_cache_hit_ignores_leading_trailing_whitespace(client, sample_chunks):
     cached_data = {
         "answer": {"summary": ["Cached TV answer."], "stats": [], "chart": None, "followups": []},
         "sources": [
-            {"title": "PA2", "chunk": "excerpt...", "url": "https://thinkbox.tv",
-             "page": 1, "topic": "ROI", "distance": 0.2}
+            {
+                "title": "PA2",
+                "chunk": "excerpt...",
+                "url": "https://thinkbox.tv",
+                "page": 1,
+                "topic": "ROI",
+                "distance": 0.2,
+            }
         ],
         "model_used": "gpt-4o",
     }
     cache.set(
         cached_data,
         question="Does TV work for FMCG?",
-        sector=None, brand_stage=None, tv_history=None, primary_goal=None, budget_tier=None,
+        sector=None,
+        brand_stage=None,
+        tv_history=None,
+        primary_goal=None,
+        budget_tier=None,
     )
     # Question has 10 chars minimum for validation, padded version still valid
     resp = client.post("/api/query", json={"question": "Does TV work for FMCG?"})
@@ -157,10 +172,14 @@ def test_query_retries_generation_when_output_guardrail_rejects(client, sample_c
 
     cache.clear()
     first_answer = "TV delivers £5.61 ROI for every £1 spent."
-    second_answer = "Grounded answer from retry. TV delivers £5.61 ROI. Key sources: Profit Ability 2."
+    second_answer = (
+        "Grounded answer from retry. TV delivers £5.61 ROI. Key sources: Profit Ability 2."
+    )
     first_structured = {"summary": [first_answer], "stats": [], "chart": None, "followups": []}
     second_structured = {"summary": [second_answer], "stats": [], "chart": None, "followups": []}
-    generate_mock = AsyncMock(side_effect=[(first_structured, "gpt-4o"), (second_structured, "gpt-4o")])
+    generate_mock = AsyncMock(
+        side_effect=[(first_structured, "gpt-4o"), (second_structured, "gpt-4o")]
+    )
     check_output_mock = AsyncMock(side_effect=[(False, "REJECTED"), (True, "APPROVED")])
 
     with (
@@ -326,7 +345,9 @@ def test_startup_raises_in_production_with_no_llm_keys():
     mock_settings.anthropic_api_key = ""
 
     with patch("app.main.settings", mock_settings):
-        with pytest.raises(RuntimeError, match="At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set"):
+        with pytest.raises(
+            RuntimeError, match="At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set"
+        ):
             _check_production_config()
 
 
@@ -373,13 +394,18 @@ def test_no_retry_for_qualitative_answer_without_statistics(client, sample_chunk
         resp = client.post("/api/query", json={"question": "How does TV build brand?"})
 
     assert resp.status_code == 200
-    assert generate_mock.call_count == 1, "generate() must be called only once for qualitative answer"
+    assert (
+        generate_mock.call_count == 1
+    ), "generate() must be called only once for qualitative answer"
 
 
 def test_corpus_lists_ingested_documents(client):
-    with patch("app.api.routes.get_corpus_summary", return_value=[
-        {"source_title": "Profit Ability 2", "chunks": 45, "topic": "ROI"},
-    ]):
+    with patch(
+        "app.api.routes.get_corpus_summary",
+        return_value=[
+            {"source_title": "Profit Ability 2", "chunks": 45, "topic": "ROI"},
+        ],
+    ):
         resp = client.get("/api/corpus")
     assert resp.status_code == 200
     data = resp.json()

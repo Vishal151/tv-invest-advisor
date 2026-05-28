@@ -139,7 +139,7 @@ export function ExportModal() {
                         {answer.sources.map((s) => (
                           <div key={s.n} style={{ marginBottom: '10px' }}>
                             <div style={{ fontFamily: 'var(--cue-serif)', fontSize: '13px', fontWeight: 500 }}>[{s.n}] {s.title}{s.page > 0 ? ` · p.${s.page}` : ''}</div>
-                            <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12px', color: 'var(--cue-ink-3)', margin: '3px 0' }}>"{s.quote}"</div>
+                            <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12px', color: 'var(--cue-ink-3)', margin: '3px 0' }}>&quot;{s.quote}&quot;</div>
                             <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', color: 'var(--cue-ink-4)' }}>{s.url}</div>
                           </div>
                         ))}

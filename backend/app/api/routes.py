@@ -25,6 +25,7 @@ def _answer_contains_statistic(answer: str) -> bool:
     """True if answer includes a number that looks like a quantitative claim."""
     return bool(_STAT_PATTERN.search(answer))
 
+
 SAFE_FALLBACK_ANSWER = (
     "Based on Thinkbox research, TV advertising is consistently shown "
     "to be the most effective channel for driving long-term profit growth. "

@@ -68,12 +68,14 @@ def test_generate_is_async():
 
 
 async def test_generate_returns_answer_and_model(sample_chunks):
-    valid_json = json.dumps({
-        "summary": ["TV delivers strong ROI backed by Thinkbox research."],
-        "stats": [],
-        "chart": None,
-        "followups": [],
-    })
+    valid_json = json.dumps(
+        {
+            "summary": ["TV delivers strong ROI backed by Thinkbox research."],
+            "stats": [],
+            "chart": None,
+            "followups": [],
+        }
+    )
     with (
         patch(
             "app.services.generator.acompletion",
@@ -89,12 +91,14 @@ async def test_generate_returns_answer_and_model(sample_chunks):
 
 
 async def test_generate_falls_back_on_primary_failure(sample_chunks):
-    fallback_json = json.dumps({
-        "summary": ["Based on research, TV works well."],
-        "stats": [],
-        "chart": None,
-        "followups": [],
-    })
+    fallback_json = json.dumps(
+        {
+            "summary": ["Based on research, TV works well."],
+            "stats": [],
+            "chart": None,
+            "followups": [],
+        }
+    )
     call_count = 0
 
     async def side_effect(**kwargs):
@@ -124,12 +128,14 @@ async def test_generate_uses_langfuse_v4_observation_api(sample_chunks):
     mock_lf.start_observation.return_value = mock_root
     mock_root.start_observation.return_value = mock_gen
 
-    valid_json = json.dumps({
-        "summary": ["TV delivers strong ROI."],
-        "stats": [],
-        "chart": None,
-        "followups": [],
-    })
+    valid_json = json.dumps(
+        {
+            "summary": ["TV delivers strong ROI."],
+            "stats": [],
+            "chart": None,
+            "followups": [],
+        }
+    )
 
     with (
         patch(
@@ -157,12 +163,14 @@ async def test_generate_uses_langfuse_v4_observation_api(sample_chunks):
 
 async def test_generate_does_not_crash_without_langfuse(sample_chunks):
     """Tracing is a no-op when langfuse_enabled is False — generate() must not crash."""
-    valid_json = json.dumps({
-        "summary": ["TV works well."],
-        "stats": [],
-        "chart": None,
-        "followups": [],
-    })
+    valid_json = json.dumps(
+        {
+            "summary": ["TV works well."],
+            "stats": [],
+            "chart": None,
+            "followups": [],
+        }
+    )
     with (
         patch(
             "app.services.generator.acompletion",
@@ -177,31 +185,36 @@ async def test_generate_does_not_crash_without_langfuse(sample_chunks):
 
 async def test_generate_returns_parsed_json(sample_chunks):
     """generate() returns a parsed dict with expected keys when LLM returns valid JSON."""
-    valid_json = json.dumps({
-        "summary": ["TV delivers £5.61 ROI per £1 spent [1].", "Long-term effects amplify returns."],
-        "stats": [
-            {
-                "value": "£5.61",
-                "unit": "ROI per £1 spent",
-                "context": "Average across 141 brands and 14 categories",
-                "source": "Profit Ability 2",
-                "page": 12,
-            }
-        ],
-        "chart": {
-            "title": "Average ROI per £1 · by channel",
-            "source": "Profit Ability 2",
-            "unit": "£",
-            "bars": [
-                {"label": "TV", "value": 5.61, "highlight": True},
-                {"label": "Digital", "value": 3.21},
+    valid_json = json.dumps(
+        {
+            "summary": [
+                "TV delivers £5.61 ROI per £1 spent [1].",
+                "Long-term effects amplify returns.",
             ],
-        },
-        "followups": [
-            "How does this change for a DTC brand?",
-            "What is the minimum budget to see TV ROI?",
-        ],
-    })
+            "stats": [
+                {
+                    "value": "£5.61",
+                    "unit": "ROI per £1 spent",
+                    "context": "Average across 141 brands and 14 categories",
+                    "source": "Profit Ability 2",
+                    "page": 12,
+                }
+            ],
+            "chart": {
+                "title": "Average ROI per £1 · by channel",
+                "source": "Profit Ability 2",
+                "unit": "£",
+                "bars": [
+                    {"label": "TV", "value": 5.61, "highlight": True},
+                    {"label": "Digital", "value": 3.21},
+                ],
+            },
+            "followups": [
+                "How does this change for a DTC brand?",
+                "What is the minimum budget to see TV ROI?",
+            ],
+        }
+    )
 
     with (
         patch(

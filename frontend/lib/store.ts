@@ -155,6 +155,7 @@ export const useStore = create<AppStore>((set, get) => ({
   setActiveSource(n)   { set({ activeSource: n }) },
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(useStore as any).getInitialState = () => ({
   thread:         newThread(),
   threads:        [],

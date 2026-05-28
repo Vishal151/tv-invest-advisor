@@ -1,4 +1,5 @@
 """Integration tests using a real in-memory ChromaDB collection."""
+
 # Fix for systems with SQLite < 3.35.0 (common on Linux)
 __import__("pysqlite3")
 import sys  # noqa: E402

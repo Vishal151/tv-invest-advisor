@@ -98,7 +98,7 @@ export function SourceCard({ source, highlight = false, compact = false }: Props
           </div>
         )}
         <div style={{ fontFamily: 'var(--cue-serif)', fontStyle: 'italic', fontSize: '12.5px', color: 'var(--cue-ink-2)', lineHeight: 1.45, marginBottom: '6px' }}>
-          "{source.quote}"
+          &quot;{source.quote}&quot;
         </div>
         <a
           href={source.url}

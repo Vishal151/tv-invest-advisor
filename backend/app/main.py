@@ -31,9 +31,7 @@ def _configure_logging() -> None:
 
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(
-            getattr(logging, settings.log_level)
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(getattr(logging, settings.log_level)),
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
     )
@@ -64,8 +62,6 @@ def _check_production_config() -> None:
         )
     if not settings.openai_api_key and not settings.anthropic_api_key:
         raise RuntimeError("At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set")
-
-
 
 
 @asynccontextmanager
