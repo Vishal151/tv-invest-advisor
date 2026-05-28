@@ -6,12 +6,15 @@ services:
       args:
         APP_UID: ${UID:-1001}
         APP_GID: ${GID:-1001}
+    # host UID/GID alignment keeps bind-mounted chroma_db writable on Linux
     user: "${UID:-1001}:${GID:-1001}"
     ports:
       - "8000:8000"
     env_file:
       - path: ./backend/.env
         required: false
+    environment:
+      - APP_ENV=production
     volumes:
       - ./backend/chroma_db:/app/chroma_db
       - ./data/pdfs:/app/data/pdfs:ro
@@ -20,7 +23,7 @@ services:
       test:
         [
           "CMD",
-          "python",
+          "python3",
           "-c",
           "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
         ]
