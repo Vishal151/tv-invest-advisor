@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Chart as ChartType } from '@/lib/types'
 
-type Props = { chart: ChartType; dense?: boolean }
+type Props = { chart: ChartType }
 
-export function Chart({ chart, dense = false }: Props) {
+export function Chart({ chart }: Props) {
   const maxValue = Math.max(...chart.bars.map((b) => b.value))
   const [mounted, setMounted] = useState(false)
   const ref = useRef<HTMLDivElement>(null)

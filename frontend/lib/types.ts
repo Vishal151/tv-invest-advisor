@@ -18,9 +18,8 @@ export type Source = {
 }
 
 export type Stat     = { value: string; unit: string; context: string; source: string; page: number }
-export type Headline = { stat: string; unit: string; caption: string }
 export type Callout  = { label: string; body: string }
-export type ChartBar = { label: string; value: number; highlight?: boolean }
+type ChartBar = { label: string; value: number; highlight?: boolean }
 export type Chart    = { title: string; source: string; unit: string; bars: ChartBar[] }
 
 export type Answer = {
