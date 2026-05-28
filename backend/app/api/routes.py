@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import get_settings
 from app.core.limiter import limiter
+from app.models import AnswerStat, AnswerChartBar, AnswerChart, StructuredAnswer
 from app.services.cache import cache
 from app.services.retriever import retrieve, get_doc_count, get_corpus_summary
 from app.services.generator import generate
@@ -76,35 +77,6 @@ class QueryRequest(BaseModel):
         if v is not None and v not in settings.valid_budget_tiers:
             raise ValueError(f"Invalid budget_tier '{v}'. Valid: {settings.valid_budget_tiers}")
         return v
-
-
-class AnswerStat(BaseModel):
-    value: str
-    unit: str
-    context: str
-    source: str
-    page: int = 0
-
-
-class AnswerChartBar(BaseModel):
-    label: str
-    value: float
-    highlight: bool = False
-
-
-class AnswerChart(BaseModel):
-    title: str
-    source: str
-    unit: str
-    bars: list[AnswerChartBar]
-
-
-class StructuredAnswer(BaseModel):
-    summary: list[str]
-    stats: list[AnswerStat] = []
-    chart: AnswerChart | None = None
-    checklist: list[str] | None = None
-    followups: list[str] = []
 
 
 class Source(BaseModel):

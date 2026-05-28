@@ -1,7 +1,7 @@
-import json
 import logging
 from litellm import acompletion
 from app.core.config import get_settings
+from app.models import StructuredAnswer
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -130,19 +130,8 @@ Return only the JSON object — no markdown fences, no preamble, no trailing tex
 
 
 def _parse_response(raw: str) -> dict:
-    """Parse LLM response to structured dict. Falls back gracefully on bad JSON."""
-    try:
-        parsed = json.loads(raw)
-        if not isinstance(parsed.get("summary"), list):
-            raise ValueError("summary is not a list")
-        parsed.setdefault("stats", [])
-        parsed.setdefault("chart", None)
-        parsed.setdefault("checklist", None)
-        parsed.setdefault("followups", [])
-        return parsed
-    except Exception:
-        logger.warning("Failed to parse LLM response as JSON — using fallback dict")
-        return {"summary": [raw], "stats": [], "chart": None, "checklist": None, "followups": []}
+    """Validate LLM JSON against StructuredAnswer schema. Raises on invalid input."""
+    return StructuredAnswer.model_validate_json(raw).model_dump()
 
 
 async def generate(

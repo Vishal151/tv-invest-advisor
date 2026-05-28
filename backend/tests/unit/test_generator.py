@@ -223,10 +223,9 @@ async def test_generate_returns_parsed_json(sample_chunks):
     assert len(answer["followups"]) == 2
 
 
-async def test_generate_falls_back_on_invalid_json(sample_chunks):
-    """generate() returns fallback dict when LLM returns plain prose (not JSON)."""
+async def test_generate_raises_on_invalid_json(sample_chunks):
+    """generate() raises when LLM returns plain prose — routes.py catches this as 503."""
     prose = "TV delivers strong returns. Based on Thinkbox research, brands see 5x ROI."
-
     with (
         patch(
             "app.services.generator.acompletion",
@@ -234,6 +233,5 @@ async def test_generate_falls_back_on_invalid_json(sample_chunks):
         ),
         patch("app.services.generator._get_langfuse", return_value=None),
     ):
-        answer, model = await generate(question="Does TV work?", chunks=sample_chunks)
-
-    assert answer == {"summary": [prose], "stats": [], "chart": None, "checklist": None, "followups": []}
+        with pytest.raises(Exception):
+            await generate(question="Does TV work?", chunks=sample_chunks)
