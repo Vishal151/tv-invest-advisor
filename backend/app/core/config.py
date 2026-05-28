@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import Field, model_validator
 from typing import Literal
 from functools import lru_cache
 
@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
+
+    @model_validator(mode="after")
+    def validate_cors_with_credentials(self) -> "Settings":
+        if "*" in self.cors_origins_list:
+            raise ValueError(
+                "CORS_ORIGINS cannot contain '*' — wildcard origins are incompatible "
+                "with allow_credentials=True and would expose all routes to CSRF."
+            )
+        return self
 
     # ── API security ─────────────────────────────────────────────────────────
     api_key: str = Field(default="dev-key", description="Protects POST /api/ingest")
