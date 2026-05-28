@@ -48,6 +48,12 @@ frontend, Docker Compose.
 | frontend (Next.js) | ✅ Done | Next.js 16, React 19, Tailwind v4, Zustand v5, 62 tests |
 | docker-compose.yml | ✅ Done | Redis service + healthcheck; backend depends_on redis |
 | Data corpus ingested | ✅ Done | Thinkbox PDFs ingested into ChromaDB |
+| backend/app/models.py | ✅ Done | Shared Pydantic v2 models: StructuredAnswer, AnswerStat, AnswerChart, AnswerChartBar |
+| Strict LLM output validation | ✅ Done | _parse_response() raises on invalid JSON/schema; no silent fallbacks |
+| LLM mock mode | ✅ Done | LLM_MOCK=true short-circuits generator, guardrails, retriever; no API keys needed |
+| Dockerfile (root) | ✅ Done | Multi-stage: Node 22 → Python 3.13 slim; serves static + API in one container |
+| docker-compose.standalone.yml | ✅ Done | Single-container deployment (no nginx, no Redis) |
+| e2e/ (Playwright) | ✅ Done | 4 E2E tests; LLM_MOCK=true; Playwright webServer spins up both servers |
  
 Update this table as work progresses.
  
@@ -59,23 +65,26 @@ Update this table as work progresses.
 tv-invest-advisor/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py               # FastAPI app, mounts routes, CORS
+│   │   ├── main.py               # FastAPI app, mounts routes, CORS, optional StaticFiles
+│   │   ├── models.py             # Shared Pydantic models (StructuredAnswer, AnswerStat, etc.)
 │   │   ├── api/
 │   │   │   ├── __init__.py
 │   │   │   └── routes.py         # /api/query, /api/ingest, /api/health
 │   │   ├── core/
 │   │   │   ├── __init__.py
-│   │   │   └── config.py         # Settings via pydantic-settings
+│   │   │   └── config.py         # Settings via pydantic-settings (incl. llm_mock)
 │   │   └── services/
 │   │       ├── __init__.py
 │   │       ├── embedder.py       # OpenAI text-embedding-3-small wrapper
-│   │       ├── retriever.py      # ChromaDB retrieval + metadata filter
-│   │       ├── generator.py      # LiteLLM → GPT-4o, Anthropic fallback
+│   │       ├── retriever.py      # ChromaDB retrieval + metadata filter; mock short-circuit
+│   │       ├── generator.py      # LiteLLM → GPT-4o, Anthropic fallback; strict validation
 │   │       ├── cache.py          # Hash-based response cache
-│   │       └── guardrails.py     # Input + output LLM reviewer
+│   │       └── guardrails.py     # Input + output LLM reviewer; mock short-circuit
 │   ├── scripts/
 │   │   ├── ingest.py             # Offline: PDF → chunks → embeddings → ChromaDB
 │   │   └── test_retrieval.py     # Smoke test retrieval quality
+│   ├── tests/
+│   │   └── unit/                 # pytest unit tests (93 tests)
 │   ├── chroma_db/                # ChromaDB persistence (gitignored)
 │   ├── pyproject.toml
 │   ├── .env.example
@@ -84,9 +93,15 @@ tv-invest-advisor/
 │   ├── app/
 │   ├── components/
 │   └── (standard Next.js structure)
+├── e2e/                          # Playwright E2E tests
+│   ├── tests/app.spec.ts         # 4 tests; LLM_MOCK=true
+│   ├── playwright.config.ts      # webServer: backend :8001 + frontend :3000
+│   └── package.json
 ├── data/
 │   └── pdfs/                     # Thinkbox PDFs (gitignored, add manually)
-├── docker-compose.yml
+├── Dockerfile                    # Multi-stage standalone: Node 22 → Python 3.13
+├── docker-compose.yml            # Full stack: nginx + Redis + backend
+├── docker-compose.standalone.yml # Single-container: FastAPI serves static + API
 ├── .gitignore
 └── CLAUDE.md                     # This file
 ```
@@ -145,7 +160,13 @@ All fields except `question` are optional enums — see config.py for valid valu
 **Response:**
 ```json
 {
-  "answer": "Based on Thinkbox research...",
+  "answer": {
+    "summary": ["Based on Thinkbox research, TV delivers £5.61 ROI per £1 [1]."],
+    "stats": [{ "value": "£5.61", "unit": "ROI per £1 spent", "context": "141 brands, 14 categories", "source": "Profit Ability 2", "page": 12 }],
+    "chart": null,
+    "checklist": null,
+    "followups": ["How does this change for a DTC brand?"]
+  },
   "sources": [
     {
       "title": "Profit Ability 2",
@@ -230,6 +251,9 @@ CORS_ORIGINS=http://localhost:3000
 # App
 APP_ENV=development           # development | production
 LOG_LEVEL=INFO
+
+# Mock mode (offline dev / E2E testing — no LLM/embedding API calls)
+# LLM_MOCK=false
 ```
  
 ---
@@ -260,7 +284,23 @@ LOG_LEVEL=INFO
   a Thinkbox source. Hallucinated stats in a media planning tool cause
   real commercial harm
 - **Do not**: Remove either guardrail stage
-### Decision 5: Structured inputs shape retrieval (May 2026)
+### Decision 5a: Strict LLM output validation via Pydantic (May 2026)
+- **Choice**: `_parse_response()` in `generator.py` calls `StructuredAnswer.model_validate_json(raw).model_dump()` — raises on any schema violation
+- **Why**: Silent fallbacks mask hallucinations. In a media planning tool, a corrupted answer silently served as valid causes real commercial harm. Failures surface as 503s; `routes.py` already handles these.
+- **Do not**: Add `try/except` around `_parse_response()` that swallows errors or returns partial data
+
+### Decision 5b: LLM mock mode (May 2026)
+- **Choice**: `LLM_MOCK=true` env flag short-circuits generator, guardrails, and retriever — all return deterministic fixtures, no API calls made
+- **Why**: E2E tests and offline development need a working app without API keys. Mock responses are typed/validated so they exercise the real response shape.
+- **Do not**: Bypass mock mode for unit tests — use `monkeypatch.setattr(get_settings(), "llm_mock", True)`
+
+### Decision 5c: Single-container Dockerfile (May 2026)
+- **Choice**: Multi-stage build — Node 22 builds the Next.js static export, Python 3.13 runs FastAPI and mounts static files via `STATIC_DIR`
+- **Why**: Simpler deployment for demos and portfolio showcasing (one `docker run`, no nginx/Redis dependency)
+- **Trade-off**: No Redis cache and no reverse proxy; for production scale, use `docker-compose.yml` with nginx + Redis
+- **Do not**: Remove the `backend/Dockerfile` or `docker-compose.yml` — they are still the primary production deployment path
+
+### Decision 6: Structured inputs shape retrieval (May 2026)
 - **Choice**: sector, brand_stage, tv_history, primary_goal, budget_tier
   passed as ChromaDB metadata filters alongside the freeform question
 - **Why**: Without structured context, retrieval is generic and less useful

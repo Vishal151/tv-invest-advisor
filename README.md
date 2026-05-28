@@ -120,7 +120,8 @@ flowchart LR
 | Vector store | ChromaDB (local persistent) |
 | Observability | LangFuse (traces, costs, guardrail outcomes) |
 | Cache | Redis (production) / in-memory dict (development) |
-| Containerisation | Docker Compose |
+| Containerisation | Docker Compose (dev) / single-container Dockerfile (standalone) |
+| E2E tests | Playwright (mock mode, no API keys required) |
 
 ---
 
@@ -142,7 +143,7 @@ npm install
 npm run dev            # http://localhost:3000
 ```
 
-### Docker (full stack)
+### Docker (full stack — nginx + Redis)
 
 ```bash
 cp backend/.env.example backend/.env   # fill in API keys
@@ -153,6 +154,15 @@ docker-compose up --build
 The root `.env` sets `UID` and `GID` to match your host user (required on Linux/WSL so `./backend/chroma_db` is not read-only inside the container). Run `id -u` and `id -g` if unsure.
 
 The backend runs at `http://localhost:8000`. Set `NEXT_PUBLIC_API_URL=http://localhost:8000` in `frontend/.env.local` so the browser can reach the API (see `frontend/README.md`).
+
+### Standalone single-container (no nginx or Redis dependency)
+
+```bash
+cp backend/.env.example backend/.env
+docker-compose -f docker-compose.standalone.yml up --build
+```
+
+The root `Dockerfile` is a multi-stage build: Node 22 builds the Next.js static export, then Python 3.13 runs FastAPI and serves the static files via `STATIC_DIR`. All traffic on `:8000`.
 
 ### Ingest the corpus
 
@@ -187,6 +197,10 @@ CORS_ORIGINS=http://localhost:3000
 
 # Redis — leave empty to use in-memory dict cache for local dev
 # REDIS_URL=redis://localhost:6379/0
+
+# Mock mode — returns deterministic answers without calling any LLM/embeddings API
+# Useful for offline development and E2E tests
+# LLM_MOCK=false
 ```
 
 ---
@@ -219,7 +233,13 @@ All fields except `question` are optional. Valid enum values:
 Response:
 ```json
 {
-  "answer": "Based on Thinkbox research...",
+  "answer": {
+    "summary": ["Based on Thinkbox research, TV delivers £5.61 ROI per £1 spent [1]."],
+    "stats": [{ "value": "£5.61", "unit": "ROI per £1 spent", "context": "141 brands, 14 categories", "source": "Profit Ability 2", "page": 12 }],
+    "chart": null,
+    "checklist": null,
+    "followups": ["How does this change for a DTC brand?"]
+  },
   "sources": [
     { "title": "Profit Ability 2", "chunk": "TV delivered...", "url": "https://thinkbox.tv/..." }
   ],
@@ -252,13 +272,14 @@ Requires `X-API-Key` header. Ingests a single document.
 tv-invest-advisor/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py               # FastAPI app, lifespan startup, CORS
+│   │   ├── main.py               # FastAPI app, lifespan startup, CORS, static file mount
+│   │   ├── models.py             # Shared Pydantic models (StructuredAnswer, AnswerStat, etc.)
 │   │   ├── api/routes.py         # /api/query, /api/ingest, /api/health
-│   │   ├── core/config.py        # Settings via pydantic-settings
+│   │   ├── core/config.py        # Settings via pydantic-settings (incl. LLM_MOCK)
 │   │   └── services/
 │   │       ├── embedder.py       # OpenAI text-embedding-3-small
 │   │       ├── retriever.py      # ChromaDB retrieval + metadata filter
-│   │       ├── generator.py      # LiteLLM → GPT-4o / Claude fallback
+│   │       ├── generator.py      # LiteLLM → GPT-4o / Claude fallback; strict JSON validation
 │   │       ├── cache.py          # Redis + in-memory dict, same interface
 │   │       ├── guardrails.py     # Input + output LLM checks
 │   │       └── ingestor.py       # PDF → chunks → embeddings → ChromaDB
@@ -266,7 +287,7 @@ tv-invest-advisor/
 │   │   ├── ingest.py             # Offline corpus ingestion
 │   │   └── test_retrieval.py     # Retrieval quality smoke test
 │   ├── tests/                    # pytest unit + integration tests
-│   ├── Dockerfile
+│   ├── Dockerfile                # Backend-only image (used by docker-compose.yml)
 │   └── pyproject.toml
 ├── frontend/
 │   ├── app/                      # Next.js App Router
@@ -274,8 +295,13 @@ tv-invest-advisor/
 │   ├── overlays/                 # HistoryDrawer, ExportModal
 │   ├── lib/                      # types.ts, api.ts, store.ts (Zustand)
 │   └── __tests__/                # Jest + React Testing Library (62 tests)
+├── e2e/                          # Playwright E2E tests (LLM_MOCK=true, no API keys needed)
+│   ├── tests/app.spec.ts
+│   └── playwright.config.ts
 ├── data/pdfs/                    # Thinkbox PDFs (gitignored — add manually)
-├── docker-compose.yml
+├── Dockerfile                    # Multi-stage: Node 22 → Python 3.13 (standalone)
+├── docker-compose.yml            # Full stack: nginx + Redis + backend
+├── docker-compose.standalone.yml # Single-container: FastAPI serves static + API
 └── README.md
 ```
 
@@ -293,6 +319,10 @@ tv-invest-advisor/
 
 **Static export + nginx reverse proxy** — `frontend/` builds to static files (`output: 'export'`). In production (`docker compose up`), nginx serves the static export on `:80` and proxies `/api/*` to FastAPI. In local development, run Next.js dev server (`npm run dev`) on `:3000` and FastAPI on `:8000` separately. No Node.js runtime in production.
 
+**Strict LLM output validation** — `generator.py` validates every LLM response against `StructuredAnswer` (Pydantic v2). Invalid JSON or schema mismatches raise immediately; `routes.py` catches these as 503s. No silent fallbacks that could mask hallucinations.
+
+**LLM mock mode** — Set `LLM_MOCK=true` to short-circuit all LLM and embedding calls. Generator, guardrails, and retriever return deterministic fixtures. Used for offline development and Playwright E2E tests — no API keys or live services needed.
+
 ---
 
 ## Development
@@ -308,4 +338,12 @@ uv run pytest
 cd frontend
 npm run lint
 npm test
+
+# E2E tests (Playwright — starts backend + frontend automatically)
+cd e2e
+npm install
+npx playwright install chromium
+npm test
 ```
+
+E2E tests use `LLM_MOCK=true` so no API keys are required. Playwright spins up both servers automatically via `webServer` config.
