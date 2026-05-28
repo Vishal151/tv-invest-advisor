@@ -281,7 +281,9 @@ async def ingest(request: Request, body: IngestRequest):
     try:
         chunks_added = await run_ingest(body.source_path)
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logger.warning(f"Ingest: file not found — {e}")
+        raise HTTPException(status_code=404, detail="Document not found.")
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.warning(f"Ingest: invalid request — {e}")
+        raise HTTPException(status_code=400, detail="Invalid ingest request.")
     return {"message": "Ingestion complete", "chunks_added": chunks_added}
