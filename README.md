@@ -2,7 +2,7 @@
 
 A RAG-powered web application that helps brands and agencies understand when and how TV advertising could work for them, grounded in Thinkbox's published research. Think of it as a senior media planner available 24/7.
 
-Built as a portfolio project targeting AI backend engineer roles — demonstrating RAG pipelines, LiteLLM gateway, ChromaDB, LangFuse observability, guardrails, Redis caching, and a React frontend.
+Built as a portfolio project targeting AI backend engineer roles — demonstrating RAG pipelines, LiteLLM gateway, ChromaDB, LangFuse observability, guardrails, Redis caching, and a React frontend. Retrieval quality is measured against a hand-labelled golden dataset — see [Retrieval Evaluation](#retrieval-evaluation).
 
 ---
 
@@ -368,6 +368,56 @@ tv-invest-advisor/
 
 ---
 
+## Retrieval Evaluation
+
+Retrieval quality is measured, not assumed. A hand-labelled golden dataset
+(`backend/eval/golden_qa.json`, 25 questions across five types — exact-keyword,
+semantic, noisy, comparison, multi-doc) is scored against the live retriever with
+Recall@K, Precision@K, and MRR.
+
+```bash
+cd backend
+uv run scripts/eval_retrieval.py                       # production path
+uv run scripts/eval_retrieval.py --ignore-threshold    # pure ranker (no distance filter)
+uv run scripts/eval_retrieval.py --out eval/results/run.json   # save a snapshot
+```
+
+**Baseline** (408-chunk corpus; relevance judged at page level for the long PDFs,
+title level for short/scraped sources):
+
+| Question type | MRR | R@1 | R@3 | R@5 | P@5 |
+|---------------|-----|-----|-----|-----|-----|
+| **Overall**   | **0.87** | **0.55** | **0.81** | **0.89** | **0.38** |
+| exact-keyword | 0.90 | 0.70 | 0.80 | 0.80 | 0.24 |
+| semantic      | 1.00 | 0.80 | 0.90 | 1.00 | 0.60 |
+| noisy         | 1.00 | 0.80 | 0.90 | 1.00 | 0.28 |
+| comparison    | 0.67 | 0.15 | 0.75 | 0.95 | 0.40 |
+| multi-doc     | 0.77 | 0.30 | 0.70 | 0.70 | 0.40 |
+
+Metrics are hand-rolled pure functions (`backend/eval/metrics.py`, unit-tested) — no
+heavy eval dependency. The script doubles as a regression check: re-run before and
+after any retrieval change and keep the change only if the numbers move.
+
+### What the eval surfaced, and where to improve next
+
+These are evidence-led hypotheses — none are implemented yet, by design. Each should
+be A/B'd against this benchmark before adoption:
+
+- **The distance filter is inert.** Production and `--ignore-threshold` runs are
+  identical, so the 0.75 cosine-distance cutoff prunes nothing at top-5. Either lower
+  it so it actually gates low-confidence chunks, or remove it.
+- **Comparison questions rank poorly at the top** (R@1 = 0.15). "A vs B" queries
+  retrieve a blend of both sides. Decomposing into two sub-queries, retrieving each,
+  then merging before a rerank should lift the best answer to rank 1.
+- **Multi-doc misses the second source** (R@5 = 0.70). The supporting document often
+  sits just outside top-5. Retrieve wider (k = 8–10) and rerank to 5 with a
+  cross-encoder to pull it up.
+- **Exact-keyword precision is noisy** (P@5 = 0.24). Number/term queries ("£4.11",
+  "60:40") are where lexical matching shines — a BM25 + dense hybrid is the most
+  promising single change to test here.
+
+---
+
 ## Development
 
 ```bash
@@ -390,3 +440,17 @@ npm test
 ```
 
 E2E tests use `LLM_MOCK=true` so no API keys are required. Playwright spins up both servers automatically via `webServer` config.
+
+---
+
+## Disclaimer & Attribution
+
+This project is an independent educational and experimental tool and is not affiliated with, endorsed by, or sponsored by Thinkbox or any associated organisations. All referenced reports, trademarks, and source materials remain the property of their respective owners.
+
+The application references publicly available research documents and provides grounded citations and references to original sources where possible.
+
+---
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE). You are free to use, modify, and distribute this work, including commercially, provided you retain attribution as set out in the [NOTICE](NOTICE) file.

@@ -2,6 +2,8 @@
 name = "backend"
 version = "0.1.0"
 requires-python = ">=3.13"
+license = "Apache-2.0"
+authors = [{ name = "Vishal Patel" }]
 dependencies = [
     "chromadb>=1.5.9",
     "fastapi>=0.136.3",

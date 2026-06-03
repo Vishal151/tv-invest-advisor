@@ -54,6 +54,8 @@ frontend, Docker Compose.
 | Dockerfile (root) | ✅ Done | Multi-stage: Node 22 → Python 3.13 slim; serves static + API in one container |
 | docker-compose.standalone.yml | ✅ Done | Single-container deployment (no nginx, no Redis) |
 | e2e/ (Playwright) | ✅ Done | 4 E2E tests; LLM_MOCK=true; Playwright webServer spins up both servers |
+| backend/eval/ (retrieval eval) | ✅ Done | Golden dataset (25 Qs, 5 types) + Recall@K/Precision@K/MRR metrics; `scripts/eval_retrieval.py`; page-level relevance |
+| LICENSE + NOTICE + README disclaimer | ✅ Done | Apache-2.0; attribution + independent-tool disclaimer |
  
 Update this table as work progresses.
  
@@ -161,8 +163,8 @@ All fields except `question` are optional enums — see config.py for valid valu
 ```json
 {
   "answer": {
-    "summary": ["Based on Thinkbox research, TV delivers £5.61 ROI per £1 [1]."],
-    "stats": [{ "value": "£5.61", "unit": "ROI per £1 spent", "context": "141 brands, 14 categories", "source": "Profit Ability 2", "page": 12 }],
+    "summary": ["Based on Thinkbox research, advertising delivers £4.11 Profit ROI per £1 over sustained effects [1]."],
+    "stats": [{ "value": "£4.11", "unit": "Profit ROI per £1 (sustained)", "context": "£1.87 short-term, rising to £4.11 sustained", "source": "Profit Ability 2", "page": 30 }],
     "chart": null,
     "checklist": null,
     "followups": ["How does this change for a DTC brand?"]
@@ -214,7 +216,7 @@ Topic and sector fields enable metadata filtering at retrieval time.
  
 | Document | Year | Topic tag | Key data points |
 |----------|------|-----------|-----------------|
-| Profit Ability 2 | 2024 | ROI | £5.61 ROI/£1, 141 brands, 14 categories |
+| Profit Ability 2 | 2024 | ROI | £1.87 short-term / £4.11 sustained Profit ROI per £1, 141 brands, 14 categories |
 | Profit Ability 1 | 2018 | ROI | 2,000+ campaigns, short vs long-term payback |
 | As Seen on TV / Supercharge | 2019 | small_business | 300+ campaigns, 80% of sales, 4-month payback |
 | Peter Field white paper | 2024 | effectiveness | 10 years IPA data, attention/emotion/trust |

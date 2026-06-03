@@ -92,6 +92,36 @@ DOCUMENT_REGISTRY: dict[str, dict] = {
         "topic": "planning",
         "sector": "all",
     },
+    "TB_FromGoodToGreat_Whitepaper.pdf": {
+        "source_title": "From Good to Great: Improving the Odds",
+        "source_url": "https://www.thinkbox.tv/research/reports/from-good-to-great-improving-the-odds",
+        "topic": "creative",
+        "sector": "all",
+    },
+    "The_Value_Of_TV_Report_Richard_Shotton_and_Thinkbox_2024.pdf": {
+        "source_title": "The Value of TV: A Behavioural Science Perspective",
+        "source_url": "https://www.thinkbox.tv/research/reports/the-value-of-tv-a-behavioural-science-perspective",
+        "topic": "effectiveness",
+        "sector": "all",
+    },
+    "Giving_attention_a_little_attention.pdf": {
+        "source_title": "Giving Attention a Little Attention",
+        "source_url": "https://www.thinkbox.tv/research/reports/giving-attention-a-little-attention-download-the-white-paper",
+        "topic": "creative",
+        "sector": "all",
+    },
+    "Effectiveness_In_Context.pdf": {
+        "source_title": "Effectiveness in Context",
+        "source_url": "https://www.thinkbox.tv/research/reports/effectiveness-in-context-free-download",
+        "topic": "effectiveness",
+        "sector": "all",
+    },
+    "Media_in_focus_marketing_effectiveness_in_the_digital_era.pdf": {
+        "source_title": "Media in Focus: Marketing Effectiveness in the Digital Era",
+        "source_url": "https://www.thinkbox.tv/research/reports/media-in-focus-free-download",
+        "topic": "planning",
+        "sector": "all",
+    },
 }
 
 

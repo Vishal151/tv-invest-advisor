@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "corpus_doc_count": 408,
+  "notes": "Page-level relevance for long clean PDFs (Profit Ability 2, Effectiveness in Context, Media in Focus, Giving Attention). Title-only (pages: null) for short thematic PDFs whose per-page text is dominated by repeated nav/TOC (The Value of TV, From Good to Great, TV is at the Heart of Effectiveness) and for scraped sources with synthetic page numbers (As Seen on TV, Signalling Success, Payback Studies, Demand Generator, TV Viewing Report 2025). Labels bootstrapped from retrieval and reviewed against source pages.",
+  "questions": [
+    {
+      "id": "exact-roi-per-pound",
+      "question": "What average Profit ROI does advertising deliver per pound spent?",
+      "type": "exact-keyword",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Profit Ability 2", "pages": [9, 30]}],
+      "notes": "Profit ROI £1.87 short-term, rising to £4.11 with sustained effects."
+    },
+    {
+      "id": "exact-pa2-methodology",
+      "question": "What dataset and methodology underpin the Profit Ability 2 study?",
+      "type": "exact-keyword",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Profit Ability 2", "pages": [120, 121]}],
+      "notes": "Based on econometrics / Marketing Mix Modelling (MMM) datasets."
+    },
+    {
+      "id": "exact-daily-viewing",
+      "question": "How much Total TV do people watch per day?",
+      "type": "exact-keyword",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "TV Viewing Report 2025", "pages": null}],
+      "notes": "Around 3h 26m of Total TV per day in 2025."
+    },
+    {
+      "id": "exact-partial-attention",
+      "question": "Are TV ads still effective when people are only paying partial attention?",
+      "type": "exact-keyword",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Giving Attention a Little Attention", "pages": [21]}],
+      "notes": "80% prompted recognition even when primary attention was elsewhere."
+    },
+    {
+      "id": "exact-tv-share-profit",
+      "question": "What share of short-term media-driven profit does TV generate?",
+      "type": "exact-keyword",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Profit Ability 2", "pages": [29]}],
+      "notes": "TV (Linear TV and BVOD) generates 41.5% of short-term media-driven profit."
+    },
+
+    {
+      "id": "semantic-worth-it",
+      "question": "Is putting money into telly actually worth it financially?",
+      "type": "semantic",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "Profit Ability 2", "pages": [30]},
+        {"source_title": "Payback Studies (Payback 1-4): Pathways to Profit", "pages": null}
+      ],
+      "notes": "Profitability of advertising / TV return on investment."
+    },
+    {
+      "id": "semantic-trust",
+      "question": "Why do people instinctively trust brands they see advertised on television?",
+      "type": "semantic",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "The Value of TV: A Behavioural Science Perspective", "pages": null}],
+      "notes": "TV as a costly, public signal; trust bias."
+    },
+    {
+      "id": "semantic-creative-strength",
+      "question": "What makes an advert creatively strong enough to drive sales?",
+      "type": "semantic",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "From Good to Great: Improving the Odds", "pages": null}],
+      "notes": "Creative quality, barriers, and best practice."
+    },
+    {
+      "id": "semantic-reach-vs-target",
+      "question": "Does reaching lots of people beat narrowly targeting a few?",
+      "type": "semantic",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Media in Focus: Marketing Effectiveness in the Digital Era", "pages": [15, 16]}],
+      "notes": "Mass marketing vs tight targeting; market share as profit driver."
+    },
+    {
+      "id": "semantic-cognitive-biases",
+      "question": "What psychological factors explain why television advertising works so well?",
+      "type": "semantic",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "The Value of TV: A Behavioural Science Perspective", "pages": null}],
+      "notes": "Five cognitive and behavioural biases."
+    },
+
+    {
+      "id": "noisy-roi-vs-media",
+      "question": "hows tv ads roi compared to other media??",
+      "type": "noisy",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Profit Ability 2", "pages": [34, 47]}],
+      "notes": "Channel-by-channel ROI comparison."
+    },
+    {
+      "id": "noisy-small-biz",
+      "question": "does tele advertising help small biz grow",
+      "type": "noisy",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "As Seen on TV: Supercharging Your Small Business", "pages": null}],
+      "notes": "TV for small businesses."
+    },
+    {
+      "id": "noisy-attention",
+      "question": "wot makes ppl pay attention to ads on tv",
+      "type": "noisy",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Giving Attention a Little Attention", "pages": [21]}],
+      "notes": "Attention to TV ads."
+    },
+    {
+      "id": "noisy-60-40",
+      "question": "is 60 40 split still a thing for ad budgets",
+      "type": "noisy",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Media in Focus: Marketing Effectiveness in the Digital Era", "pages": [22]}],
+      "notes": "Brand:activation budget ratio."
+    },
+    {
+      "id": "noisy-big-brands-online",
+      "question": "y do big brands still advertise on telly not just online",
+      "type": "noisy",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Media in Focus: Marketing Effectiveness in the Digital Era", "pages": [25, 26]}],
+      "notes": "How media work today: TV's continued role alongside online."
+    },
+
+    {
+      "id": "compare-tv-vs-online-video",
+      "question": "How does TV compare with online video for building a brand?",
+      "type": "comparison",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Media in Focus: Marketing Effectiveness in the Digital Era", "pages": [25, 26, 30, 34]}],
+      "notes": "How media work today; video most effective brand-building form on and offline."
+    },
+    {
+      "id": "compare-activation-vs-brand",
+      "question": "Short-term activation versus long-term brand building, which pays back better?",
+      "type": "comparison",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Effectiveness in Context", "pages": [19, 20]}],
+      "notes": "Activation efficiency vs brand-building scale of effect."
+    },
+    {
+      "id": "compare-large-vs-small",
+      "question": "Is TV advertising more effective for large brands than for small ones?",
+      "type": "comparison",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Effectiveness in Context", "pages": [76, 78]}],
+      "notes": "Brand size, market share, and share of voice."
+    },
+    {
+      "id": "compare-linear-vs-bvod",
+      "question": "How do Linear TV and BVOD compare for driving profit?",
+      "type": "comparison",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Profit Ability 2", "pages": [95, 98]}],
+      "notes": "BVOD CPM vs Linear TV; consider together."
+    },
+    {
+      "id": "compare-fame-vs-performance",
+      "question": "Brand fame versus performance marketing for long-term growth?",
+      "type": "comparison",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [{"source_title": "Effectiveness in Context", "pages": [80]}],
+      "notes": "Long-term brand development vs short-term activation."
+    },
+
+    {
+      "id": "multidoc-profitable-and-trusted",
+      "question": "What evidence shows TV advertising is both profitable and trusted?",
+      "type": "multi-doc",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "Profit Ability 2", "pages": [30]},
+        {"source_title": "The Value of TV: A Behavioural Science Perspective", "pages": null}
+      ],
+      "notes": "Profitability (PA2) plus trust/signalling (Value of TV)."
+    },
+    {
+      "id": "multidoc-attention-and-creative",
+      "question": "How do attention and creative quality together drive TV effectiveness?",
+      "type": "multi-doc",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "TV is at the Heart of Effectiveness", "pages": null},
+        {"source_title": "From Good to Great: Improving the Odds", "pages": null}
+      ],
+      "notes": "Attention as an effectiveness driver (Peter Field) plus creative quality (From Good to Great). Retrieval surfaces the attention/effectiveness side but not the creative side - a known weakness."
+    },
+    {
+      "id": "multidoc-low-risk-high-return",
+      "question": "Why is TV considered a low-risk, high-return investment?",
+      "type": "multi-doc",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "Profit Ability 2", "pages": [10]},
+        {"source_title": "The Value of TV: A Behavioural Science Perspective", "pages": null}
+      ],
+      "notes": "Channel risk (PA2) plus behavioural trust signals (Value of TV)."
+    },
+    {
+      "id": "multidoc-new-to-tv",
+      "question": "What should a brand new to TV know about cost, payback and creative quality?",
+      "type": "multi-doc",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "As Seen on TV: Supercharging Your Small Business", "pages": null},
+        {"source_title": "From Good to Great: Improving the Odds", "pages": null}
+      ],
+      "notes": "Small-business entry (As Seen on TV) plus creative quality (From Good to Great)."
+    },
+    {
+      "id": "multidoc-brand-activation-synergy",
+      "question": "How do brand building and activation work together over time?",
+      "type": "multi-doc",
+      "filters": {"sector": null, "topic": null},
+      "relevant": [
+        {"source_title": "Media in Focus: Marketing Effectiveness in the Digital Era", "pages": [8]},
+        {"source_title": "Effectiveness in Context", "pages": [19]}
+      ],
+      "notes": "Synergy of brand building and activation."
+    }
+  ]
+}
