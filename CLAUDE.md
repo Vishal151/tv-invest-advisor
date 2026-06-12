@@ -56,6 +56,7 @@ frontend, Docker Compose.
 | e2e/ (Playwright) | ✅ Done | 4 E2E tests; LLM_MOCK=true; Playwright webServer spins up both servers |
 | backend/eval/ (retrieval eval) | ✅ Done | Golden dataset (25 Qs, 5 types) + Recall@K/Precision@K/MRR metrics; `scripts/eval_retrieval.py`; page-level relevance |
 | LICENSE + NOTICE + README disclaimer | ✅ Done | Apache-2.0; attribution + independent-tool disclaimer |
+| Audit + remediation (2026-06-12) | ✅ Done | Full audit (`docs/audit-2026-06-12.md`); all High + 10 Medium findings fixed test-first: guardrail covers stats/chart, unified ingestion registry/chunker, honest /api/health (503 when degraded), request-ID in logs, live CorpusRail via /api/corpus. Outstanding work listed at end of audit doc |
  
 Update this table as work progresses.
  
@@ -139,7 +140,7 @@ Thinkbox PDFs → pypdf extract text → chunk (800 tokens, 100 overlap)
 - **FastAPI** — REST API, async, Pydantic v2 models
 - **LiteLLM** — model gateway: OpenAI primary, Anthropic fallback, cost tracking
 - **ChromaDB** — persistent local vector store (chroma_db/ directory)
-- **LangFuse** — traces every query: latency, tokens, cost, guardrail outcomes
+- **LangFuse** — traces LLM generation calls (model used, errors, output preview); full-pipeline spans (retrieval, guardrails, cache) are a known gap
 - **Cache** — Redis in production (REDIS_URL set), dict in development; both implement the same interface; TTL 7 days; graceful degradation on Redis errors
 ---
  

@@ -20,6 +20,11 @@ test('calls onRetry when Retry clicked', async () => {
   expect(onRetry).toHaveBeenCalled()
 })
 
+test('does not render a non-functional Rephrase button', () => {
+  render(<ErrorCard title="Error" message="msg" reference="ref" retryable={true} onRetry={jest.fn()} time="12:00" />)
+  expect(screen.queryByRole('button', { name: /rephrase/i })).not.toBeInTheDocument()
+})
+
 test('does not surface backend details in message', () => {
   render(<ErrorCard title="Error" message="Service unavailable." reference="ref" retryable={true} onRetry={jest.fn()} time="12:00" />)
   expect(screen.queryByText(/503/)).not.toBeInTheDocument()

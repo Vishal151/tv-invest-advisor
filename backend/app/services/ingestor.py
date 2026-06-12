@@ -8,10 +8,12 @@ from app.services.retriever import get_collection
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+# Single source of truth for corpus metadata — scripts/ingest.py imports this.
+# Add new documents here when expanding the corpus.
 DOCUMENT_REGISTRY: dict[str, dict] = {
     "profit-ability-2.pdf": {
         "source_title": "Profit Ability 2",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-2-the-business-case-for-advertising",
+        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-2-the-new-business-case-for-advertising",
         "topic": "ROI",
         "sector": "all",
     },
@@ -57,6 +59,36 @@ DOCUMENT_REGISTRY: dict[str, dict] = {
         "topic": "planning",
         "sector": "all",
     },
+    "TB_FromGoodToGreat_Whitepaper.pdf": {
+        "source_title": "From Good to Great: Improving the Odds",
+        "source_url": "https://www.thinkbox.tv/research/reports/from-good-to-great-improving-the-odds",
+        "topic": "creative",
+        "sector": "all",
+    },
+    "The_Value_Of_TV_Report_Richard_Shotton_and_Thinkbox_2024.pdf": {
+        "source_title": "The Value of TV: A Behavioural Science Perspective",
+        "source_url": "https://www.thinkbox.tv/research/reports/the-value-of-tv-a-behavioural-science-perspective",
+        "topic": "effectiveness",
+        "sector": "all",
+    },
+    "Giving_attention_a_little_attention.pdf": {
+        "source_title": "Giving Attention a Little Attention",
+        "source_url": "https://www.thinkbox.tv/research/reports/giving-attention-a-little-attention-download-the-white-paper",
+        "topic": "creative",
+        "sector": "all",
+    },
+    "Effectiveness_In_Context.pdf": {
+        "source_title": "Effectiveness in Context",
+        "source_url": "https://www.thinkbox.tv/research/reports/effectiveness-in-context-free-download",
+        "topic": "effectiveness",
+        "sector": "all",
+    },
+    "Media_in_focus_marketing_effectiveness_in_the_digital_era.pdf": {
+        "source_title": "Media in Focus: Marketing Effectiveness in the Digital Era",
+        "source_url": "https://www.thinkbox.tv/research/reports/media-in-focus-free-download",
+        "topic": "planning",
+        "sector": "all",
+    },
 }
 
 
@@ -73,24 +105,17 @@ def _extract_pages(pdf_path: Path) -> list[tuple[str, int]]:
     return pages
 
 
-def _chunk_text(text: str, page_number: int) -> list[dict]:
-    """Splits text into overlapping word-based chunks."""
+def chunk_text(text: str, chunk_size: int, overlap: int) -> list[str]:
+    """Splits text into overlapping word-based chunks, dropping fragments of
+    20 words or fewer. Shared by all ingestion paths."""
     words = text.split()
     chunks = []
     start = 0
-    chunk_size = settings.chunk_size
-    overlap = settings.chunk_overlap
 
     while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunk_words = words[start:end]
+        chunk_words = words[start : start + chunk_size]
         if len(chunk_words) > 20:
-            chunks.append(
-                {
-                    "text": " ".join(chunk_words),
-                    "page": page_number,
-                }
-            )
+            chunks.append(" ".join(chunk_words))
         start += chunk_size - overlap
 
     return chunks
@@ -129,7 +154,8 @@ async def run_ingest(source_path: str) -> int:
 
     all_chunks = []
     for page_text, page_num in pages:
-        all_chunks.extend(_chunk_text(page_text, page_num))
+        for text in chunk_text(page_text, settings.chunk_size, settings.chunk_overlap):
+            all_chunks.append({"text": text, "page": page_num})
 
     if not all_chunks:
         return 0

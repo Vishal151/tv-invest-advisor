@@ -2,6 +2,7 @@ import hmac
 import logging
 import re
 from fastapi import APIRouter, HTTPException, Header, Depends, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.config import get_settings
@@ -28,10 +29,31 @@ def _answer_contains_statistic(answer: str) -> bool:
 
 
 SAFE_FALLBACK_ANSWER = (
-    "Based on Thinkbox research, TV advertising is consistently shown "
-    "to be the most effective channel for driving long-term profit growth. "
-    "Please refine your question for a more specific answer."
+    "We couldn't produce an answer that is fully grounded in the Thinkbox "
+    "research corpus for this question. Rather than risk an unverified claim, "
+    "please rephrase or narrow your question and try again."
 )
+
+
+def _answer_review_text(answer: dict) -> str:
+    """Flattens summary, stats, and chart values into one text for the grounding review.
+
+    Stats and chart bars are the most prominent numbers in the UI — they must be
+    reviewed alongside the prose, not just the summary paragraphs.
+    """
+    parts = list(answer["summary"])
+    for s in answer.get("stats") or []:
+        parts.append(
+            f"Stat: {s['value']} {s['unit']} — {s['context']} "
+            f"(source: {s['source']}, p.{s['page']})"
+        )
+    chart = answer.get("chart")
+    if chart:
+        bars = ", ".join(f"{b['label']}: {b['value']}" for b in chart["bars"])
+        parts.append(
+            f"Chart '{chart['title']}' ({chart['unit']}, source: {chart['source']}): {bars}"
+        )
+    return "\n\n".join(parts)
 
 
 # ── Request / Response models ─────────────────────────────────────────────────
@@ -127,14 +149,21 @@ def verify_api_key(x_api_key: str = Header(...)) -> str:
 async def health(request: Request):
     from app.services.cache import check_redis_status
 
-    return HealthResponse(
-        status="ok",
-        chroma_docs=get_doc_count(),
+    docs = get_doc_count()
+    redis_status = check_redis_status()
+    # Mock mode runs without external dependencies — never degraded.
+    degraded = not settings.llm_mock and (docs == 0 or redis_status == "unavailable")
+    payload = HealthResponse(
+        status="degraded" if degraded else "ok",
+        chroma_docs=docs,
         version=settings.version,
-        redis=check_redis_status(),
+        redis=redis_status,
         llm_configured=bool(settings.openai_api_key or settings.anthropic_api_key),
         langfuse_enabled=settings.langfuse_enabled,
     )
+    if degraded:
+        return JSONResponse(status_code=503, content=payload.model_dump())
+    return payload
 
 
 @router.get("/corpus")
@@ -175,18 +204,32 @@ async def query(request: Request, body: QueryRequest):
         )
 
     # 3. Retrieve relevant chunks
-    chunks = await retrieve(
-        question=question,
-        sector=body.sector,
-        brand_stage=body.brand_stage,
-        primary_goal=body.primary_goal,
-        tv_history=body.tv_history,
-        budget_tier=body.budget_tier,
-    )
-    if not chunks:
+    try:
+        chunks = await retrieve(
+            question=question,
+            sector=body.sector,
+            brand_stage=body.brand_stage,
+            primary_goal=body.primary_goal,
+            tv_history=body.tv_history,
+            budget_tier=body.budget_tier,
+        )
+    except Exception as e:
+        logger.error(f"Retrieval failed: {e}")
         raise HTTPException(
             status_code=503,
-            detail="No research documents found. " "Please ensure the corpus has been ingested.",
+            detail="The research retrieval service is temporarily unavailable. "
+            "Please try again shortly.",
+        )
+    if not chunks:
+        if get_doc_count() == 0:
+            raise HTTPException(
+                status_code=503,
+                detail="No research documents found. Please ensure the corpus has been ingested.",
+            )
+        raise HTTPException(
+            status_code=503,
+            detail="No sufficiently relevant research was found for this question. "
+            "Please try rephrasing it.",
         )
 
     # 4. Generate answer via LiteLLM
@@ -207,7 +250,7 @@ async def query(request: Request, body: QueryRequest):
         )
 
     # 5. Output guardrail (retry once with stricter grounding before generic fallback)
-    answer_prose = "\n\n".join(answer["summary"])
+    answer_prose = _answer_review_text(answer)
     output_ok, reject_reason = await check_output(answer=answer_prose, chunks=chunks)
     is_fallback = False
     if not output_ok and _answer_contains_statistic(answer_prose):
@@ -224,7 +267,7 @@ async def query(request: Request, body: QueryRequest):
                 primary_goal=body.primary_goal,
                 strict_grounding=True,
             )
-            answer_prose = "\n\n".join(answer["summary"])
+            answer_prose = _answer_review_text(answer)
             output_ok, reject_reason = await check_output(answer=answer_prose, chunks=chunks)
         except Exception as e:
             logger.error(f"Strict regeneration failed: {e}")

@@ -35,8 +35,8 @@ export function ErrorCard({ title, message, reference, retryable, onRetry, time 
         <p style={{ margin: 0, fontFamily: 'var(--cue-serif)', fontSize: '15px', color: 'var(--cue-ink-2)', lineHeight: 1.5 }}>
           {message}
         </p>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {retryable && (
+        {retryable && (
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
               type="button"
               onClick={onRetry}
@@ -55,23 +55,8 @@ export function ErrorCard({ title, message, reference, retryable, onRetry, time 
             >
               Retry
             </button>
-          )}
-          <button
-            type="button"
-            style={{
-              padding:      '8px 16px',
-              borderRadius: '6px',
-              border:       '1px solid var(--cue-rule)',
-              background:   'transparent',
-              fontFamily:   'var(--cue-sans)',
-              fontSize:     '13px',
-              color:        'var(--cue-ink-2)',
-              cursor:       'pointer',
-            }}
-          >
-            Rephrase
-          </button>
-        </div>
+          </div>
+        )}
         <div style={{ fontFamily: 'var(--cue-mono)', fontSize: '10px', color: 'var(--cue-ink-4)', display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>Reference</span>
           <span>{reference}</span>

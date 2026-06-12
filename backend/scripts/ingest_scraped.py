@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.core.config import get_settings  # noqa: E402
 from app.services.embedder import embed_batch  # noqa: E402
+from app.services.ingestor import chunk_text  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -67,20 +68,6 @@ def parse_header(text: str) -> tuple[dict, str]:
 
     body = "\n".join(lines[body_start:]).strip()
     return metadata, body
-
-
-def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> list[str]:
-    """Split text into overlapping word-based chunks."""
-    words = text.split()
-    chunks = []
-    start = 0
-    while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunk_words = words[start:end]
-        if len(chunk_words) > 20:
-            chunks.append(" ".join(chunk_words))
-        start += chunk_size - overlap
-    return chunks
 
 
 async def ingest_text_file(

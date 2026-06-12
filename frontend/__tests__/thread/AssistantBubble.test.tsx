@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AssistantBubble } from '@/components/thread/AssistantBubble'
 import type { Answer } from '@/lib/types'
 
@@ -38,4 +39,19 @@ test('renders followup buttons when isLast=true', () => {
 test('hides followup buttons when isLast=false', () => {
   render(<AssistantBubble answer={answer} time="11:43" isLast={false} onFollowup={jest.fn()} />)
   expect(screen.queryByText('How should I split the burst?')).not.toBeInTheDocument()
+})
+
+test('copies the answer text to the clipboard on Copy click', async () => {
+  const writeText = jest.fn().mockResolvedValue(undefined)
+  Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+
+  render(<AssistantBubble answer={answer} time="11:43" isLast={true} onFollowup={jest.fn()} />)
+  await userEvent.click(screen.getByRole('button', { name: /copy/i }))
+
+  expect(writeText).toHaveBeenCalledWith(expect.stringContaining('TV delivers strong ROI'))
+})
+
+test('does not render a non-functional Regenerate button', () => {
+  render(<AssistantBubble answer={answer} time="11:43" isLast={true} onFollowup={jest.fn()} />)
+  expect(screen.queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument()
 })

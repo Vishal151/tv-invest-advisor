@@ -399,6 +399,134 @@ def test_no_retry_for_qualitative_answer_without_statistics(client, sample_chunk
     ), "generate() must be called only once for qualitative answer"
 
 
+def test_output_guardrail_reviews_stats_and_chart(client, sample_chunks):
+    """H1: the grounding review must cover stats[] and chart values, not just summary prose."""
+    from app.services.cache import cache
+
+    cache.clear()
+    structured = {
+        "summary": ["TV outperforms other channels."],
+        "stats": [
+            {
+                "value": "£5.61",
+                "unit": "ROI per £1 spent",
+                "context": "141 brands",
+                "source": "Profit Ability 2",
+                "page": 12,
+            }
+        ],
+        "chart": {
+            "title": "ROI by channel",
+            "source": "Profit Ability 2",
+            "unit": "£",
+            "bars": [
+                {"label": "TV", "value": 5.61, "highlight": True},
+                {"label": "Digital", "value": 3.21},
+            ],
+        },
+        "followups": [],
+    }
+    check_output_mock = AsyncMock(return_value=(True, "APPROVED"))
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+        patch("app.api.routes.generate", new=AsyncMock(return_value=(structured, "gpt-4o"))),
+        patch("app.api.routes.check_output", check_output_mock),
+    ):
+        resp = client.post("/api/query", json={"question": "Guardrail must review stats too?"})
+
+    assert resp.status_code == 200
+    reviewed = check_output_mock.call_args.kwargs["answer"]
+    assert "£5.61" in reviewed, "stat values must be part of the grounding review"
+    assert "Profit Ability 2" in reviewed
+    assert "3.21" in reviewed, "chart bar values must be part of the grounding review"
+    cache.clear()
+
+
+def test_health_returns_503_when_corpus_empty(client):
+    """H3: health must report degraded (503) when ChromaDB has no documents."""
+    with patch("app.api.routes.get_doc_count", return_value=0):
+        resp = client.get("/api/health")
+    assert resp.status_code == 503
+    assert resp.json()["status"] == "degraded"
+
+
+def test_health_returns_503_when_redis_configured_but_unavailable(client, monkeypatch):
+    """H3: health must report degraded when Redis is enabled and unreachable."""
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "redis_url", "redis://localhost:6399/0")
+    with (
+        patch("app.api.routes.get_doc_count", return_value=142),
+        patch("app.services.cache.check_redis_status", return_value="unavailable"),
+    ):
+        resp = client.get("/api/health")
+    assert resp.status_code == 503
+    assert resp.json()["redis"] == "unavailable"
+
+
+def test_health_stays_ok_in_mock_mode_without_corpus(client, monkeypatch):
+    """Mock mode runs without external dependencies — health must not report degraded."""
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "llm_mock", True)
+    with patch("app.api.routes.get_doc_count", return_value=0):
+        resp = client.get("/api/health")
+    assert resp.status_code == 200
+
+
+def test_query_returns_503_on_retrieval_failure(client):
+    """M1: an embeddings/ChromaDB outage must surface as 503, not an unhandled 500."""
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch(
+            "app.api.routes.retrieve",
+            new=AsyncMock(side_effect=RuntimeError("embeddings API down")),
+        ),
+    ):
+        resp = client.post("/api/query", json={"question": "Does TV work during outages?"})
+    assert resp.status_code == 503
+    assert "unavailable" in resp.json()["detail"].lower()
+
+
+def test_no_relevant_chunks_message_distinct_from_empty_corpus(client):
+    """M4: a filtered-out retrieval must not claim the corpus is missing."""
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=[])),
+        patch("app.api.routes.get_doc_count", return_value=408),
+    ):
+        resp = client.post("/api/query", json={"question": "Question with no relevant chunks?"})
+    assert resp.status_code == 503
+    assert "rephras" in resp.json()["detail"].lower()
+    assert "ingest" not in resp.json()["detail"].lower()
+
+    with (
+        patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+        patch("app.api.routes.retrieve", new=AsyncMock(return_value=[])),
+        patch("app.api.routes.get_doc_count", return_value=0),
+    ):
+        resp = client.post("/api/query", json={"question": "Question against an empty corpus?"})
+    assert resp.status_code == 503
+    assert "ingest" in resp.json()["detail"].lower()
+
+
+def test_safe_fallback_makes_no_substantive_claim():
+    """M10: the fallback served when grounding fails must not itself assert an uncited claim."""
+    from app.api.routes import SAFE_FALLBACK_ANSWER, _answer_contains_statistic
+
+    assert not _answer_contains_statistic(SAFE_FALLBACK_ANSWER)
+    assert "most effective" not in SAFE_FALLBACK_ANSWER.lower()
+
+
+def test_cors_exposes_request_id_header(client):
+    """M9: the browser must be able to read X-Request-ID for support references."""
+    with patch("app.api.routes.get_doc_count", return_value=142):
+        resp = client.get("/api/health", headers={"Origin": "http://localhost:3000"})
+    exposed = resp.headers.get("access-control-expose-headers", "")
+    assert "x-request-id" in exposed.lower()
+
+
 def test_corpus_lists_ingested_documents(client):
     with patch(
         "app.api.routes.get_corpus_summary",

@@ -2,6 +2,22 @@
 
 ---
 
+## Outstanding — post-audit (2026-06-12)
+
+Current source of truth: `docs/audit-2026-06-12.md` ("Outstanding work after remediation").
+All High and most Medium audit findings are fixed. Remaining:
+
+- [ ] Full-pipeline LangFuse tracing (root trace per request; spans for cache, guardrails, retrieval, generation) — pair with extracting `routes.query()` into an `answer_query()` service (M3)
+- [ ] Sector filter decision: tag sector-specific chunks at ingest or remove the inert filter; A/B via eval (M5)
+- [ ] Tune or remove the 0.75 retrieval distance threshold against the eval benchmark (M4 remainder)
+- [ ] Pin Docker base images to patch + SHA256 digest (M11 remainder)
+- [ ] Retrieval roadmap: BM25 hybrid + rerank, comparison-query decomposition, smaller chunks — A/B via eval
+- [ ] Low findings L1–L14 (see audit doc); highest value: Literal types for request enums, thread titles + persistence, E2E job in CI
+
+The sections below are the original (May 2026) task list, kept for history — most items are done.
+
+---
+
 ## P0 — Blocking: must fix before "production-ready"
 
 - [ ] Commit `backend/uv.lock` — remove from `.gitignore`; Dockerfile copies it so clean-clone Docker build fails

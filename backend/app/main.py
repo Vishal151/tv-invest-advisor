@@ -18,6 +18,16 @@ from app.api.routes import router
 settings = get_settings()
 
 
+class RequestIDLogFilter(logging.Filter):
+    """Copies the structlog-bound request_id onto stdlib records so every log
+    line carries it. Without this, RequestIDMiddleware's binding never reaches
+    the stdlib loggers the services use."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.request_id = structlog.contextvars.get_contextvars().get("request_id", "-")
+        return True
+
+
 def _configure_logging() -> None:
     processors = [
         structlog.contextvars.merge_contextvars,
@@ -35,7 +45,12 @@ def _configure_logging() -> None:
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
     )
-    logging.basicConfig(level=settings.log_level)
+    logging.basicConfig(
+        level=settings.log_level,
+        format="%(asctime)s %(levelname)s [%(request_id)s] %(name)s: %(message)s",
+    )
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(RequestIDLogFilter())
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -115,6 +130,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "X-API-Key", "X-Request-ID"],
+    expose_headers=["X-Request-ID"],
 )
 
 app.include_router(router, prefix="/api")

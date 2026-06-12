@@ -250,6 +250,58 @@ async def test_generate_raises_on_invalid_json(sample_chunks):
             await generate(question="Does TV work?", chunks=sample_chunks)
 
 
+async def test_generate_sets_response_format_for_fallback_model(sample_chunks):
+    """M6: JSON forcing must apply to the fallback model too, when LiteLLM supports it."""
+    calls = []
+    fallback_json = json.dumps(
+        {"summary": ["TV works."], "stats": [], "chart": None, "followups": []}
+    )
+
+    async def side_effect(**kwargs):
+        calls.append(kwargs)
+        if "gpt-4o" in kwargs["model"]:
+            raise RuntimeError("OpenAI down")
+        return _make_litellm_response(fallback_json)
+
+    with (
+        patch("app.services.generator.acompletion", side_effect=side_effect),
+        patch(
+            "app.services.generator.get_supported_openai_params",
+            return_value=["response_format", "max_tokens"],
+            create=True,
+        ),
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
+        await generate(question="q", chunks=sample_chunks)
+
+    assert len(calls) == 2
+    assert calls[1]["response_format"] == {"type": "json_object"}
+    assert calls[1]["max_tokens"] >= 2000, "max_tokens must allow a full structured answer"
+
+
+async def test_generate_omits_response_format_when_model_does_not_support_it(sample_chunks):
+    """M6: response_format must be skipped for models without JSON-mode support."""
+    calls = []
+    valid_json = json.dumps({"summary": ["TV works."], "stats": [], "chart": None, "followups": []})
+
+    async def side_effect(**kwargs):
+        calls.append(kwargs)
+        return _make_litellm_response(valid_json)
+
+    with (
+        patch("app.services.generator.acompletion", side_effect=side_effect),
+        patch(
+            "app.services.generator.get_supported_openai_params",
+            return_value=["max_tokens"],
+            create=True,
+        ),
+        patch("app.services.generator._get_langfuse", return_value=None),
+    ):
+        await generate(question="q", chunks=sample_chunks)
+
+    assert "response_format" not in calls[0]
+
+
 def test_build_prompt_wraps_chunks_in_xml_tags(sample_chunks):
     """Chunks must be wrapped in XML data tags to prevent prompt injection."""
     messages = build_prompt("What is TV ROI?", sample_chunks)

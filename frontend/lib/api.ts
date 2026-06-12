@@ -59,8 +59,23 @@ function mapResponse(raw: RawResponse, generationMs: number): QueryResult {
   }
 }
 
-function makeReference(): string {
+function makeReference(res?: Response): string {
+  // Prefer the backend's request ID so the reference can be correlated with server logs.
+  const requestId = res?.headers?.get?.('x-request-id')
+  if (requestId) return requestId
   return 'cue-err-' + Math.random().toString(36).slice(2, 8)
+}
+
+export type CorpusDoc = { source_title: string; chunks: number; topic: string }
+
+export async function fetchCorpus(): Promise<CorpusDoc[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/corpus`)
+    if (!res.ok) return []
+    return (await res.json()) as CorpusDoc[]
+  } catch {
+    return []
+  }
 }
 
 export async function queryApi({
@@ -110,12 +125,21 @@ export async function queryApi({
     }
   }
 
+  if (res.status === 429) {
+    return {
+      kind: 'error',
+      title: 'Taking a quick breather',
+      message: "You've asked a lot of questions in a short time. Please wait a minute and ask again.",
+      reference: makeReference(res),
+    }
+  }
+
   if (!res.ok) {
     return {
       kind: 'error',
       title: "We couldn't ground this one",
       message: "Cue couldn't reach the language model just now. We won't return an ungrounded answer — please try again in a moment.",
-      reference: makeReference(),
+      reference: makeReference(res),
     }
   }
 

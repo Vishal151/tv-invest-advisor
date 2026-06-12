@@ -81,24 +81,22 @@ export function AssistantBubble({ answer, time, isLast, onFollowup }: Props) {
         )}
 
         <div style={{ display: 'flex', gap: '8px', paddingTop: '12px', borderTop: '1px dashed var(--cue-rule-2)' }}>
-          {['Copy', 'Regenerate'].map((label) => (
-            <button
-              key={label}
-              type="button"
-              style={{
-                padding:      '6px 12px',
-                border:       '1px solid var(--cue-rule)',
-                borderRadius: '6px',
-                background:   'transparent',
-                cursor:       'pointer',
-                fontFamily:   'var(--cue-mono)',
-                fontSize:     '10.5px',
-                color:        'var(--cue-ink-3)',
-              }}
-            >
-              {label}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => navigator.clipboard?.writeText(answer.summary.join('\n\n'))}
+            style={{
+              padding:      '6px 12px',
+              border:       '1px solid var(--cue-rule)',
+              borderRadius: '6px',
+              background:   'transparent',
+              cursor:       'pointer',
+              fontFamily:   'var(--cue-mono)',
+              fontSize:     '10.5px',
+              color:        'var(--cue-ink-3)',
+            }}
+          >
+            Copy
+          </button>
         </div>
 
         {isLast && <Followups items={answer.followups} onPick={onFollowup} />}

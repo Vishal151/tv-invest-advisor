@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.core.config import get_settings  # noqa: E402
 from app.services.embedder import embed_batch  # noqa: E402
+from app.services.ingestor import DOCUMENT_REGISTRY, chunk_text  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,91 +39,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 settings = get_settings()
-
-# ── Document registry ─────────────────────────────────────────────────────────
-# Maps filename → metadata for the Thinkbox corpus.
-# Add new documents here when expanding the corpus.
-
-DOCUMENT_REGISTRY: dict[str, dict] = {
-    "profit-ability-2.pdf": {
-        "source_title": "Profit Ability 2",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-2-the-new-business-case-for-advertising",
-        "topic": "ROI",
-        "sector": "all",
-    },
-    "profit-ability-1.pdf": {
-        "source_title": "Profit Ability 1",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/profit-ability-the-business-case-for-advertising",
-        "topic": "ROI",
-        "sector": "all",
-    },
-    "as-seen-on-tv.pdf": {
-        "source_title": "As Seen on TV: Supercharging Small Business",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/as-seen-on-tv-supercharging-your-small-business",
-        "topic": "small_business",
-        "sector": "all",
-    },
-    "peter-field-white-paper.pdf": {
-        "source_title": "TV is at the Heart of Effectiveness",
-        "source_url": "https://www.thinkbox.tv/research/reports/tv-is-at-the-heart-of-effectiveness-whitepaper-by-peter-field",
-        "topic": "effectiveness",
-        "sector": "all",
-    },
-    "payback-4.pdf": {
-        "source_title": "Payback 4: Pathways to Profit",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/payback-4",
-        "topic": "ROI",
-        "sector": "all",
-    },
-    "tv-viewing-report-2024.pdf": {
-        "source_title": "TV Viewing Report 2024",
-        "source_url": "https://www.thinkbox.tv/research/nickable-charts/viewing-and-audiences/tv-viewing-report",
-        "topic": "viewing",
-        "sector": "all",
-    },
-    "signalling-success.pdf": {
-        "source_title": "Signalling Success",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/signalling-success",
-        "topic": "effectiveness",
-        "sector": "all",
-    },
-    "demand-generator.pdf": {
-        "source_title": "Demand Generator",
-        "source_url": "https://www.thinkbox.tv/research/thinkbox-research/demand-generation",
-        "topic": "planning",
-        "sector": "all",
-    },
-    "TB_FromGoodToGreat_Whitepaper.pdf": {
-        "source_title": "From Good to Great: Improving the Odds",
-        "source_url": "https://www.thinkbox.tv/research/reports/from-good-to-great-improving-the-odds",
-        "topic": "creative",
-        "sector": "all",
-    },
-    "The_Value_Of_TV_Report_Richard_Shotton_and_Thinkbox_2024.pdf": {
-        "source_title": "The Value of TV: A Behavioural Science Perspective",
-        "source_url": "https://www.thinkbox.tv/research/reports/the-value-of-tv-a-behavioural-science-perspective",
-        "topic": "effectiveness",
-        "sector": "all",
-    },
-    "Giving_attention_a_little_attention.pdf": {
-        "source_title": "Giving Attention a Little Attention",
-        "source_url": "https://www.thinkbox.tv/research/reports/giving-attention-a-little-attention-download-the-white-paper",
-        "topic": "creative",
-        "sector": "all",
-    },
-    "Effectiveness_In_Context.pdf": {
-        "source_title": "Effectiveness in Context",
-        "source_url": "https://www.thinkbox.tv/research/reports/effectiveness-in-context-free-download",
-        "topic": "effectiveness",
-        "sector": "all",
-    },
-    "Media_in_focus_marketing_effectiveness_in_the_digital_era.pdf": {
-        "source_title": "Media in Focus: Marketing Effectiveness in the Digital Era",
-        "source_url": "https://www.thinkbox.tv/research/reports/media-in-focus-free-download",
-        "topic": "planning",
-        "sector": "all",
-    },
-}
 
 
 # ── PDF extraction ────────────────────────────────────────────────────────────
@@ -142,36 +58,6 @@ def extract_text_from_pdf(pdf_path: Path) -> list[tuple[str, int]]:
             pages.append((text.strip(), i))
     logger.info(f"Extracted {len(pages)} pages from {pdf_path.name}")
     return pages
-
-
-# ── Chunking ──────────────────────────────────────────────────────────────────
-
-
-def chunk_text(
-    text: str,
-    page_number: int,
-    chunk_size: int = 800,
-    overlap: int = 100,
-) -> list[dict]:
-    """
-    Splits text into overlapping word-based chunks.
-    Returns list of dicts with text and positional info.
-    """
-    words = text.split()
-    chunks = []
-    start = 0
-
-    while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunk_words = words[start:end]
-        chunk_text = " ".join(chunk_words)
-
-        if len(chunk_words) > 20:  # skip very short chunks
-            chunks.append({"text": chunk_text, "page": page_number})
-
-        start += chunk_size - overlap
-
-    return chunks
 
 
 # ── Ingestion ─────────────────────────────────────────────────────────────────
@@ -197,13 +83,8 @@ async def ingest_document(
     # Chunk all pages
     all_chunks = []
     for page_text, page_num in pages:
-        chunks = chunk_text(
-            page_text,
-            page_number=page_num,
-            chunk_size=settings.chunk_size,
-            overlap=settings.chunk_overlap,
-        )
-        all_chunks.extend(chunks)
+        for text in chunk_text(page_text, settings.chunk_size, settings.chunk_overlap):
+            all_chunks.append({"text": text, "page": page_num})
 
     if not all_chunks:
         logger.warning(f"No chunks produced for {pdf_path.name} — skipping")
@@ -327,7 +208,7 @@ async def main():
         if doc_metadata is None:
             logger.warning(
                 f"'{filename}' not in DOCUMENT_REGISTRY — skipping. "
-                f"Add it to the registry in scripts/ingest.py"
+                f"Add it to the registry in app/services/ingestor.py"
             )
             continue
 

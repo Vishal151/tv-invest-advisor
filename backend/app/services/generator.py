@@ -1,5 +1,5 @@
 import logging
-from litellm import acompletion
+from litellm import acompletion, get_supported_openai_params
 from app.core.config import get_settings
 from app.models import StructuredAnswer
 
@@ -207,11 +207,11 @@ async def generate(
             call_kwargs = dict(
                 model=model,
                 messages=messages,
-                max_tokens=1500,
+                max_tokens=2500,
                 temperature=0.3,
                 timeout=60,
             )
-            if model == settings.primary_model:
+            if "response_format" in (get_supported_openai_params(model=model) or []):
                 call_kwargs["response_format"] = {"type": "json_object"}
 
             response = await acompletion(**call_kwargs)

@@ -103,7 +103,7 @@ export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled 
 
       <div style={{ padding: '0 14px 8px', display: 'flex', gap: '10px' }}>
         <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9.5px', color: 'var(--cue-ink-4)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Answers grounded in 8 Thinkbox reports
+          Answers grounded in published Thinkbox research
         </span>
         <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9.5px', color: 'var(--cue-ink-4)' }}>
           <kbd style={{ background: 'var(--cue-paper-2)', padding: '1px 4px', borderRadius: '3px', border: '1px solid var(--cue-rule)' }}>↵</kbd> send

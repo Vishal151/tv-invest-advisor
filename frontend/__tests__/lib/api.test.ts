@@ -63,3 +63,32 @@ test('queryApi returns error on 503', async () => {
   const result = await queryApi({ question: 'Does TV work?', brief: null })
   expect(result.kind).toBe('error')
 })
+
+test('queryApi returns a rate-limit message on 429, not a model-failure message', async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: false,
+    status: 429,
+    headers: { get: () => null },
+    json: async () => ({ detail: 'Rate limit exceeded' }),
+  })
+
+  const result = await queryApi({ question: 'Does TV work?', brief: null })
+  expect(result.kind).toBe('error')
+  if (result.kind !== 'error') return
+  expect(result.message).toMatch(/wait/i)
+  expect(result.message).not.toMatch(/language model/i)
+})
+
+test('queryApi uses the X-Request-ID response header as the error reference', async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: false,
+    status: 503,
+    headers: { get: (k: string) => (k.toLowerCase() === 'x-request-id' ? 'req-123' : null) },
+    json: async () => ({ detail: 'unavailable' }),
+  })
+
+  const result = await queryApi({ question: 'Does TV work?', brief: null })
+  expect(result.kind).toBe('error')
+  if (result.kind !== 'error') return
+  expect(result.reference).toBe('req-123')
+})
