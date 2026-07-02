@@ -2,6 +2,7 @@
 
 import { useStore } from '@/lib/store'
 import type { Turn } from '@/lib/types'
+import { briefLabel } from '@/lib/briefLabels'
 
 export function ExportModal() {
   const { exportOpen, setExportOpen, thread } = useStore()
@@ -83,11 +84,11 @@ export function ExportModal() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', fontFamily: 'var(--cue-mono)' }}>
               <tbody>
                 {[
-                  ['Sector',      brief.sector],
-                  ['Stage',       brief.brandStage],
-                  ['TV History',  brief.tvHistory],
-                  ['Goal',        brief.primaryGoal],
-                  ['Budget',      brief.budgetTier],
+                  ['Sector',      briefLabel('sector', brief.sector)],
+                  ['Stage',       briefLabel('brandStage', brief.brandStage)],
+                  ['TV History',  briefLabel('tvHistory', brief.tvHistory)],
+                  ['Goal',        briefLabel('primaryGoal', brief.primaryGoal)],
+                  ['Budget',      briefLabel('budgetTier', brief.budgetTier)],
                 ].map(([k, v]) => (
                   <tr key={k} style={{ borderBottom: '1px solid #ebe5d8' }}>
                     <td style={{ padding: '5px 0', color: 'var(--cue-ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', width: '120px' }}>{k}</td>

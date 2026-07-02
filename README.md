@@ -48,7 +48,9 @@ Built as a portfolio project targeting AI backend engineer roles — demonstrati
 </tr>
 </table>
 
-> Screenshots and video captured via `cd e2e && npm run capture-demo` (uses `LLM_MOCK=true` — no API keys required).
+> Screenshots and video captured via `cd e2e && DEMO_REAL=1 npm run capture-demo` — a live run
+> of the full pipeline (retrieval → GPT-4o → grounding checks) against the ingested corpus.
+> Omit `DEMO_REAL=1` to capture in mock mode with no API keys.
 
 ---
 

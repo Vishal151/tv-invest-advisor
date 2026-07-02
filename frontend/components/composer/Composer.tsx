@@ -1,6 +1,7 @@
 'use client'
 
 import type { Brief } from '@/lib/types'
+import { BRIEF_VALUE_LABELS } from '@/lib/briefLabels'
 import { Chip } from './Chip'
 
 type Props = {
@@ -12,11 +13,14 @@ type Props = {
   disabled:  boolean
 }
 
-const SECTOR_OPTS  = ['FMCG','Retail','Finance','Auto','Telco','Travel','DTC','Other'].map((v) => ({ value: v, label: v }))
-const STAGE_OPTS   = [{ value:'start-up', label:'Start-up' }, { value:'scale-up', label:'Scale-up' }, { value:'established', label:'Established' }, { value:'large', label:'Large' }]
-const HISTORY_OPTS = [{ value:'never', label:'Never run TV' }, { value:'tried', label:'Tried once or twice' }, { value:'regular', label:'Regular advertiser' }]
-const GOAL_OPTS    = [{ value:'sales', label:'Short-term sales' }, { value:'brand', label:'Brand building' }, { value:'both', label:'Both' }, { value:'unsure', label:'Unsure' }]
-const BUDGET_OPTS  = [{ value:'under-100k', label:'Under £100k' }, { value:'100k-500k', label:'£100k–£500k' }, { value:'500k-2m', label:'£500k–£2m' }, { value:'2m-plus', label:'£2m+' }, { value:'undecided', label:'Undecided' }]
+const opts = (key: keyof typeof BRIEF_VALUE_LABELS) =>
+  Object.entries(BRIEF_VALUE_LABELS[key]).map(([value, label]) => ({ value, label }))
+
+const SECTOR_OPTS  = opts('sector')
+const STAGE_OPTS   = opts('brandStage')
+const HISTORY_OPTS = opts('tvHistory')
+const GOAL_OPTS    = opts('primaryGoal')
+const BUDGET_OPTS  = opts('budgetTier')
 
 export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled }: Props) {
   // Backend validates question length 5-500 — don't let shorter ones submit
