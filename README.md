@@ -1,5 +1,8 @@
 # Cue — TV Investment Advisor
 
+[![CI](https://github.com/Vishal151/tv-invest-advisor/actions/workflows/ci.yml/badge.svg)](https://github.com/Vishal151/tv-invest-advisor/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 A RAG-powered web application that helps brands and agencies understand when and how TV advertising could work for them, grounded in Thinkbox's published research. Think of it as a senior media planner available 24/7.
 
 Built as a portfolio project targeting AI backend engineer roles — demonstrating RAG pipelines, LiteLLM gateway, ChromaDB, LangFuse observability, guardrails, Redis caching, and a React frontend. Retrieval quality is measured against a hand-labelled golden dataset — see [Retrieval Evaluation](#retrieval-evaluation).
@@ -170,12 +173,34 @@ flowchart LR
 
 ## Quick Start
 
-### Local development
+### Try it without API keys (mock mode)
+
+The fastest way to see the app working — no API keys, no corpus, no Docker.
+`LLM_MOCK=true` runs the full pipeline against deterministic fixtures (it's how
+the E2E tests and the demo above run). Requires [uv](https://docs.astral.sh/uv/)
+and Node 22+.
+
+```bash
+# Terminal 1 — backend in mock mode
+cd backend
+LLM_MOCK=true uv run uvicorn app.main:app --port 8000
+
+# Terminal 2 — frontend
+cd frontend
+npm install
+echo 'NEXT_PUBLIC_API_URL=http://localhost:8000' > .env.local
+npm run dev            # open http://localhost:3000
+```
+
+### Local development (real answers)
+
+Real answers need LLM API keys **and an ingested corpus** — until both are in
+place, every query returns 503. See [Ingest the corpus](#ingest-the-corpus).
 
 **Backend:**
 ```bash
 cd backend
-cp .env.example .env   # fill in API keys
+cp .env.example .env   # fill in OPENAI_API_KEY (and ANTHROPIC_API_KEY for fallback)
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
@@ -183,6 +208,7 @@ uv run uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
+echo 'NEXT_PUBLIC_API_URL=http://localhost:8000' > .env.local
 npm run dev            # http://localhost:3000
 ```
 
@@ -191,25 +217,47 @@ npm run dev            # http://localhost:3000
 ```bash
 cp backend/.env.example backend/.env   # fill in API keys
 cp .env.example .env                   # set UID/GID so ChromaDB bind mount is writable
-docker-compose up --build
+docker compose up --build
 ```
 
-The root `.env` sets `UID` and `GID` to match your host user (required on Linux/WSL so `./backend/chroma_db` is not read-only inside the container). Run `id -u` and `id -g` if unsure.
+Open **http://localhost** — nginx serves the UI and proxies `/api/*` to the
+backend (which is not directly published in this setup). The root `.env` sets
+`UID` and `GID` to match your host user (required on Linux/WSL so
+`./backend/chroma_db` is not read-only inside the container); run `id -u` and
+`id -g` if unsure.
 
-The backend runs at `http://localhost:8000`. Set `NEXT_PUBLIC_API_URL=http://localhost:8000` in `frontend/.env.local` so the browser can reach the API (see `frontend/README.md`).
+Until the corpus is ingested, `/api/health` reports `degraded` (503) and the
+container shows as such — that's expected on a fresh clone, not a broken build.
 
 ### Standalone single-container (no nginx or Redis dependency)
 
 ```bash
-cp backend/.env.example backend/.env
-docker-compose -f docker-compose.standalone.yml up --build
+cp backend/.env.example backend/.env   # required — the config check refuses default keys in production
+docker compose -f docker-compose.standalone.yml up --build
 ```
 
 The root `Dockerfile` is a multi-stage build: Node 22 builds the Next.js static export, then Python 3.13 runs FastAPI and serves the static files via `STATIC_DIR`. All traffic on `:8000`.
 
 ### Ingest the corpus
 
-Download the [Thinkbox research PDFs](https://www.thinkbox.tv/research) into `data/pdfs/`, then:
+Download the research PDFs from [thinkbox.tv/research](https://www.thinkbox.tv/research)
+into `data/pdfs/`, named exactly as the ingestion registry expects (embedding them
+uses your OpenAI key):
+
+| Filename | Document |
+|----------|----------|
+| `profit-ability-2.pdf` | Profit Ability 2 |
+| `profit-ability-1.pdf` | Profit Ability 1 |
+| `as-seen-on-tv.pdf` | As Seen on TV: Supercharging Small Business |
+| `peter-field-white-paper.pdf` | TV is at the Heart of Effectiveness |
+| `payback-4.pdf` | Payback 4: Pathways to Profit |
+| `tv-viewing-report-2024.pdf` | TV Viewing Report 2024 |
+| `signalling-success.pdf` | Signalling Success |
+| `demand-generator.pdf` | Demand Generator |
+
+The full filename ↔ metadata mapping (including scraped sources) lives in
+`DOCUMENT_REGISTRY` in `backend/app/services/ingestor.py` — a file not listed
+there is rejected. Then:
 
 ```bash
 cd backend
@@ -294,10 +342,30 @@ Response:
 ### `GET /api/health`
 
 ```json
-{ "status": "ok", "chroma_docs": 142, "version": "0.1.0", "redis": "ok" }
+{
+  "status": "ok",
+  "chroma_docs": 408,
+  "version": "0.1.0",
+  "redis": "ok",
+  "llm_configured": true,
+  "langfuse_enabled": true
+}
 ```
 
 `redis`: `"ok"` | `"disabled"` | `"unavailable"`
+
+Returns **503** with `"status": "degraded"` when the corpus is empty or Redis is
+configured but unreachable (never in mock mode). A fresh clone is degraded until
+ingestion — the Docker healthchecks treat any HTTP response as alive for this
+reason.
+
+### `GET /api/corpus`
+
+Lists ingested documents with chunk counts — powers the corpus rail in the UI.
+
+```json
+[{ "source_title": "Profit Ability 2", "chunks": 45, "topic": "ROI" }]
+```
 
 ### `POST /api/ingest`
 
@@ -440,6 +508,12 @@ npm test
 ```
 
 E2E tests use `LLM_MOCK=true` so no API keys are required. Playwright spins up both servers automatically via `webServer` config.
+
+### Contributing
+
+Issues and PRs are welcome. Before pushing, run the four checks above
+(`black`/`flake8`/`pytest` and `npm run lint`/`npm test`) — CI enforces all of
+them on every PR.
 
 ---
 

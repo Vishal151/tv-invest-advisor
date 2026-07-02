@@ -351,6 +351,48 @@ def test_startup_raises_in_production_with_no_llm_keys():
             _check_production_config()
 
 
+def test_query_rate_limited_after_20_requests(client, sample_chunks):
+    """The 20/minute limit on /api/query must actually produce a 429."""
+    from app.core.limiter import limiter
+
+    structured = {"summary": ["TV works."], "stats": [], "chart": None, "followups": []}
+    limiter.reset()
+    try:
+        with (
+            patch("app.api.routes.check_input", new=AsyncMock(return_value=(True, "APPROVED"))),
+            patch("app.api.routes.retrieve", new=AsyncMock(return_value=sample_chunks)),
+            patch("app.api.routes.generate", new=AsyncMock(return_value=(structured, "gpt-4o"))),
+            patch("app.api.routes.check_output", new=AsyncMock(return_value=(True, "APPROVED"))),
+        ):
+            responses = [
+                client.post("/api/query", json={"question": "When does TV advertising work?"})
+                for _ in range(21)
+            ]
+    finally:
+        limiter.reset()
+
+    assert all(r.status_code == 200 for r in responses[:20])
+    assert responses[20].status_code == 429
+
+
+def test_startup_raises_in_production_with_llm_mock():
+    """LLM_MOCK=true in production serves fabricated answers with guardrails
+    disabled while health reports ok — startup must refuse it outright."""
+    from unittest.mock import Mock, patch
+    from app.main import _check_production_config
+
+    mock_settings = Mock()
+    mock_settings.is_production = True
+    mock_settings.api_key = "valid-prod-key"
+    mock_settings.openai_api_key = "sk-test"
+    mock_settings.anthropic_api_key = ""
+    mock_settings.llm_mock = True
+
+    with patch("app.main.settings", mock_settings):
+        with pytest.raises(RuntimeError, match="LLM_MOCK must not be enabled in production"):
+            _check_production_config()
+
+
 def test_startup_passes_development_mode():
     """Startup should skip checks in development mode."""
     from unittest.mock import Mock, patch

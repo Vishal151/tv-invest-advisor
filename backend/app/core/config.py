@@ -65,6 +65,16 @@ class Settings(BaseSettings):
         description="Return deterministic mock responses. Set LLM_MOCK=true for offline dev/E2E.",
     )
 
+    # ── Proxy ────────────────────────────────────────────────────────────────
+    trust_proxy_headers: bool = Field(
+        default=False,
+        description=(
+            "Rate-limit on X-Forwarded-For instead of the socket address. Enable only "
+            "behind a trusted reverse proxy (the nginx docker-compose path) — the "
+            "header is client-spoofable otherwise."
+        ),
+    )
+
     # ── ChromaDB ─────────────────────────────────────────────────────────────
     chroma_db_path: str = "./chroma_db"
     chroma_collection: str = "thinkbox_docs"

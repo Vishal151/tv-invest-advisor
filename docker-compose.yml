@@ -26,6 +26,8 @@ services:
       - APP_ENV=production
       - REDIS_URL=redis://redis:6379/0
       - CORS_ORIGINS=http://localhost,http://localhost:3000
+      # Backend is only reachable through nginx here, so X-Forwarded-For is trustworthy
+      - TRUST_PROXY_HEADERS=true
     volumes:
       - ./backend/chroma_db:/app/chroma_db
       - ./data/pdfs:/app/data/pdfs:ro
@@ -38,12 +40,14 @@ services:
         limits:
           memory: 1g
     healthcheck:
+      # Liveness: any HTTP response counts, including the degraded 503 that
+      # /api/health returns until the corpus is ingested (urlopen would raise on it)
       test:
         [
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+          "import http.client; c = http.client.HTTPConnection('localhost', 8000, timeout=5); c.request('GET', '/api/health'); c.getresponse()",
         ]
       interval: 30s
       timeout: 10s
