@@ -12,7 +12,7 @@ export default defineConfig({
     viewport: { width: 1400, height: 900 },
     video: { mode: 'on', size: { width: 1400, height: 900 } },
     // Slow down interactions so the video looks deliberate
-    launchOptions: { slowMo: 80 },
+    launchOptions: { slowMo: 350 },
   },
   webServer: [
     {
