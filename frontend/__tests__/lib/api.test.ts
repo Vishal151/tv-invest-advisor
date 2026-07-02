@@ -119,3 +119,18 @@ test('queryApi returns an error result when a 200 body has the wrong shape', asy
   const result = await queryApi({ question: 'Does TV work?', brief: null })
   expect(result.kind).toBe('error')
 })
+
+test('queryApi maps a 422 to a length-specific message, not a model-failure message', async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: false,
+    status: 422,
+    headers: { get: () => null },
+    json: async () => ({ detail: [{ msg: 'String should have at least 5 characters' }] }),
+  })
+
+  const result = await queryApi({ question: 'Hi', brief: null })
+  expect(result.kind).toBe('error')
+  if (result.kind !== 'error') return
+  expect(result.message).toMatch(/5.*500|between/i)
+  expect(result.message).not.toMatch(/language model/i)
+})

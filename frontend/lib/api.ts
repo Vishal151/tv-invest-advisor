@@ -125,6 +125,16 @@ export async function queryApi({
     }
   }
 
+  if (res.status === 422) {
+    return {
+      kind: 'error',
+      title: 'Question length',
+      message:
+        'Questions need to be between 5 and 500 characters. Please adjust yours and ask again.',
+      reference: makeReference(res),
+    }
+  }
+
   if (res.status === 429) {
     return {
       kind: 'error',
