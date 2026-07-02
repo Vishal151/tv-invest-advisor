@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, model_validator
 from typing import Literal
@@ -78,6 +80,18 @@ class Settings(BaseSettings):
     # ── ChromaDB ─────────────────────────────────────────────────────────────
     chroma_db_path: str = "./chroma_db"
     chroma_collection: str = "thinkbox_docs"
+
+    # ── Corpus ───────────────────────────────────────────────────────────────
+    pdf_dir: str = Field(
+        default_factory=lambda: str(
+            # repo-root data/pdfs, anchored to this file — never the process CWD.
+            # Docker images set PDF_DIR=/app/data/pdfs to match their layout.
+            Path(__file__).resolve().parents[2].parent
+            / "data"
+            / "pdfs"
+        ),
+        description="Directory PDF ingestion is allowed to read from",
+    )
 
     # ── RAG settings ─────────────────────────────────────────────────────────
     retrieval_top_k: int = 5  # chunks returned per query

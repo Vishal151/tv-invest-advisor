@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { Composer } from '@/components/composer/Composer'
 import type { Brief } from '@/lib/types'
 
@@ -31,4 +30,21 @@ test('does not submit on Shift+Enter', async () => {
   render(<Composer brief={brief} setBrief={jest.fn()} value="text" onChange={jest.fn()} onSubmit={onSubmit} disabled={false} />)
   fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', shiftKey: true })
   expect(onSubmit).not.toHaveBeenCalled()
+})
+
+test('Ask stays disabled for questions under 5 characters (backend minimum)', () => {
+  render(<Composer brief={brief} setBrief={jest.fn()} value="Hi" onChange={jest.fn()} onSubmit={jest.fn()} disabled={false} />)
+  expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
+})
+
+test('Enter does not submit questions under 5 characters', () => {
+  const onSubmit = jest.fn()
+  render(<Composer brief={brief} setBrief={jest.fn()} value="Hi" onChange={jest.fn()} onSubmit={onSubmit} disabled={false} />)
+  fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', code: 'Enter' })
+  expect(onSubmit).not.toHaveBeenCalled()
+})
+
+test('textarea caps input at the backend maximum of 500 characters', () => {
+  render(<Composer brief={brief} setBrief={jest.fn()} value="" onChange={jest.fn()} onSubmit={jest.fn()} disabled={false} />)
+  expect(screen.getByRole('textbox')).toHaveAttribute('maxLength', '500')
 })

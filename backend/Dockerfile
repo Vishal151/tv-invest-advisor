@@ -25,5 +25,8 @@ RUN mkdir -p chroma_db data/pdfs \
 USER ${APP_UID}
 
 ENV UV_CACHE_DIR=/app/.cache/uv
+# In this image the code lives at /app/app, so the config default (repo-layout
+# relative) would miss — point ingestion at the compose bind mount explicitly
+ENV PDF_DIR=/app/data/pdfs
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -43,3 +43,6 @@ frontend/out/
 *.tfstate
 *.tfstate.*
 .terraform/
+
+# make start/stop runtime state (pids, logs)
+.run/

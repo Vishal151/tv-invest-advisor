@@ -28,6 +28,14 @@ function newThread(): Thread {
   }
 }
 
+/** Writes the current thread into the history list, replacing any stale copy. */
+function saveCurrent(threads: Thread[], current: Thread): Thread[] {
+  if (threads.some((t) => t.id === current.id)) {
+    return threads.map((t) => (t.id === current.id ? current : t))
+  }
+  return [current, ...threads]
+}
+
 type AppStore = {
   thread:         Thread
   threads:        Thread[]
@@ -77,6 +85,9 @@ export const useStore = create<AppStore>((set, get) => ({
     const { composerInput, thread } = get()
     const question = composerInput.trim()
     if (!question || get().phase !== 'idle') return
+    // The user can navigate threads while the request is in flight — remember
+    // which thread asked so the answer lands there, not wherever we are later.
+    const askingThreadId = thread.id
 
     const userTurn: Turn = {
       role:     'user',
@@ -123,10 +134,21 @@ export const useStore = create<AppStore>((set, get) => ({
       }
     }
 
-    set((s) => ({
-      phase:  'idle',
-      thread: { ...s.thread, turns: [...s.thread.turns, assistantTurn] },
-    }))
+    set((s) => {
+      if (s.thread.id === askingThreadId) {
+        return {
+          phase:  'idle',
+          thread: { ...s.thread, turns: [...s.thread.turns, assistantTurn] },
+        }
+      }
+      // Navigated away mid-flight: file the answer into the asking thread in
+      // history and leave the current thread (and its idle phase) untouched.
+      return {
+        threads: s.threads.map((t) =>
+          t.id === askingThreadId ? { ...t, turns: [...t.turns, assistantTurn] } : t
+        ),
+      }
+    })
   },
 
   async retry() {
@@ -138,23 +160,24 @@ export const useStore = create<AppStore>((set, get) => ({
   },
 
   newThread() {
-    set((s) => {
-      const current = s.thread
-      const exists = s.threads.find((t) => t.id === current.id)
-      return {
-        thread:        newThread(),
-        composerInput: '',
-        phase:         'idle',
-        threads:       exists ? s.threads : [current, ...s.threads],
-      }
-    })
+    set((s) => ({
+      thread:        newThread(),
+      composerInput: '',
+      phase:         'idle',
+      threads:       saveCurrent(s.threads, s.thread),
+    }))
   },
 
   openThread(id) {
     set((s) => {
       const found = s.threads.find((t) => t.id === id)
       if (!found) return s
-      return { thread: found, historyOpen: false, phase: 'idle' }
+      return {
+        thread:      found,
+        threads:     saveCurrent(s.threads, s.thread),
+        historyOpen: false,
+        phase:       'idle',
+      }
     })
   },
 

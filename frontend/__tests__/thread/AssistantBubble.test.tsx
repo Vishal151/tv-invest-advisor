@@ -55,3 +55,21 @@ test('does not render a non-functional Regenerate button', () => {
   render(<AssistantBubble answer={answer} time="11:43" isLast={true} onFollowup={jest.fn()} />)
   expect(screen.queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument()
 })
+
+test('citations in older answers do not drive the evidence rail highlight', async () => {
+  // The rail always shows the LAST answer's sources — an older answer's [2]
+  // pointing at a different document must not highlight the latest source #2.
+  const { useStore } = jest.requireActual('@/lib/store')
+  render(<AssistantBubble answer={answer} time="11:43" isLast={false} onFollowup={jest.fn()} />)
+  await userEvent.click(screen.getByRole('button', { name: '1' }))
+  expect(useStore.getState().activeCitation).toBeNull()
+})
+
+test('clicking a citation in the latest answer highlights the source and expands a collapsed rail', async () => {
+  const { useStore } = jest.requireActual('@/lib/store')
+  useStore.setState({ activeCitation: null, railCollapsed: true })
+  render(<AssistantBubble answer={answer} time="11:43" isLast={true} onFollowup={jest.fn()} />)
+  await userEvent.click(screen.getByRole('button', { name: '1' }))
+  expect(useStore.getState().activeCitation).toBe(1)
+  expect(useStore.getState().railCollapsed).toBe(false)
+})

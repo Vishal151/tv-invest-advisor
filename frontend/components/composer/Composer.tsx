@@ -19,10 +19,14 @@ const GOAL_OPTS    = [{ value:'sales', label:'Short-term sales' }, { value:'bran
 const BUDGET_OPTS  = [{ value:'under-100k', label:'Under £100k' }, { value:'100k-500k', label:'£100k–£500k' }, { value:'500k-2m', label:'£500k–£2m' }, { value:'2m-plus', label:'£2m+' }, { value:'undecided', label:'Undecided' }]
 
 export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled }: Props) {
+  // Backend validates question length 5-500 — don't let shorter ones submit
+  // only to bounce off a 422.
+  const canSubmit = value.trim().length >= 5
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (value.trim()) onSubmit()
+      if (canSubmit) onSubmit()
     }
   }
 
@@ -64,6 +68,7 @@ export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled 
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
+          maxLength={500}
           placeholder="Ask Cue about your TV investment…"
           rows={2}
           style={{
@@ -81,18 +86,18 @@ export function Composer({ brief, setBrief, value, onChange, onSubmit, disabled 
         <button
           type="button"
           onClick={onSubmit}
-          disabled={disabled || !value.trim()}
+          disabled={disabled || !canSubmit}
           aria-label="Ask"
           style={{
             padding:      '8px 16px',
             borderRadius: '8px',
             border:       'none',
-            background:   disabled || !value.trim() ? 'var(--cue-rule)' : 'var(--cue-accent)',
-            color:        disabled || !value.trim() ? 'var(--cue-ink-4)' : 'var(--cue-paper)',
+            background:   disabled || !canSubmit ? 'var(--cue-rule)' : 'var(--cue-accent)',
+            color:        disabled || !canSubmit ? 'var(--cue-ink-4)' : 'var(--cue-paper)',
             fontFamily:   'var(--cue-sans)',
             fontSize:     '13px',
             fontWeight:   500,
-            cursor:       disabled || !value.trim() ? 'not-allowed' : 'pointer',
+            cursor:       disabled || !canSubmit ? 'not-allowed' : 'pointer',
             transition:   'background 120ms, color 120ms',
             whiteSpace:   'nowrap',
           }}

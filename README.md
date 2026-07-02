@@ -181,6 +181,17 @@ the E2E tests and the demo above run). Requires [uv](https://docs.astral.sh/uv/)
 and Node 22+.
 
 ```bash
+cd frontend && npm install && cd ..   # first time only
+make start MOCK=1                     # backend :8000 + frontend :3000, detached
+# open http://localhost:3000
+make stop                             # shut everything down
+```
+
+`make status` shows what's running, `make logs` tails both servers, and
+`make dev` runs both in the foreground instead (Ctrl-C stops them). Or run the
+servers by hand:
+
+```bash
 # Terminal 1 — backend in mock mode
 cd backend
 LLM_MOCK=true uv run uvicorn app.main:app --port 8000
@@ -487,6 +498,10 @@ be A/B'd against this benchmark before adoption:
 ---
 
 ## Development
+
+Everything below is wrapped in the root `Makefile`: `make start [MOCK=1]` /
+`make stop` / `make status` / `make logs` / `make dev` / `make test` /
+`make e2e` / `make ingest`.
 
 ```bash
 # Backend — lint and test
