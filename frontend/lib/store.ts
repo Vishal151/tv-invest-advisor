@@ -91,22 +91,35 @@ export const useStore = create<AppStore>((set, get) => ({
       thread: { ...s.thread, turns: [...s.thread.turns, userTurn] },
     }))
 
-    const result = await queryApi({ question, brief: thread.brief })
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
+    // queryApi resolves to an error result on every known failure, but if it
+    // ever rejects the phase must still return to 'idle' or the UI is stuck.
     let assistantTurn: Turn
-    if (result.kind === 'answer') {
-      assistantTurn = { role: 'assistant', answer: result.answer, time }
-    } else if (result.kind === 'refusal') {
-      assistantTurn = { role: 'refusal', message: result.message, examples: result.examples, time }
-    } else {
+    try {
+      const result = await queryApi({ question, brief: thread.brief })
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+      if (result.kind === 'answer') {
+        assistantTurn = { role: 'assistant', answer: result.answer, time }
+      } else if (result.kind === 'refusal') {
+        assistantTurn = { role: 'refusal', message: result.message, examples: result.examples, time }
+      } else {
+        assistantTurn = {
+          role: 'error',
+          title:     result.title,
+          message:   result.message,
+          reference: result.reference,
+          retryable: true,
+          time,
+        }
+      }
+    } catch {
       assistantTurn = {
-        role: 'error',
-        title:     result.title,
-        message:   result.message,
-        reference: result.reference,
+        role:      'error',
+        title:     "We couldn't ground this one",
+        message:   'Cue hit an unexpected error. Please try again in a moment.',
+        reference: 'cue-err-' + Math.random().toString(36).slice(2, 8),
         retryable: true,
-        time,
+        time:      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       }
     }
 

@@ -77,6 +77,11 @@ def _check_production_config() -> None:
         )
     if not settings.openai_api_key and not settings.anthropic_api_key:
         raise RuntimeError("At least one of OPENAI_API_KEY or ANTHROPIC_API_KEY must be set")
+    if settings.llm_mock:
+        raise RuntimeError(
+            "LLM_MOCK must not be enabled in production — it serves fabricated answers "
+            "with both guardrails disabled"
+        )
 
 
 @asynccontextmanager

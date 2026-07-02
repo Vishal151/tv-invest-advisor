@@ -92,3 +92,30 @@ test('queryApi uses the X-Request-ID response header as the error reference', as
   if (result.kind !== 'error') return
   expect(result.reference).toBe('req-123')
 })
+
+test('queryApi returns an error result when a 200 body is not valid JSON', async () => {
+  // A proxy can return 200 with an HTML error page — this must not reject
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    headers: { get: () => null },
+    json: async () => {
+      throw new SyntaxError('Unexpected token < in JSON')
+    },
+  })
+
+  const result = await queryApi({ question: 'Does TV work?', brief: null })
+  expect(result.kind).toBe('error')
+})
+
+test('queryApi returns an error result when a 200 body has the wrong shape', async () => {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    headers: { get: () => null },
+    json: async () => ({ unexpected: 'shape' }),
+  })
+
+  const result = await queryApi({ question: 'Does TV work?', brief: null })
+  expect(result.kind).toBe('error')
+})

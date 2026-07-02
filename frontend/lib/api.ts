@@ -143,6 +143,17 @@ export async function queryApi({
     }
   }
 
-  const raw = (await res.json()) as RawResponse
-  return mapResponse(raw, Date.now() - t0)
+  // A 200 with an unreadable or misshapen body (e.g. a proxy error page) must
+  // surface as an error result, never as a rejection that strands the UI.
+  try {
+    const raw = (await res.json()) as RawResponse
+    return mapResponse(raw, Date.now() - t0)
+  } catch {
+    return {
+      kind: 'error',
+      title: "We couldn't ground this one",
+      message: "Cue received a response it couldn't read. Please try again in a moment.",
+      reference: makeReference(res),
+    }
+  }
 }

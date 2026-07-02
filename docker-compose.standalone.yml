@@ -20,12 +20,14 @@ services:
       - ./data/pdfs:/app/data/pdfs:ro
     restart: unless-stopped
     healthcheck:
+      # Liveness: any HTTP response counts, including the degraded 503 that
+      # /api/health returns until the corpus is ingested (urlopen would raise on it)
       test:
         [
           "CMD",
           "python3",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+          "import http.client; c = http.client.HTTPConnection('localhost', 8000, timeout=5); c.request('GET', '/api/health'); c.getresponse()",
         ]
       interval: 30s
       timeout: 10s
