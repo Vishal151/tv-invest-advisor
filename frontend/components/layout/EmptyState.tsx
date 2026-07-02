@@ -1,5 +1,8 @@
 'use client'
 
+import { useStore } from '@/lib/store'
+import { briefLabel } from '@/lib/briefLabels'
+
 const STARTERS = [
   { topic: 'ROI',          q: 'When does linear TV deliver its best ROI for a scale-up FMCG brand?' },
   { topic: 'Planning',     q: 'How should I split spend between linear TV and BVOD?' },
@@ -12,11 +15,17 @@ const STARTERS = [
 type Props = { onPickStarter: (q: string) => void }
 
 export function EmptyState({ onPickStarter }: Props) {
+  const brief = useStore((s) => s.thread.brief)
+  const kicker = [
+    briefLabel('sector', brief.sector),
+    briefLabel('brandStage', brief.brandStage),
+    briefLabel('budgetTier', brief.budgetTier),
+  ].join(' \u00b7 ')
   return (
     <div style={{ padding: '40px 0', display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--cue-accent-ink)' }}>
-          For FMCG · Scale-up · £500K–£2M
+          For {kicker}
         </span>
         <h1
           style={{

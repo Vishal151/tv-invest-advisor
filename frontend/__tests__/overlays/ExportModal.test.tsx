@@ -23,3 +23,20 @@ test('does not render when exportOpen=false', () => {
   const { container } = render(<ExportModal />)
   expect(container.firstChild).toBeNull()
 })
+
+test('brief table shows human-readable labels, not raw enum values', () => {
+  const s = useStore.getState()
+  useStore.setState({
+    exportOpen: true,
+    thread: {
+      ...s.thread,
+      brief: { sector: 'FMCG', brandStage: 'scale-up', tvHistory: 'never', primaryGoal: 'brand', budgetTier: '100k-500k' },
+    },
+  })
+  render(<ExportModal />)
+  expect(screen.getByText('Scale-up')).toBeInTheDocument()
+  expect(screen.getByText('Never run TV')).toBeInTheDocument()
+  expect(screen.getByText('Brand building')).toBeInTheDocument()
+  expect(screen.getByText('£100k–£500k')).toBeInTheDocument()
+  expect(screen.queryByText('100k-500k')).toBeNull()
+})

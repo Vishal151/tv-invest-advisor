@@ -148,9 +148,12 @@ test('demo: chat flow and PDF export', async ({ page }, testInfo) => {
   // ── 4. Submit and wait for answer ───────────────────────────────────────────
   await page.getByRole('button', { name: 'Ask' }).click()
 
-  await expect(
-    page.getByText('Mock: TV advertising delivers strong ROI based on Thinkbox research.')
-  ).toBeVisible({ timeout: 20_000 })
+  // Narrate the pipeline while it runs — with DEMO_REAL=1 this is genuinely
+  // retrieval + GPT-4o generation + grounding checks, not a canned wait.
+  await caption(page, 'Grounded generation', 'Retrieving Thinkbox research · generating a cited answer')
+
+  // The Copy button renders with every assistant answer — mock or real.
+  await expect(page.getByRole('button', { name: 'Copy' })).toBeVisible({ timeout: 120_000 })
 
   // Dwell on the answer long enough to read the summary, stat card and sources
   await caption(page, 'Step 3 · Evidence-backed answer', 'Every stat is cited to its Thinkbox source')

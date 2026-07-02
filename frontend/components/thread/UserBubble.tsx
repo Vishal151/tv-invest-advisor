@@ -1,6 +1,7 @@
 'use client'
 
 import type { Brief } from '@/lib/types'
+import { briefLabel } from '@/lib/briefLabels'
 
 type Props = { question: string; brief: Brief | null; time: string }
 
@@ -44,7 +45,7 @@ export function UserBubble({ question, brief, time }: Props) {
                 <span style={{ fontFamily: 'var(--cue-mono)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.06em', opacity: 0.6 }}>
                   {BRIEF_LABELS[key]}
                 </span>
-                <span style={{ fontFamily: 'var(--cue-sans)', fontWeight: 500 }}>{val}</span>
+                <span style={{ fontFamily: 'var(--cue-sans)', fontWeight: 500 }}>{briefLabel(key, val as never)}</span>
               </span>
             ))}
           </div>
